@@ -11,6 +11,10 @@ to take on this additional task, a great starting point would be to
 focus only on ORCA05. Later the same analysis could be done for the
 other 2 resolutions.
 
+Recall: Total and natural fluxes can be positive or negative.
+Anthropogenic fluxes are always negative.
+total = natural + anthropogenic
+
 In the table, results are given as specific fluxes, i.e., per unit area
 [mol C / (m^2 yr)]. But the table also provides the area (km^2) of each
 region, so it would be great to see a histogram of the specific flux and
@@ -48,3 +52,15 @@ focus only on the anthropogenic flux (always the same sign).
 
 3) The anthropogenic flux for the ORCA025 flux is missing, but Timothée
 could add that soon.
+
+-----------------------------------------------------------------------
+
+Link to the article describing the classification of the coastal regions (MARCATS segmentation):
+http://www.hydrol-earth-syst-sci.net/17/2029/2013/hess-17-2029-2013.html
+
+The link below point directly to the supplementary material of the article above. This is a ZIP file that contains GIS files. The shapefile Continental_Shelf.shp delineate COSCAT regions (COSCAT regions are sub-unit of MARCATS regions). Each COSCAT region have an ID number for COSCAT and MARCATS. We need to focus only on MARCATS unit so we need to aggregate the COSCAT region that have the same MARCATS ID number. The MARCATS ID number are the same as in my paper and in the xls file sent yesterday.
+http://www.hydrol-earth-syst-sci.net/17/2029/2013/hess-17-2029-2013-supplement.zip 
+
+I’ll send you anthropogenic fluxes for ORCA2 and ORCA025 asap.
+
+-----------------------------------------------------------------------
