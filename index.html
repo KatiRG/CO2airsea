@@ -44,8 +44,8 @@ label {
 <script>
 
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 460 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
@@ -90,14 +90,11 @@ d3.tsv("orca05.tsv", function(error, data) {
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "RCLASS"; }));
 
-  data.forEach(function(d) {
-    console.log("d: ", d)
-    console.log("d.RCLASS: ", d.RCLASS)
+  data.forEach(function(d) {    
     var mystate = d.RCLASS; //add to stock code
     var y0 = 0;
     //d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
-    d.ages = color.domain().map(function(name) {
-      console.log("d[name]: ", d[name])
+    d.ages = color.domain().map(function(name) {      
       //return { mystate:mystate, name: name, y0: y0, y1: y0 += +d[name]}; });
       return { 
         mystate:mystate, 
