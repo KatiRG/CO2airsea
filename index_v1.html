@@ -228,7 +228,7 @@
           var whichCountry; //for histograms
 
           var margin = {
-              top: 10,
+              top: 100,
               right: 10,
               bottom: 10,
               left: 10
@@ -325,6 +325,9 @@
           GasFlaring_color = "#AEC7E8";
           Cement_color = "#666688";
 
+          //https://www.colorcodehex.com/eff3ff/
+          colour_sequence = ["#CBD8FF", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"];
+
           // http://chimera.labs.oreilly.com/books/1230000000345/ch09.html#_changing_the_data
           // Sankey button
           d3.select("#TA")
@@ -340,7 +343,8 @@
                 
                 d3.select("#sortButton").text("Sort");
                 units = "MtCO2";
-                d3.json("emissions_MtCO2.json", function(error, graph) {
+                //d3.json("emissions_MtCO2.json", function(error, graph) {
+                d3.json("sankey_flux.json", function(error, graph) {  
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -378,14 +382,15 @@
 
           // load the data
           units = "MtCO2";
-          d3.json("emissions_MtCO2.json", function(error, graph) {
+          //d3.json("emissions_MtCO2.json", function(error, graph) {
+          d3.json("sankey_flux.json", function(error, graph) {  
             make(graph);
           });
 
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents CO2 emissions in MtCO2 from five major sources (left column) and their distibution over region (middle column) and country (right column, 50 highest). China, the US, Europe and India continue to be the world's top emitters in 2014, amounting to 59% of global emissions." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -429,16 +434,15 @@
               .style("stroke-width", function(d) {
                 return Math.max(1, d.dy);
               })
-              .style("stroke", function(d) {
-                if (Europe.indexOf(d.target.name) != -1) return Europe_color
-                else if (NorthAmerica.indexOf(d.target.name) != -1) return NorthAmerica_color
-                else if (CentralAmerica.indexOf(d.target.name) != -1) return CentralAmerica_color
-                else if (SouthAmerica.indexOf(d.target.name) != -1) return SouthAmerica_color
-                else if (Asia.indexOf(d.target.name) != -1) return Asia_color
-                else if (MiddleEast.indexOf(d.target.name) != -1) return MiddleEast_color
-                else if (Africa.indexOf(d.target.name) != -1) return Africa_color
-                else if (Oceania.indexOf(d.target.name) != -1) return Oceania_color
-              })
+              .style("stroke", function (d) {                
+                if (d.source.name === "EBC") return colour_sequence[0];
+                else if (d.source.name === "Indian margins") return colour_sequence[1];
+                else if (d.source.name === "Marginal sea") return colour_sequence[2];
+                else if (d.source.name === "Polar") return colour_sequence[3];
+                else if (d.source.name === "Subpolar") return colour_sequence[4];
+                else if (d.source.name === "Tropical") return colour_sequence[5];
+                else return colour_sequence[6];
+              })   
               .sort(function(a, b) {
                 return b.dy - a.dy;
               });
@@ -467,7 +471,7 @@
                 return "translate(" + d.x + "," + d.y + ")";
               })
               .on("click", highlight_node_links);
-              col_xcoord = uniques(col_xcoord);
+              col_xcoord = uniques(col_xcoord);              
 
             // add the rectangles for the nodes
             node.append("rect")
@@ -475,20 +479,14 @@
                 return d.dy;
               })
               .attr("width", sankey.nodeWidth())
-              .style("fill", function(d) {
-                if (Europe.indexOf(d.name) != -1) return Europe_color
-                else if (NorthAmerica.indexOf(d.name) != -1) return NorthAmerica_color
-                else if (CentralAmerica.indexOf(d.name) != -1) return CentralAmerica_color
-                else if (SouthAmerica.indexOf(d.name) != -1) return SouthAmerica_color
-                else if (Asia.indexOf(d.name) != -1) return Asia_color
-                else if (MiddleEast.indexOf(d.name) != -1) return MiddleEast_color
-                else if (Africa.indexOf(d.name) != -1) return Africa_color
-                else if (Oceania.indexOf(d.name) != -1) return Oceania_color
-                else if (d.name == "Coal") return Coal_color
-                else if (d.name == "Oil") return Oil_color
-                else if (d.name == "Gas") return Gas_color
-                else if (d.name == "Gas flaring") return GasFlaring_color
-                else if (d.name == "Cement") return Cement_color
+              .style("fill", function (d) {                
+                if (d.name === "EBC") return colour_sequence[0];
+                else if (d.name === "Indian margins") return colour_sequence[1];
+                else if (d.name === "Marginal sea") return colour_sequence[2];
+                else if (d.name === "Polar") return colour_sequence[3];
+                else if (d.name === "Subpolar") return colour_sequence[4];
+                else if (d.name === "Tropical") return colour_sequence[5];
+                else return colour_sequence[6];
               })
               .style("stroke-width", "2px")
               .style("stroke", "#555");
@@ -527,7 +525,7 @@
             //=================================================
             // action for 'Sort all' button
             d3.select("#sortButton")
-              .on("click", function() {
+              .on("click", function() {                
                 //toggle button
                 if (d3.select("#sortButton").text() === "Clear") {
                   svg2.selectAll("*").remove(); //clears sort rects
@@ -545,11 +543,14 @@
                   // Sort the rect heights by decreasing size and store in array      
                   d3.selectAll("g.node")
                     .filter(function(d) {
-                      if (d.x === col_xcoord[2]) { //select rects in last column (countries)
+                      
+                      if (d.x === col_xcoord[1]) { //select rects in last column (countries)
+                        console.log("match")
+                        console.log("d: ", d)
                         yheight.push(d.dy);
-                        yheight.sort(sortDescending);
+                        yheight.sort(sortDescending);                        
                         return yheight;
-                      }
+                      }                      
 
                       function sortDescending(a, b) {
                         return b - a; //use a - b to sort in increasing order
@@ -560,9 +561,10 @@
                   // Plot rects in order of increasing height on an svg2 canvas
                   d3.selectAll("g.node")
                     .filter(function(d) {
-                      if (d.x === col_xcoord[2]) { //selects last col (countries)
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)
                         dfilt = d;
                         ynames[idx] = d.name; //save country names
+                        console.log("d.name: ", d.name)
 
                         var rect = svg2.append("g")
                           .append("rect")
