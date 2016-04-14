@@ -390,7 +390,7 @@
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes per unit area from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -535,22 +535,20 @@
                   var yheight = []; //array to store sorted rect height array
                   var yval = []; //array to store calculated ycoords
                   var ynames = []; //array to store sorted names
-                  delta = 10; //spacing between rects
+                  delta = 10; //spacing between rects                  
 
                   //d3.select(this).attr("class", "selected");
                   d3.select(this).text("Clear");
 
                   // Sort the rect heights by decreasing size and store in array      
                   d3.selectAll("g.node")
-                    .filter(function(d) {
-                      
+                    .filter(function (d) {
                       if (d.x === col_xcoord[1]) { //select rects in last column (countries)
-                        console.log("match")
-                        console.log("d: ", d)
                         yheight.push(d.dy);
-                        yheight.sort(sortDescending);                        
+                        yheight.sort(sortDescending);
+
                         return yheight;
-                      }                      
+                      }
 
                       function sortDescending(a, b) {
                         return b - a; //use a - b to sort in increasing order
@@ -558,18 +556,26 @@
 
                     });
 
+                  //Find names corresponding to yheight
+                  d3.selectAll("g.node")
+                    .filter(function (d, i) {
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)
+                                                                    
+                        var idx_place = yheight.indexOf(d.dy); //order for sorted names
+                        //handle case when ynames contains two (or more) equal numbers
+                        if (idx_place < ynames.length) idx_place = ynames.length;
+                        ynames[idx_place] = d.name;                                              
+                      }
+                    });
+
                   // Plot rects in order of increasing height on an svg2 canvas
                   d3.selectAll("g.node")
                     .filter(function(d) {
-                      if (d.x === col_xcoord[1]) { //selects last col (countries)
-                        dfilt = d;
-                        ynames[idx] = d.name; //save country names
-                        console.log("d.name: ", d.name)
-
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)                        
                         var rect = svg2.append("g")
                           .append("rect")
                           .attr("height", function(d) {
-                            return dfilt.dy;
+                            return yheight[idx];
                           })
                           .attr("width", sankey.nodeWidth())
                           .attr("transform", function(d) {
@@ -580,14 +586,7 @@
                             return "translate(" + 0 + "," + yval[idx] + ")";
                           })
                           .style("fill", function(d) {
-                            if (Europe.indexOf(dfilt.name) != -1) return Europe_color
-                            else if (NorthAmerica.indexOf(dfilt.name) != -1) return NorthAmerica_color
-                            else if (CentralAmerica.indexOf(dfilt.name) != -1) return CentralAmerica_color
-                            else if (SouthAmerica.indexOf(dfilt.name) != -1) return SouthAmerica_color
-                            else if (Asia.indexOf(dfilt.name) != -1) return Asia_color
-                            else if (MiddleEast.indexOf(dfilt.name) != -1) return MiddleEast_color
-                            else if (Africa.indexOf(dfilt.name) != -1) return Africa_color
-                            else if (Oceania.indexOf(dfilt.name) != -1) return Oceania_color
+                            return colour_sequence[6];
                           })
                           .style("stroke-width", "2px")
                           .style("stroke", "#555");
@@ -605,7 +604,8 @@
                     })
                     .attr("dy", ".35em")
                     .attr("text-anchor", "start")
-                    .text(function(d, i) {
+                    .text(function (d, i) {                     
+                      // return formatX(i + 1) + " " + ynames[i];
                       return formatX(i + 1) + " " + ynames[i];
                     })
                     .style("stroke-width", "2px")
