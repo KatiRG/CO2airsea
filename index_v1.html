@@ -560,22 +560,21 @@
                   d3.selectAll("g.node")
                     .filter(function (d, i) {
                       if (d.x === col_xcoord[1]) { //selects last col (countries)
-                                                                    
                         var idx_place = yheight.indexOf(d.dy); //order for sorted names
                         //handle case when ynames contains two (or more) equal numbers
                         if (idx_place < ynames.length) idx_place = ynames.length;
-                        ynames[idx_place] = d.name;                                              
+                        ynames[idx_place] = d.name;
                       }
                     });
 
                   // Plot rects in order of increasing height on an svg2 canvas
                   d3.selectAll("g.node")
                     .filter(function(d) {
-                      if (d.x === col_xcoord[1]) { //selects last col (countries)                        
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)
                         var rect = svg2.append("g")
                           .append("rect")
                           .attr("height", function(d) {
-                            return yheight[idx];
+                            return yheight[idx] ;
                           })
                           .attr("width", sankey.nodeWidth())
                           .attr("transform", function(d) {
@@ -604,8 +603,7 @@
                     })
                     .attr("dy", ".35em")
                     .attr("text-anchor", "start")
-                    .text(function (d, i) {                     
-                      // return formatX(i + 1) + " " + ynames[i];
+                    .text(function (d, i) {
                       return formatX(i + 1) + " " + ynames[i];
                     })
                     .style("stroke-width", "2px")
