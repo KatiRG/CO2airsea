@@ -1,0 +1,16 @@
+Example: http://blog.thematicmapping.org/2013/06/converting-shapefiles-to-topojson.html
+
+topojson --id-property NR -p name=NAVN -p name -o NO_Admin_UTM33.topojson NO_Fylker_pol.shp NO_Kommuner_pol.shp
+
+Processing notes
+----------------
+
+topojson -o all.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
+
+topojson -o shelf.topojson GIS_FILES/Continental_Shelf.shp 
+
+topojson --id-property COSCAT -p name=COSCAT -o shelf_coscat.topojson GIS_FILES/Continental_Shelf.shp 
+
+topojson --id-property MARCATS -p name=MARCATS -o shelf_marcats.topojson GIS_FILES/Continental_Shelf.shp 
+
+topojson --id-property COSCAT -p name=COSCAT -p name=COSCAT -o all_coscat.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
