@@ -1,0 +1,89 @@
+<!--http://bl.ocks.org/d3noob/5193723-->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+	path {
+	  stroke: white;
+	  stroke-width: 0.25px;
+	  fill: grey;
+	}
+
+	.feature {
+	  fill: #ccc;
+	  cursor: pointer;
+	}
+
+	.feature.active {
+	  fill: orange;
+	}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v0.min.js"></script>
+<script>
+	var width = 990,
+	    height = 700
+	    active = d3.select(null);
+
+	var projection = d3.geo.mercator()
+	    //.center([0, 55])    
+	    // .rotate([-180,0]);
+	    .scale(130)
+	    .translate([width / 2, height / 1.5]);
+
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	var path = d3.geo.path()
+	    .projection(projection);
+
+	var g = svg.append("g");
+
+	// load and display the World
+	d3.json("refs/all.topojson", function(error, topology) {
+
+	g.selectAll("path")
+	      .data(topojson.object(topology, topology.objects.Continents)
+	          .geometries)
+	    .enter()
+	      .append("path")
+	      .attr("d", path)
+	      .attr("class", "feature")
+	      .on("click", clicked);
+	});
+
+	// zoom and pan
+	var zoom = d3.behavior.zoom()
+	    .on("zoom", zoomed);
+
+	svg.call(zoom)
+
+	function clicked(d) {
+
+	  if (active.node() === this) return reset();
+	  active.classed("active", false);
+	  active = d3.select(this).classed("active", true);	 
+	  
+	}
+
+	function reset() {	  
+	  active.classed("active", false);
+	  active = d3.select(null);
+	}
+
+	function zoomed() {
+		console.log("d3.event: ", d3.event)
+		console.log("d3.event.scale: ", d3.event.scale)
+		console.log("d3.event.translate: ", d3.event.translate)
+
+		g.attr("transform","translate("+ 
+	            d3.event.translate.join(",")+")scale("+d3.event.scale+")");
+		 // g.selectAll("path")  
+	  //           .attr("d", path.projection(projection));
+	}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!-- Mix of https://bl.ocks.org/mbostock/4699541 and https://bl.ocks.org/mbostock/9656675 -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.feature {
+  fill: #ccc;
+  cursor: pointer;
+}
+
+.feature.active {
+  fill: orange;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.continent-bd {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.shelf-bd {
+  fill: none;
+  stroke: gray;
+}
+
+</style>
+<body>
+<script src="d3.v3.min.js"></script>
+<script src="lib/topojson.v1.min.js"></script>
+<script>
+
+var width = 960,
+    height = 700,
+    active = d3.select(null)
+    scale0 = (width - 1) / 2 / Math.PI;
+
+var current_scale, current_translate;
+
+var projection = d3.geo.mercator() //d3.geo.albersUsa()
+    .scale(130)
+    //.translate([width / 2, height / 2]);
+    .translate([width / 2, height / 1.5]);
+
+var zoom = d3.behavior.zoom()
+    //.translate([0, 0])
+    //.scale(1)
+    //.scaleExtent([1, 8])
+    .on("zoom", zoomed);    
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    //.on("click", reset);
+
+var g = svg.append("g")
+    .style("stroke-width", "1.5px");
+
+svg
+    .call(zoom); // delete this line to disable free zooming
+    //.call(zoom.event);    
+
+d3.json("refs/all.topojson", function(error, us) {
+  if (error) throw error;
+
+  g.selectAll("path")
+      //.data(topojson.feature(us, us.objects.states).features)
+      .data(topojson.feature(us, us.objects.Continents).features)
+    .enter().append("path")
+      .attr("d", path)
+      .attr("class", "feature")
+      .on("click", clicked);
+
+  g.append("path")
+      //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .datum(topojson.mesh(us, us.objects.Continents, function(a, b) { return a !== b; }))
+      .attr("class", "mesh")
+      .attr("d", path);          
+});
+
+function clicked(d) {
+
+  if (active.node() === this) {console.log("calling reset"); return reset();}
+  active.classed("active", false);
+  active = d3.select(this).classed("active", true);
+
+  var bounds = path.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = .9 / Math.max(dx / width, dy / height),
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+      console.log("scale: ", scale)
+      console.log("translate: ", translate)
+      current_scale = scale;
+      current_translate = translate;
+
+  g.transition()
+      .duration(750)
+      .style("stroke-width", 1.5 / scale + "px")
+      .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+}
+
+function reset() {
+  console.log("in reset")
+  active.classed("active", false);
+  active = d3.select(null);
+
+  g.transition()
+      .duration(750)
+      .style("stroke-width", "1.5px")
+      .attr("transform", "");
+}
+
+function zoomed() {
+  console.log("d3.event: ", d3.event)
+  console.log("zoom.scale(): ", zoom.scale())
+  console.log("projection.translate(): ", projection.translate())
+  console.log("projection.scale(): ", projection.scale())
+  //http://stackoverflow.com/questions/20674537/d3-how-to-get-correct-scale-and-translate-origin-after-manual-zoom-and-pan-to
+  console.log("current_scale in zoomed: ", current_scale)
+  console.log("current_translate in zoomed: ", current_translate)
+  console.log("d3.event.scale: ", d3.event.scale)
+  console.log("d3.event.translate: ", d3.event.translate)
+  
+  // console.log("zoom: ", zoom)
+  // console.log("zoom.scale(1): ", zoom.scale(1))
+  // console.log("_this.zoom.scale(1): ", _this.zoom.scale(1))
+  // console.log("_this.zoom.translate([0, 0]): ", _this.zoom.translate([0, 0]))
+
+  var this_translate = [];
+  //t[0] * d3.event.scale + d3.event.translate[0];
+  this_translate[0] = projection.translate()[0] + d3.event.translate[0];
+  this_translate[1] = projection.translate()[1] + d3.event.translate[1];
+  //this_translate[0] = this_translate[0] + d3.event.translate[0];
+  //this_translate[1] = this_translate[1] + d3.event.translate[1];
+  console.log("this_translate: ", this_translate)
+
+  //zoom.scale(1);
+  //zoom.translate([0, 0]);
+  
+
+  //g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  //g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  // g.attr("transform","translate("+ 
+  //             this_translate.join(",")+")scale("+current_scale+")");
+
+  g.attr("transform","translate("+ 
+              this_translate.join(",")+")scale("+d3.event.scale+")");
+
+  
+
+  
+}
+
+
+// function zoomed() {
+//   console.log("in zoomed")
+//   projection
+//       .translate(zoom.translate());
+//       //.scale(zoom.scale());
+
+//   g.selectAll("path")
+//       .attr("d", path);
+// }
+
+</script>
