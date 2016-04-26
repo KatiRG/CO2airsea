@@ -59,7 +59,7 @@ var zoom = d3.behavior.zoom()
     //.translate([0, 0])
     //.scale(1)
     //.scaleExtent([1, 8])
-    .on("zoom", zoomed);    
+    .on("zoom", zoomed);
 
 var path = d3.geo.path()
     .projection(projection);
@@ -81,7 +81,7 @@ svg
     .call(zoom); // delete this line to disable free zooming
     //.call(zoom.event);    
 
-d3.json("refs/all.topojson", function(error, us) {
+d3.json("refs/all_nameM_idC.topojson", function(error, us) {
   if (error) throw error;
 
   g.selectAll("path")

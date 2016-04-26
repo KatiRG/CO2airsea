@@ -14,3 +14,7 @@ topojson --id-property COSCAT -p name=COSCAT -o shelf_coscat.topojson GIS_FILES/
 topojson --id-property MARCATS -p name=MARCATS -o shelf_marcats.topojson GIS_FILES/Continental_Shelf.shp 
 
 topojson --id-property COSCAT -p name=COSCAT -p name=COSCAT -o all_coscat.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
+
+//Create topojson where name=MARCATS and id=COSCAT number:
+
+topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o all_nameM_idC.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
