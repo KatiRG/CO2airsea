@@ -58,6 +58,8 @@ could add that soon.
 Link to the article describing the classification of the coastal regions (MARCATS segmentation):
 http://www.hydrol-earth-syst-sci.net/17/2029/2013/hess-17-2029-2013.html
 
+Data zip file retrievable from http://www.hydrol-earth-syst-sci.net/17/2029/2013/ in Download section.
+
 The link below point directly to the supplementary material of the article above. This is a ZIP file that contains GIS files. The shapefile Continental_Shelf.shp delineate COSCAT regions (COSCAT regions are sub-unit of MARCATS regions). Each COSCAT region have an ID number for COSCAT and MARCATS. We need to focus only on MARCATS unit so we need to aggregate the COSCAT region that have the same MARCATS ID number. The MARCATS ID number are the same as in my paper and in the xls file sent yesterday.
 http://www.hydrol-earth-syst-sci.net/17/2029/2013/hess-17-2029-2013-supplement.zip 
 
