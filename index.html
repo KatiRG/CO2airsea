@@ -168,16 +168,9 @@
     height: 600px;
   }
 
-  #GDPchart {
+  #Mmap {
     position: relative;
     top: -765px;
-    left: 651px;
-    height: 600px;
-  }
-
-  #POPchart {
-    position: relative;
-    top: -930px;
     left: 651px;
     height: 600px;
   }
@@ -365,16 +358,11 @@
                 d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
                 fname = "orca05.tsv"; //"MtCO2_byCountry.tsv";
+                mapname = "all_nameM_idC.topojson";
                 chartdiv = "Mchart";
-                showStackedBars(chartdiv);  
+                mapdiv = "Mmap";
 
-                // fname = "MtCO2perGDP_byCountry.tsv";
-                // chartdiv = "GDPchart";
-                // showStackedBars(chartdiv);
-
-                // fname = "MtCO2perPop_byCountry.tsv";
-                // chartdiv = "POPchart";
-                // showStackedBars(chartdiv);
+                plotHistogram(chartdiv, mapdiv);
               }
 
 
@@ -678,7 +666,7 @@
           } // end fn make(graph)
           
 
-          function showStackedBars(chartdiv) {
+          function plotHistogram(chartdiv, mapdiv) {
             // Interactive, Sortable Stacked Bar Chart
             // http://bl.ocks.org/katirg/f7d064cd9c3efbc3c360
             // http://bl.ocks.org/mbostock/3886208
@@ -686,14 +674,7 @@
             // http://bl.ocks.org/mbostock/3885705
 
             d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of unit area [mol C / (m² yr)] and region area [mol C / km²]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
-              .style("display", "block");
-            
-         
-            chartTitles = {
-              "Mchart": "MtCO2    ",
-              "GDPchart": "kgCO2/GDP",
-              "POPchart": "tCO2/person"
-            };
+              .style("display", "block");            
 
             // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
             function make_y_axis() {
@@ -750,7 +731,7 @@
               //.tickFormat(d3.format(".2s"))
               .tickFormat(d3.format(".1f"));
 
-            // append the svg to the chart div corresponding to the measure selected
+            // append the chart div to <p id="chart">
             var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
               .append("svg")
               .attr("width", width + margin.left + margin.right)
@@ -763,15 +744,8 @@
               .append("div")
                 .attr("class", "class_chartTitle")
                 .append("h4")
-                .text(chartTitles[chartdiv]);
-
-            var active_link = "0"; //to control legend selections and hover
-            var legendClicked; //to control legend selections
-            var legendClassArray = []; //store legend classes to select bars in plotSingle()
-            var legendClassArray_orig = []; //orig (with spaces)
-            var sortDescending = false; //if true, bars are sorted by height in descending order
-            var restoreXFlag = false; //restore order of bars back to original
-            var fadeOpacity = 0.3; //opacity value for de-selected countries
+                .text("MtCO2");
+           
 
             var div = d3.select("body").append("div")
               .attr("class", "tooltip")
@@ -803,9 +777,7 @@
                     ycoord_corrected: 0
                   };
                 });
-                d.total = d.sources[d.sources.length - 1].y1;
-
-                d["Gasflaring"] = d["Gas flaring"]; // to handle the space
+                d.total = d.sources[d.sources.length - 1].y1;            
 
               });
 
@@ -877,8 +849,7 @@
 
                   if (d.name === "Cement") height_diff = 0; //reset for next set of stacked bars
 
-                  return ycoord_corrected;
-                  // return y(d.y1);  //orig, but not accurate  
+                  return ycoord_corrected;                 
 
                 })
                 .attr("x", function(d) { //add to stock code
@@ -908,198 +879,57 @@
                     format = d3.format("5.1f");
                     div.transition().style("opacity", .9);
                     div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
-                      " " + chartTitles[chartdiv] + "</b>")
+                      " " + "MtCO2" + "</b>")
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
                 })
-                .on("mouseout", function() {                                  
+                .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
                 .on("click", function(d) { //highlight all bars belonging to same country
                   // clear any previous highlights                  
                                     
-                  if ( whichCountry != d3.select(this.parentNode)[0][0].id ) {
+                  // if ( whichCountry != d3.select(this.parentNode)[0][0].id ) {
 
-                    if (whichCountry) {//turn ON                      
-                      whichCountry = d3.select(this.parentNode)[0][0].id;                      
-                      d3.selectAll("#" + whichCountry)
-                        .selectAll("rect")
-                        .style("opacity", 1.0);
-                    }              
+                  //   if (whichCountry) {//turn ON                      
+                  //     whichCountry = d3.select(this.parentNode)[0][0].id;                      
+                  //     d3.selectAll("#" + whichCountry)
+                  //       .selectAll("rect")
+                  //       .style("opacity", 1.0);
+                  //   }              
 
-                    whichCountry = d3.select(this.parentNode)[0][0].id;                   
+                  //   whichCountry = d3.select(this.parentNode)[0][0].id;                   
 
-                    d3.selectAll("g.Country:not(#" + whichCountry + ")")
-                      .selectAll('rect')
-                      .style("opacity", fadeOpacity);
+                  //   d3.selectAll("g.Country:not(#" + whichCountry + ")")
+                  //     .selectAll('rect')
+                  //     .style("opacity", fadeOpacity);
 
 
-                  } else if ( whichCountry === d3.select(this.parentNode)[0][0].id ) {                    
-                    // restore rects to orig opacity
-                    d3.selectAll("g.Country")
-                      .selectAll('rect')
-                      .style("opacity", 1.0);
+                  // } else if ( whichCountry === d3.select(this.parentNode)[0][0].id ) {                    
+                  //   // restore rects to orig opacity
+                  //   d3.selectAll("g.Country")
+                  //     .selectAll('rect')
+                  //     .style("opacity", 1.0);
                     
-                    whichCountry = d3.select(this.parentNode).attr("class").split("g ").pop();
-                  }                                          
+                  //   whichCountry = d3.select(this.parentNode).attr("class").split("g ").pop();
+                  // }                                          
                  
-                });
-              
+                }); //end on.click
 
-              // restore graph after a single selection
-              function restorePlot(d) {
-                class_keep = d.replace(/\s/g, '');                
+            }); //d3.tsv(fname)
 
-                // restore opacity of erased bars    
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".bars:not(.class" + class_keep + ")")
-                  .transition()
-                  .duration(500)
-                  .delay(function() {
-                    if (restoreXFlag) return 2000;
-                    else return 750;
-                  })
-                  .attr("width", x.rangeBand()) //restore bar width
-                  .style("opacity", function(d) {
-                    if (whichCountry && whichCountry.startsWith("id_")) {//country selected                    
-                      return (d.country.replace(/\s/g, '') === whichCountry.split("id_").pop()) 
-                              ? 1 : fadeOpacity;
-                    } else return 1; //no country selected                    
-                  });
+          //MAP
+          // append the mapdiv to <p id="chart">
+          var m_width = 960, m_height = 700;
+          var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
+              .append("svg")
+              .attr("width", m_width + margin.left + margin.right)
+              .attr("height", m_height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                d3.selectAll("#" + whichCountry).selectAll(".bars").style("opacity", 1);
-
-                // translate bars back up to original y-posn
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".class" + class_keep)
-                  //.attr("x", function(d) { return x(d.country); })
-                  .transition()
-                  .duration(500)
-                  .delay(function() {
-                    if (restoreXFlag) return 1000; //bars need time to be restored to orig posn
-                    else return 0;
-                  })
-                  .attr("y", function(d) {
-                    //return y(d.y1); //not exactly correct since not based on raw data value
-                    return d.ycoord_corrected;
-                  });
-
-                //reset
-                restoreXFlag = false;
-
-              }
-
-              // plot only a single legend selection
-              function plotSingle(d) {
-                // store which chart legend user clicks on for all selections in 
-                // plotSingle() and restorePlot()                
-
-                class_keep = d.id.split("id").pop();
-                idx = legendClassArray.indexOf(class_keep);
-
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".bars:not(.class" + class_keep + ")")
-                  .transition()
-                  .duration(500)
-                  .attr("width", 0) // svg has no zindex mechanism so hide the bars (opacity set to 0) other bar unselectable if drawn after
-                  .style("opacity", 0);
-
-                // lower the bars to start on x-axis  
-                state.selectAll("rect").forEach(function(d, i) {
-
-                  // get height and y posn of base bar and selected bar
-                  h_keep = d3.select(d[idx]).attr("height");
-                  y_keep = d3.select(d[idx]).attr("y");
-
-                  h_base = d3.select(d[0]).attr("height");
-                  y_base = d3.select(d[0]).attr("y");
-
-                  h_shift = h_keep - h_base;
-                  y_new = y_base - h_shift;
-
-                  // reposition selected bars
-                  d3.select(d[idx])
-                    .transition()
-                    .ease("bounce")
-                    .duration(500)
-                    .delay(750)
-                    .attr("y", y_new);
-                })
-
-              }
-
-              // adapted change() fn in http://bl.ocks.org/mbostock/3885705
-              function sorting() {                
-
-                if (this.checked) {
-                  sortDescending = true;          
-                  y.domain([0, d3.max(data, function(d) {
-                    return +d[class_keep];
-                  })]);
-                } else {
-                  sortDescending = false;          
-                  y.domain([0, d3.max(data, function(d) {
-                    return d.total;
-                  })]);
-                }                
-
-                // rescale the y-axis to match range of selected data
-                svg3.select(".y.axis")
-                  .call(yAxis);
-
-                colName = legendClassArray_orig[sortBy];
-
-                var x0 = x.domain(data.sort(sortDescending ? function(a, b) {
-                      return b[colName] - a[colName];
-                    } : function(a, b) {
-                      return b.total - a.total;
-                    })
-                    .map(function(d, i) {
-                      return d.Country;
-                    }))
-                  .copy(); 
-
-                state.selectAll(".class" + active_link)
-                  .sort(function(a, b) {
-                    return x0(a.country) - x0(b.country);
-                  });
-
-                var transition = svg3.transition().duration(500),
-                  delay = function(d, i) {
-                    return i * 5;
-                  }; // if transition is not fast enough, bars cannot be restored properly        
-
-                // sort bars
-                transition.selectAll(".class" + active_link)
-                  .delay(delay)
-                  .attr("x", function(d) {
-                    return x0(d.country);
-                  })
-                  .attr("y", function(d) {
-                    return y(d.value);
-                  })
-                  .attr("height", function(d) {
-                    return y(0) - y(d.value);
-                  });
-
-                // sort x-labels accordingly    
-                transition.select(".x.axis")
-                  .call(xAxis)
-                  .selectAll("text")
-                  .text(function(d, i) {
-                    return d + " " + formatX(i + 1);
-                  })
-                  .style("text-anchor", "end")
-                  .attr("dx", "-.8em")
-                  .attr("dy", ".15em")
-                  .attr("transform", "rotate(-65)");
-
-              }
-
-            });
-
-          } //end showStackedBars()
+          } //end plotHistogram()
 
         </script>
 
