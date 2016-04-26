@@ -48,7 +48,9 @@ var width = 960,
 
 var current_scale, current_translate;
 
-var projection = d3.geo.mercator();
+var projection = d3.geo.mercator()
+    .translate([width / 2, height / 1.5]);
+
 var path = d3.geo.path().projection(projection);
 var t = projection.translate(); // the projection's default translation
 var s = projection.scale() // the projection's default scale
