@@ -3,6 +3,7 @@
 
 <script src="d3.v3.min.js"></script>
 <script src="lib/jquery-1.10.2.min.js"></script>
+<script src="lib/topojson.v1.min.js"></script>
 <!--bootstrap 3.0.2 -->
 <link href="lib/bootstrap.css" rel="stylesheet">
 <script src="lib/bootstrap.min.js"></script>
@@ -170,11 +171,31 @@
 
   #Mmap {
     position: relative;
-    top: -765px;
+    top: -725px;
     left: 651px;
     height: 600px;
   }
 
+  .background {
+    fill: none;
+    pointer-events: all;
+  }
+
+  .feature {
+    fill: #ccc;
+    cursor: pointer;
+  }
+
+  .feature.active {
+    fill: orange;
+  }
+
+  .mesh {
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 
 </style>
 
@@ -919,15 +940,116 @@
 
             }); //d3.tsv(fname)
 
+          //===================================================
           //MAP
           // append the mapdiv to <p id="chart">
-          var m_width = 960, m_height = 700;
+          var m_width = 960, 
+              m_height = 700,
+              active = d3.select(null);
+
+          var projection = d3.geo.mercator()
+              .translate([m_width / 2, m_height / 1.5]);
+
+          var path = d3.geo.path().projection(projection);
+          var t = projection.translate(); // the projection's default translation
+          var s = projection.scale() // the projection's default scale        
+
+          var path = d3.geo.path()
+              .projection(projection);
+
           var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
               .append("svg")
               .attr("width", m_width + margin.left + margin.right)
-              .attr("height", m_height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              .attr("height", m_height + margin.top + margin.bottom);
+              //.append("g")
+              //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");    
+
+          svg4.append("rect")
+              .attr("class", "background")
+              .attr("width", m_width)
+              .attr("height", m_height)
+              //.on("click", reset);
+
+          var g = svg4.append("g")
+              .style("stroke-width", "1.5px");
+
+          var zoom = d3.behavior.zoom()
+              .on("zoom", zoomed);    
+
+          svg4
+              .call(zoom); // delete this line to disable free zooming
+           
+
+          d3.json("refs/all_nameM_idC.topojson", function(error, us) {
+            if (error) throw error;
+
+            g.selectAll("path")
+                //.data(topojson.feature(us, us.objects.states).features)
+                .data(topojson.feature(us, us.objects.Continents).features)
+              .enter().append("path")
+                .attr("d", path)
+                .attr("class", "feature")
+                .on("click", clicked);
+
+            g.append("path")
+                //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+                .datum(topojson.mesh(us, us.objects.Continents, function(a, b) { return a !== b; }))
+                .attr("class", "mesh")
+                .attr("d", path);          
+          }); //end d3.json
+
+          //=================
+          // Fns for map
+          function clicked(d) {
+            if (active.node() === this) return reset();
+            active.classed("active", false);
+            active = d3.select(this).classed("active", true);
+
+            var bounds = path.bounds(d),
+                dx = bounds[1][0] - bounds[0][0],
+                dy = bounds[1][1] - bounds[0][1],
+                x = (bounds[0][0] + bounds[1][0]) / 2,
+                y = (bounds[0][1] + bounds[1][1]) / 2,
+                scale = .9 / Math.max(dx / m_width, dy / m_height),
+                translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
+
+            g.transition()
+                .duration(750)
+                .style("stroke-width", 1.5 / scale + "px")
+                .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+          }
+
+          function reset() {            
+            active.classed("active", false);
+            active = d3.select(null);
+
+            g.transition()
+                .duration(750)
+                .style("stroke-width", "1.5px")
+                .attr("transform", "");
+          }
+
+          function zoomed() {
+            //http://bl.ocks.org/biovisualize/2322933
+            // d3.event.translate (an array) stores the current translation from the parent SVG element
+            // t (an array) stores the projection's default translation
+            // we add the x and y vales in each array to determine the projection's new translation
+            var tx = t[0] * d3.event.scale + d3.event.translate[0];
+            var ty = t[1] * d3.event.scale + d3.event.translate[1];
+            
+            projection.translate([tx, ty]);
+
+            // now we determine the projection's new scale, but there's a problem:
+            // the map doesn't 'zoom onto the mouse point'
+            projection.scale(s * d3.event.scale);
+   
+            // redraw the map
+            svg4.selectAll("path").attr("d", path);
+          }
+
+
+
+
 
           } //end plotHistogram()
 

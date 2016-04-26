@@ -43,10 +43,7 @@
 
 var width = 960,
     height = 700,
-    active = d3.select(null)
-    scale0 = (width - 1) / 2 / Math.PI;
-
-var current_scale, current_translate;
+    active = d3.select(null);
 
 var projection = d3.geo.mercator()
     .translate([width / 2, height / 1.5]);
@@ -82,10 +79,12 @@ svg
     //.call(zoom.event);    
 
 d3.json("refs/all_nameM_idC.topojson", function(error, us) {
+  console.log("us: ", us)
+  console.log("feature: ", us.objects.Continents)
+
   if (error) throw error;
 
-  g.selectAll("path")
-      //.data(topojson.feature(us, us.objects.states).features)
+  g.selectAll("path")      
       .data(topojson.feature(us, us.objects.Continents).features)
     .enter().append("path")
       .attr("d", path)
@@ -100,8 +99,10 @@ d3.json("refs/all_nameM_idC.topojson", function(error, us) {
 });
 
 function clicked(d) {
+  console.log("this:", this)
+  console.log("d:", d)
 
-  if (active.node() === this) {console.log("calling reset"); return reset();}
+  if (active.node() === this) return reset();
   active.classed("active", false);
   active = d3.select(this).classed("active", true);
 
@@ -113,19 +114,13 @@ function clicked(d) {
       scale = .9 / Math.max(dx / width, dy / height),
       translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-      console.log("scale: ", scale)
-      console.log("translate: ", translate)
-      current_scale = scale;
-      current_translate = translate;
-
   g.transition()
       .duration(750)
       .style("stroke-width", 1.5 / scale + "px")
       .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 }
 
-function reset() {
-  console.log("in reset")
+function reset() {  
   active.classed("active", false);
   active = d3.select(null);
 
@@ -136,10 +131,6 @@ function reset() {
 }
 
 function zoomed() {
-  console.log("d3.event.scale: ", d3.event.scale)
-  console.log("d3.event.translate: ", d3.event.translate)
-  console.log("starting t: ", t)
-  console.log("starting s: ", s)
   //http://bl.ocks.org/biovisualize/2322933
   // d3.event.translate (an array) stores the current translation from the parent SVG element
   // t (an array) stores the projection's default translation
@@ -147,7 +138,6 @@ function zoomed() {
   var tx = t[0] * d3.event.scale + d3.event.translate[0];
   var ty = t[1] * d3.event.scale + d3.event.translate[1];
 
-  console.log("new translate: ", [tx, ty])
   projection.translate([tx, ty]);
 
   // now we determine the projection's new scale, but there's a problem:
