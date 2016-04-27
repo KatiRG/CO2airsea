@@ -18,3 +18,19 @@ topojson --id-property COSCAT -p name=COSCAT -p name=COSCAT -o all_coscat.topojs
 //Create topojson where name=MARCATS and id=COSCAT number:
 
 topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o all_nameM_idC.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
+
+Merging shapefiles in QGIS
+---------------------------
+MMQGIS > Combine > Merge Layers (http://gis.stackexchange.com/questions/25061/how-to-merge-multiple-layers-to-one-layer-using-qgis)
+
+NB: Could not combine layers at first because COSCAT column id in Continental_Shelf shapefile was real, not int. Soln: 
+1. Create a new col 'tmpC', used conversion toint(COSCAT) to fill the new column, deleted col 'COSCAT' (http://gis.stackexchange.com/questions/75021/convert-string-to-integer-in-qgis-tables)
+
+2. used Table Manager plugin (installed from Extension menu) to rename 'tmpC' to 'COSCAT'
+(http://mikejcorey.github.io/qgis_advanced_2015/)
+
+output: temp.shp
+
+Now try converting temp.shp to topojson:
+
+topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o merge_nameM_idC.topojson GIS_FILES/temp.shp
