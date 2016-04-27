@@ -1,0 +1,152 @@
+<!-- Mix of https://bl.ocks.org/mbostock/4699541 and https://bl.ocks.org/mbostock/9656675 -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.feature {
+  fill: #ccc;
+  cursor: pointer;
+}
+
+.feature.active {
+  fill: orange;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.continent-bd {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.shelf-bd {
+  fill: none;
+  stroke: gray;
+}
+
+</style>
+<body>
+<script src="d3.v3.min.js"></script>
+<script src="lib/topojson.v1.min.js"></script>
+<script>
+
+var width = 960,
+    height = 700,
+    active = d3.select(null);
+
+var projection = d3.geo.mercator()
+    .translate([width / 2, height / 1.5]);
+
+var path = d3.geo.path().projection(projection);
+var t = projection.translate(); // the projection's default translation
+var s = projection.scale() // the projection's default scale
+
+var zoom = d3.behavior.zoom()
+    //.translate([0, 0])
+    //.scale(1)
+    //.scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    //.on("click", reset);
+
+var g = svg.append("g")
+    .style("stroke-width", "1.5px");
+
+svg
+    .call(zoom); // delete this line to disable free zooming
+    //.call(zoom.event);    
+
+d3.json("refs/merge_nameM_idC.topojson", function(error, us) {
+  console.log("us: ", us)
+  console.log("feature: ", us.objects.temp)
+
+  if (error) throw error;
+
+  g.selectAll("path")      
+      .data(topojson.feature(us, us.objects.temp).features)
+    .enter().append("path")
+      .attr("d", path)
+      .attr("class", "feature")
+      .on("click", clicked);
+
+  g.append("path")      
+      .datum(topojson.mesh(us, us.objects.temp, function(a, b) { return a !== b; }))
+      .attr("class", "mesh")
+      .attr("d", path);          
+});
+
+function clicked(d) {
+  console.log("this:", this)
+  console.log("d:", d)
+
+  if (active.node() === this) return reset();
+  active.classed("active", false);
+  active = d3.select(this).classed("active", true);
+
+  var bounds = path.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = .9 / Math.max(dx / width, dy / height),
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+  g.transition()
+      .duration(750)
+      .style("stroke-width", 1.5 / scale + "px")
+      .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+}
+
+function reset() {  
+  active.classed("active", false);
+  active = d3.select(null);
+
+  g.transition()
+      .duration(750)
+      .style("stroke-width", "1.5px")
+      .attr("transform", "");
+}
+
+function zoomed() {
+  //http://bl.ocks.org/biovisualize/2322933
+  // d3.event.translate (an array) stores the current translation from the parent SVG element
+  // t (an array) stores the projection's default translation
+  // we add the x and y vales in each array to determine the projection's new translation
+  var tx = t[0] * d3.event.scale + d3.event.translate[0];
+  var ty = t[1] * d3.event.scale + d3.event.translate[1];
+
+  projection.translate([tx, ty]);
+
+  // now we determine the projection's new scale, but there's a problem:
+  // the map doesn't 'zoom onto the mouse point'
+  projection.scale(s * d3.event.scale);
+
+  // redraw the map
+  svg.selectAll("path").attr("d", path);
+
+}
+
+
+</script>

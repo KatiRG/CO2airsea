@@ -16,8 +16,10 @@ topojson --id-property MARCATS -p name=MARCATS -o shelf_marcats.topojson GIS_FIL
 topojson --id-property COSCAT -p name=COSCAT -p name=COSCAT -o all_coscat.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
 
 //Create topojson where name=MARCATS and id=COSCAT number:
-
 topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o all_nameM_idC.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
+
+//Try using both MARCATS and COSCAT ids:
+topojson --id-property MARCATS -p name=MARCATS -p name=COSCAT -o test.topojson GIS_FILES/Continental_Shelf.shp GIS_FILES/Continents.shp
 
 Merging shapefiles in QGIS
 ---------------------------
@@ -34,3 +36,5 @@ output: temp.shp
 Now try converting temp.shp to topojson:
 
 topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o merge_nameM_idC.topojson GIS_FILES/temp.shp
+
+Doesn't work: see index_merge.html

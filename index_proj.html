@@ -1,4 +1,6 @@
 <!-- Mix of https://bl.ocks.org/mbostock/4699541 and https://bl.ocks.org/mbostock/9656675 -->
+<!-- NB: in second example, clicking on New England sends map flying off the screen c.f. -->
+<!-- https://gist.github.com/mbostock/9656675 comment -->
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
@@ -88,7 +90,10 @@ d3.json("refs/all_nameM_idC.topojson", function(error, us) {
       .data(topojson.feature(us, us.objects.Continents).features)
     .enter().append("path")
       .attr("d", path)
-      .attr("class", "feature")
+      .attr("class", function (d) {
+        //console.log("d: ", d.properties.name)
+        return "feature" + " marcat-" + d.properties.name; 
+      })
       .on("click", clicked);
 
   g.append("path")
@@ -100,7 +105,7 @@ d3.json("refs/all_nameM_idC.topojson", function(error, us) {
 
 function clicked(d) {
   console.log("this:", this)
-  console.log("d:", d)
+  console.log("active.node():", active.node())
 
   if (active.node() === this) return reset();
   active.classed("active", false);

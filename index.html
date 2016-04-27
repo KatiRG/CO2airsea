@@ -735,12 +735,30 @@
                              "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
                              "#ffd59b", "#db4551", "#edf8fb"];
 
+            // Dictionary for MARCATS regions
+            marcats_dict = {
+              "NorthEasternPacific": "1", "CaliforniaCurrent": "2", "TropicalEasternPacific": "3",
+              "PeruvianUpwellingCurrent": "4", "SouthernAmerica": "5", "BrazilianCurrent": "6",
+              "TropicalWesternAtlantic": "7", "CarribeanSea": "8", "GulfofMexico": "9",
+              "FloridaUpwelling": "10", "SeaofLabrador": "11", "HudsonBay": "12",
+              "CanadianArchipeloagos": "13", "NorthernGreenland": "14", "SouthernGreenland": "15",
+              "NorwegianBasin": "16", "NorthEasternAtlantic": "17", "BalticSea": "18",
+              "IberianUpwelling": "19", "MediterraneanSea": "20", "BlackSea": "21",
+              "MoroccanUpwelling": "22", "TropicalEasternAtlantic": "23", "SouthernWesternAfrica": "24",
+              "AgulhasCurrent": "25", "TropicalWesternIndian": "26", "WesternArabianSea": "27",
+              "RedSea": "28", "PersianGulf": "29", "EasternArabianSea": "30",
+              "BayofBengal": "31", "TropicalEasternIndian": "32", "LeeuwinCurrent": "33",
+              "SouthernAustralia": "34", "EasternAustrialianCurrent": "35", "NewZealand": "36",
+              "NorthernAustralia": "37", "SouthEastAsia": "38", "ChinaSea&Kuroshio": "39",
+              "SeaofJapan": "40", "SeaofOkhotsk": "41", "NorthWesternPacific": "42",
+              "SiberianShelves": "43", "Barents&Kara Sea": "44", "AntarcticShelves": "45"              
+            };  
 
             var color = d3.scale.ordinal()
               // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
               .range(marcat_colors);
             
-
+            var active_bar = d3.select(null);
 
             var xAxis = d3.svg.axis()
               .scale(x)
@@ -908,35 +926,30 @@
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight all bars belonging to same country
-                  // clear any previous highlights                  
+                .on("click", function(d) { //highlight corresponding region in map                  
+                  // console.log("active_bar.node(): ", active_bar.node())
+                  // console.log("d3.select(this): ", d3.select(this))
+
+                  // toggle active state and clear any previously clicked bar
+                  if (active_bar.node() === this) return reset_bar();
+                  active_bar.classed("active_bar", false);
+                  active_bar.attr("stroke", null);
+                  active_bar = d3.select(this).classed("active_bar", true);
+
+                  // highlight with black outline
+                  d3.select(this).attr("stroke", "#000")
+                    .attr("stroke-width", 2.5);
                                     
-                  // if ( whichCountry != d3.select(this.parentNode)[0][0].id ) {
-
-                  //   if (whichCountry) {//turn ON                      
-                  //     whichCountry = d3.select(this.parentNode)[0][0].id;                      
-                  //     d3.selectAll("#" + whichCountry)
-                  //       .selectAll("rect")
-                  //       .style("opacity", 1.0);
-                  //   }              
-
-                  //   whichCountry = d3.select(this.parentNode)[0][0].id;                   
-
-                  //   d3.selectAll("g.Country:not(#" + whichCountry + ")")
-                  //     .selectAll('rect')
-                  //     .style("opacity", fadeOpacity);
-
-
-                  // } else if ( whichCountry === d3.select(this.parentNode)[0][0].id ) {                    
-                  //   // restore rects to orig opacity
-                  //   d3.selectAll("g.Country")
-                  //     .selectAll('rect')
-                  //     .style("opacity", 1.0);
-                    
-                  //   whichCountry = d3.select(this.parentNode).attr("class").split("g ").pop();
-                  // }                                          
+                                           
                  
                 }); //end on.click
+
+                function reset_bar() {
+                  active_bar.classed("active_bar", false);
+                  active_bar.attr("stroke", null)
+
+                  active_bar = d3.select(null);
+                }
 
             }); //d3.tsv(fname)
 
@@ -988,7 +1001,10 @@
                 .data(topojson.feature(us, us.objects.Continents).features)
               .enter().append("path")
                 .attr("d", path)
-                .attr("class", "feature")
+                //.attr("class", "feature")
+                .attr("class", function (d) {                  
+                  return "feature" + " marcat-" + d.properties.name; 
+                })
                 .on("click", clicked);
 
             g.append("path")
