@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="d3.v3.min.js"></script>
+<script src="lib/jquery-1.10.2.min.js"></script>
+<!--bootstrap 3.0.2 -->
+<link href="lib/bootstrap.css" rel="stylesheet">
+<script src="lib/bootstrap.min.js"></script>
+<link href="lib/sticky-footer-navbar.css" rel="stylesheet">
+
+<title>CO2 Fluxes</title>
+<style>
+  body {
+    /*font-family: Arial;*/
+    color: #555;
+  }
+  
+  .container {
+    margin-left: 10px;
+  }
+  
+  .node rect {
+    cursor: crosshair;
+    fill-opacity: 1.0;
+    shape-rendering: crispEdges;
+  }
+  
+  .node text {
+    pointer-events: none;
+    fill: #555;
+  }
+  
+  .link {
+    cursor: crosshair;
+    fill: none;
+    stroke: #000;
+    stroke-opacity: .5;
+  }
+  
+  .link:hover {
+    stroke-opacity: 1.0 !important;
+  }
+  
+  div.tooltip {
+    position: absolute;
+    padding: 5px;
+    text-align: center;
+    font: 12px sans-serif;
+    color: #000;
+    background: #AAA;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #000;
+    border-radius: 8px;
+  }
+  
+  .nytg-navigation li.selected {
+    background: none repeat scroll 0 0 #e9e9e9;
+    border-color: #aaa;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2) inset;
+    color: #555;
+  }
+  
+  .nytg-navigation li:first-of-type {
+    border-radius: 4px 0 0 4px;
+  }
+  
+  .nytg-navigation li:last-of-type {
+    border-radius: 0 4px 4px 0;
+    border-right: 1px solid #ccc;
+  }
+  
+  .nytg-navigation li {
+    background: none repeat scroll 0 0 #f9f9f9;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    color: #999;
+    cursor: pointer;
+    float: left;
+    font-size: 14px;
+    margin: 0;
+    padding: 10px 18px;
+    border-radius: 4px 4px 4px 4px;
+  }
+  
+  ul {
+    list-style: outside none none;
+    margin-top: 80px;
+  }
+
+   .nytg-sort li {
+    background: none repeat scroll 0 0 #f9f9f9;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    color: #999;
+    cursor: pointer;
+    float: left;
+    font-size: 14px;
+    margin: 0;
+    padding: 10px 18px;
+    border-radius: 4px 4px 4px 4px;
+  }
+
+  #infotext, #infotext2 {
+    position: relative;
+    top: 115px;
+    left: 16px;
+  }
+  
+  #sortCol {
+    position: relative;
+    top: -715px;
+    left: 1142px;
+  }
+  
+  /*css for stacked bar charts*/
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #b3b3b3;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+     fill: #2f2f2f;
+  }
+
+  .y.axis, .x.axis {
+    font-size: 10px;
+    color: #2f2f2f;
+  }
+  
+  .bar {
+    fill: steelblue;
+  }
+  
+  .x.axis path {
+    display: none;
+  }
+  
+  label {
+    position: relative;
+    left: 564px;
+    top: -315px;    
+    font: 10px sans-serif;
+  }
+  
+  .grid {
+    stroke: lightgrey;
+    opacity: 0.7;
+    shape-rendering: crispEdges;
+  }
+
+  .class_chartTitle {
+    position: relative;
+    left: 314px;
+    top: -429px;
+    width: 500px;
+
+  }
+
+  #Mchart {
+    position: relative;
+    top: 100px;
+    height: 600px;
+  }
+
+  #GDPchart {
+    position: relative;
+    top: -765px;
+    left: 651px;
+    height: 600px;
+  }
+
+  #POPchart {
+    position: relative;
+    top: -930px;
+    left: 651px;
+    height: 600px;
+  }
+
+
+</style>
+
+<body>
+  <div id="wrap">
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <span class="icon-bar"></span>
+          <div class="navbar-brand" href="index.html">
+            <b>Anthropogenic CO2 Fluxes</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Begin page content -->
+    <div class="container">
+
+      <ul class="nytg-navigation" style='position: absolute; left: 0px; top: 15px;'>
+        <li id="TA" class="selected">Sankey flows</li>
+        <li id="TB">Histograms</li>
+      </ul>
+
+      <div id="infotext" style="width: 700px;"></div>
+      <div id="infotext2" style="width: 615px;"></div>
+
+      <p id="chart">
+       
+        <ul class="nytg-sort" style='position: absolute; left: 1110px; top: 50px;'>
+          <li id="sortButton">Sort</li>
+        </ul>
+
+        <div id="sortCol"></div>
+    
+        <script src="sankey.js"></script>
+        <script>
+          // Sankey diagram with highlight and tooltip
+          // http://bost.ocks.org/mike/sankey/
+          // http://bl.ocks.org/git-ashish/8959771
+
+          var whichCountry; //for histograms
+
+          var margin = {
+              top: 100,
+              right: 10,
+              bottom: 10,
+              left: 10
+            },
+            width = 1100 - margin.left - margin.right,
+            height = 700 - margin.top - margin.bottom;
+
+          var formatNumber = d3.format(".2f"),
+            format = function(d) {
+              return formatNumber(d);
+            },
+            color = d3.scale.category20();
+
+          // append the svg canvas to the page
+          var svg = d3.select("#chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+          // create svg for sorted column
+          var svg2 = d3.select("#sortCol").append("svg")
+            .attr("width", 200 + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+          // set the sankey diagram properties
+          var sankey = d3.sankey()
+            .nodeWidth(20)
+            .nodePadding(10)
+            .size([width, height]);
+
+          var path = sankey.link();
+
+          var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
+          var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
+
+          // arrays to hold list of countries
+          Africa = ['Africa', 'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi', 'Cape Verde', 'Central African Republic',
+            'Chad', 'Comoros', 'Congo', "C\xf4te d'Ivoire", 'Democratic Republic of the Congo', 'Djibouti', 'Egypt',
+            'Equatorial Guinea', 'Eritrea', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea', 'Guinea-Bissau', 'Kenya',
+            'Lesotho', 'Liberia', 'Libya', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius', 'Morocco', 'Mozambique',
+            'Namibia', 'Niger', 'Nigeria', 'Cameroon', 'R\xe9union', 'Rwanda', 'Sao Tome and Principe', 'Senegal',
+            'Seychelles', 'Sierra Leone', 'Somalia', 'South Africa', 'Sudan', 'Swaziland', 'Togo', 'Tunisia',
+            'Uganda', 'Tanzania', 'Zambia', 'Zimbabwe'
+          ];
+          Asia = ['Asia', 'Afghanistan', 'Armenia', 'Azerbaijan', 'Bangladesh', 'Bhutan', 'Brunei Darussalam', 'Cambodia', 'China',
+            'North Korea', 'Georgia', 'Hong Kong', 'India', 'Indonesia', 'Japan', 'Kazakhstan', 'Kyrgyzstan', 'Laos',
+            'Macao', 'Malaysia', 'Maldives', 'Mongolia', 'Myanmar', 'Nepal', 'Pakistan', 'Papua New Guinea',
+            'Philippines', 'South Korea', 'Singapore', 'Sri Lanka', 'Taiwan', 'Tajikistan', 'Thailand', 'Timor-Leste',
+            'Turkmenistan', 'Uzbekistan', 'Viet Nam'
+          ];
+          Europe = ['Europe', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
+            'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Faeroe Islands',
+            'Finland', 'France', 'Germany', 'Gibraltar', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia',
+            'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia (Republic of)', 'Malta', 'Montenegro', 'Netherlands',
+            'Norway', 'Poland', 'Portugal', 'Moldova', 'Romania', 'Russian Federation', 'Serbia', 'Slovakia',
+            'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Ukraine', 'United Kingdom'
+          ];
+          MiddleEast = ['Middle East', 'Bahrain', 'Iraq', 'Iran', 'Israel', 'Jordan', 'Kuwait', 'Lebanon', 'Occupied Palestinian Territory',
+            'Oman', 'Qatar', 'Saudi Arabia', 'Syria', 'Turkey', 'United Arab Emirates', 'Yemen'
+          ];
+          NorthAmerica = ['North America', 'Canada', 'Greenland', 'Mexico', 'Saint Pierre and Miquelon', 'USA'];
+          Oceania = ['Oceania', 'Australia', 'Cook Islands', 'Micronesia (Federated States of)', 'Fiji', 'French Polynesia',
+            'Kiribati', 'Marshall Islands', 'Nauru', 'New Caledonia', 'New Zealand', 'Niue', 'Palau',
+            'Samoa', 'Solomon Islands', 'Tonga', 'Vanuatu', 'Wallis and Futuna Islands'
+          ];
+          CentralAmerica = ['Central America', 'Anguilla', 'Antigua and Barbuda', 'Aruba', 'Bahamas', 'Barbados', 'Belize', 'Bermuda', 'British Virgin Islands',
+            'Cayman Islands', 'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'El Salvador', 'Grenada', 'Guadeloupe',
+            'Guatemala', 'Haiti', 'Honduras', 'Jamaica', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Nicaragua',
+            'Panama', 'Saint Helena', 'Saint Lucia', 'Saint Kitts and Nevis', 'Saint Vincent and the Grenadines',
+            'Trinidad and Tobago', 'Turks and Caicos Islands'
+          ];
+          SouthAmerica = ['South America', 'Argentina', 'Brazil', 'Chile', 'Colombia', 'Ecuador', 'Falkland Islands (Malvinas)',
+            'French Guiana', 'Guyana', 'Paraguay', 'Peru', 'Bolivia', 'Suriname', 'Uruguay', 'Venezuela'
+          ];
+
+          Africa_color = '#FFD880';
+          Asia_color = '#FF80AF';
+          CentralAmerica_color = '#9FD3C8';
+          Europe_color = '#A6D4FF';
+          MiddleEast_color = '#E0E67F';
+          NorthAmerica_color = '#C399D9';
+          Oceania_color = '#FFBFDA';
+          SouthAmerica_color = '#FFA899';
+          CentralAmerica_color = '#9FD3C8';
+
+          Coal_color = "#3B3131";
+          Oil_color = "#886666";
+          Gas_color = "#AEC7E8";
+          GasFlaring_color = "#AEC7E8";
+          Cement_color = "#666688";
+
+          //https://www.colorcodehex.com/eff3ff/
+          colour_sequence = ["#CBD8FF", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"];
+
+          // http://chimera.labs.oreilly.com/books/1230000000345/ch09.html#_changing_the_data
+          // Sankey button
+          d3.select("#TA")
+            .on("click", function() {
+              if (d3.select(this).attr("class") != "selected") {
+                //toggle button  
+                d3.selectAll("#TB").attr("class", ""); //inactivate histogram button
+                d3.select(this).attr("class", "selected");  //activate sankey button    
+
+                d3.select("#chart").selectAll("div").remove(); //remove all stacked bar charts
+                d3.select('#chart').select("svg").style("display", "inline"); //un-hide Sankey
+                d3.select("#infotext2").style("display", "none"); //hide histogram info text
+                
+                d3.select("#sortButton").text("Sort");
+                units = "MtCO2";
+                //d3.json("emissions_MtCO2.json", function(error, graph) {
+                d3.json("sankey_flux.json", function(error, graph) {  
+                  svg.selectAll("*").remove();
+                  svg2.selectAll("*").remove(); //clears sort rects
+                  make(graph);
+                })
+              }
+            });
+
+          // Sankey and histogram buttons
+          d3.select("#TB")
+            .on("click", function() {
+              if (d3.select(this).attr("class") != "selected") {
+                d3.selectAll("#TA").attr("class", "");
+                d3.select(this).attr("class", "selected");
+
+                d3.select('#chart').select("svg").style("display", "none"); //hides Sankey diagram
+                svg2.selectAll("*").remove(); //clears any sort rects displayed
+                d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
+                d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
+
+                fname = "orca05.tsv"; //"MtCO2_byCountry.tsv";
+                chartdiv = "Mchart";
+                showStackedBars(chartdiv);  
+
+                // fname = "MtCO2perGDP_byCountry.tsv";
+                // chartdiv = "GDPchart";
+                // showStackedBars(chartdiv);
+
+                // fname = "MtCO2perPop_byCountry.tsv";
+                // chartdiv = "POPchart";
+                // showStackedBars(chartdiv);
+              }
+
+
+            });
+
+          // load the data
+          units = "MtCO2";
+          //d3.json("emissions_MtCO2.json", function(error, graph) {
+          d3.json("sankey_flux.json", function(error, graph) {  
+            make(graph);
+          });
+
+          function make(graph) {
+            // Display info text for Sankey diagram
+
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes per unit area from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
+              .style("display", "block");
+
+            d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
+
+            var nodeMap = {};
+            graph.nodes.forEach(function(x) {
+              nodeMap[x.name] = x;
+            });
+            graph.links = graph.links.map(function(x) {
+              return {
+                source: nodeMap[x.source],
+                target: nodeMap[x.target],
+                value: x.value
+              };
+            });
+
+            graph.nodes.sort(function(a, b) {
+              return d3.descending(a.value, b.value);
+            });
+
+            sankey
+              .nodes(graph.nodes)
+              .links(graph.links)
+              .layout(32);
+
+            // tooltip div
+            var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+
+            // add in the links
+            var link = svg.append("g").selectAll(".link")
+              .data(graph.links)
+              .enter().append("path")
+              .attr("class", "link")
+              .attr("d", path)
+              .attr("id", function(d, i) {
+                d.id = i;
+                return "link-" + i;
+              })
+              .style("stroke-width", function(d) {
+                return Math.max(1, d.dy);
+              })
+              .style("stroke", function (d) {                
+                if (d.source.name === "EBC") return colour_sequence[0];
+                else if (d.source.name === "Indian margins") return colour_sequence[1];
+                else if (d.source.name === "Marginal sea") return colour_sequence[2];
+                else if (d.source.name === "Polar") return colour_sequence[3];
+                else if (d.source.name === "Subpolar") return colour_sequence[4];
+                else if (d.source.name === "Tropical") return colour_sequence[5];
+                else return colour_sequence[6];
+              })   
+              .sort(function(a, b) {
+                return b.dy - a.dy;
+              });
+
+            // add the link tooltip
+            link.on("mouseover", function(d) {
+                div.transition()
+                  .style("opacity", .9);
+                div.html(d.source.name + " → " + d.target.name + 
+                    "<br><b>" + format(d.value) + " " + units + "</b>")
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px");
+              })
+              .on("mouseout", function(d) {
+                div.transition()
+                  .style("opacity", 0);
+              });
+
+            // add in the nodes
+            var node = svg.append("g").selectAll(".node")
+              .data(graph.nodes)
+              .enter().append("g")
+              .attr("class", "node")
+              .attr("transform", function (d) {
+                col_xcoord.push(d.x); //x-coord of each Sankey col
+                return "translate(" + d.x + "," + d.y + ")";
+              })
+              .on("click", highlight_node_links);
+              col_xcoord = uniques(col_xcoord);              
+
+            // add the rectangles for the nodes
+            node.append("rect")
+              .attr("height", function(d) {
+                return d.dy;
+              })
+              .attr("width", sankey.nodeWidth())
+              .style("fill", function (d) {                
+                if (d.name === "EBC") return colour_sequence[0];
+                else if (d.name === "Indian margins") return colour_sequence[1];
+                else if (d.name === "Marginal sea") return colour_sequence[2];
+                else if (d.name === "Polar") return colour_sequence[3];
+                else if (d.name === "Subpolar") return colour_sequence[4];
+                else if (d.name === "Tropical") return colour_sequence[5];
+                else return colour_sequence[6];
+              })
+              .style("stroke-width", "2px")
+              .style("stroke", "#555");
+
+            // add the node tooltip
+            node.on("mouseover", function(d) {
+                div.transition()
+                  .style("opacity", .9);
+                div.html(d.name + "<br><b>" + format(d.value) + " " + units + "</b>")
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px");
+              })
+              .on("mouseout", function(d) {
+                div.transition()
+                  .style("opacity", 0);
+              });
+
+            // add in the title for the nodes
+            node.append("text")
+              .attr("x", -6)
+              .attr("y", function(d) {
+                return d.dy / 2;
+              })
+              .attr("dy", ".35em")
+              .attr("text-anchor", "end")
+              .attr("transform", null)
+              .text(function(d) {
+                return d.name;
+              })
+              .filter(function(d) {
+                return d.x < width / 2;
+              })
+              .attr("x", 6 + sankey.nodeWidth())
+              .attr("text-anchor", "start");
+
+            //=================================================
+            // action for 'Sort all' button
+            d3.select("#sortButton")
+              .on("click", function() {                
+                //toggle button
+                if (d3.select("#sortButton").text() === "Clear") {
+                  svg2.selectAll("*").remove(); //clears sort rects
+                  d3.select("#sortButton").text("Sort");
+                } else {
+                  var idx = 0;
+                  var yheight = []; //array to store sorted rect height array
+                  var yval = []; //array to store calculated ycoords
+                  var ynames = []; //array to store sorted names
+                  delta = 10; //spacing between rects                  
+
+                  //d3.select(this).attr("class", "selected");
+                  d3.select(this).text("Clear");
+
+                  // Sort the rect heights by decreasing size and store in array      
+                  d3.selectAll("g.node")
+                    .filter(function (d) {
+                      if (d.x === col_xcoord[1]) { //select rects in last column (countries)
+                        yheight.push(d.dy);
+                        yheight.sort(sortDescending);
+
+                        return yheight;
+                      }
+
+                      function sortDescending(a, b) {
+                        return b - a; //use a - b to sort in increasing order
+                      }
+
+                    });
+
+                  //Find names corresponding to yheight
+                  d3.selectAll("g.node")
+                    .filter(function (d, i) {
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)
+                        var idx_place = yheight.indexOf(d.dy); //order for sorted names
+                        //handle case when ynames contains two (or more) equal numbers
+                        if (idx_place < ynames.length) idx_place = ynames.length;
+                        ynames[idx_place] = d.name;
+                      }
+                    });
+
+                  // Plot rects in order of increasing height on an svg2 canvas
+                  d3.selectAll("g.node")
+                    .filter(function(d) {
+                      if (d.x === col_xcoord[1]) { //selects last col (countries)
+                        var rect = svg2.append("g")
+                          .append("rect")
+                          .attr("height", function(d) {
+                            return yheight[idx] ;
+                          })
+                          .attr("width", sankey.nodeWidth())
+                          .attr("transform", function(d) {
+                            if (idx === 0) yval[idx] = 0; //first rect is at (0,0)
+                            else {
+                              yval[idx] = yval[idx - 1] + yheight[idx - 1] + delta;
+                            }
+                            return "translate(" + 0 + "," + yval[idx] + ")";
+                          })
+                          .style("fill", function(d) {
+                            return colour_sequence[6];
+                          })
+                          .style("stroke-width", "2px")
+                          .style("stroke", "#555");
+
+                        idx++;
+                      }
+                    }) //end d.x filter
+
+                  // add text
+                  svg2.selectAll("g")
+                    .append("text")
+                    .attr("x", 26)
+                    .attr("y", function(d, i) {
+                      return yval[i] + yheight[i] / 2;
+                    })
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "start")
+                    .text(function (d, i) {
+                      return formatX(i + 1) + " " + ynames[i];
+                    })
+                    .style("stroke-width", "2px")
+                    .style("fill", "#555");
+
+                } //end button toggle check
+              }); //end 'sort All' button action
+
+            //=================================================
+            // FUNCTIONS
+            //=================================================
+            // http://stackoverflow.com/questions/1960473/unique-values-in-an-array
+            function uniques(arr) {
+              var a = [];
+              for (var i=0, l=arr.length; i<l; i++)
+                if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
+                  a.push(arr[i]);
+                return a;
+            }
+
+            function sortAscending(a, b) {
+              return a - b;
+            }
+
+            // http://bl.ocks.org/git-ashish/8959771
+            function highlight_node_links(node, i) {
+
+              var remainingNodes = [],
+                nextNodes = [];
+
+              var stroke_opacity = 0;
+              if (d3.select(this).attr("data-clicked") == "1") {
+                d3.select(this).attr("data-clicked", "0");
+                stroke_opacity = 0.5;
+              } else {
+                d3.select(this).attr("data-clicked", "1");
+                stroke_opacity = 1.0;
+              }
+
+              var traverse = [{
+                linkType: "sourceLinks",
+                nodeType: "target"
+              }, {
+                linkType: "targetLinks",
+                nodeType: "source"
+              }];
+
+              traverse.forEach(function(step) {
+                node[step.linkType].forEach(function(link) {
+                  remainingNodes.push(link[step.nodeType]);
+                  highlight_link(link.id, stroke_opacity);
+                });
+
+                while (remainingNodes.length) {
+                  nextNodes = [];
+                  remainingNodes.forEach(function(node) {
+                    node[step.linkType].forEach(function(link) {
+                      nextNodes.push(link[step.nodeType]);
+                      highlight_link(link.id, stroke_opacity);
+                    });
+                  });
+                  remainingNodes = nextNodes;
+                }
+              });
+            }
+
+            function highlight_link(id, opacity) {
+              d3.select("#link-" + id).style("stroke-opacity", opacity);
+            }
+
+
+          } // end fn make(graph)
+          
+
+          function showStackedBars(chartdiv) {
+            // Interactive, Sortable Stacked Bar Chart
+            // http://bl.ocks.org/katirg/f7d064cd9c3efbc3c360
+            // http://bl.ocks.org/mbostock/3886208
+            // http://bl.ocks.org/yuuniverse4444/8325617
+            // http://bl.ocks.org/mbostock/3885705
+
+            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of unit area [mol C / (m² yr)] and region area [mol C / km²]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+              .style("display", "block");
+            
+         
+            chartTitles = {
+              "Mchart": "MtCO2    ",
+              "GDPchart": "kgCO2/GDP",
+              "POPchart": "tCO2/person"
+            };
+
+            // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+            function make_y_axis() {
+              return d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(10)
+            }      
+
+            var margin = {
+                top: 25,
+                right: 20,
+                bottom: 120,
+                left: 50
+              },
+              width = 660 - margin.left - margin.right,
+              height = 420 - margin.top - margin.bottom;
+
+            var x = d3.scale.ordinal()
+              .rangeRoundBands([0, width], .1);
+
+            var y = d3.scale.linear()
+              .rangeRound([height, 0]);
+            
+            // Coal_color = "#3B3131";
+            // Oil_color = "#886666";
+            // Gas_color = "#AEC7E8";
+            // GasFlaring_color = "#f99a1c";
+            // Cement_color = "#666688";
+
+            var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
+                             "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+                             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
+                             "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
+                             "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
+                             "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
+                             "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
+                             "#ffd59b", "#db4551", "#edf8fb"];
+
+
+            var color = d3.scale.ordinal()
+              // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
+              .range(marcat_colors);
+            
+
+
+            var xAxis = d3.svg.axis()
+              .scale(x)
+              .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+              .scale(y)
+              .orient("left")
+              //.tickFormat(d3.format(".2s"))
+              .tickFormat(d3.format(".1f"));
+
+            // append the svg to the chart div corresponding to the measure selected
+            var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
+              .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // add chart title
+            d3.select("#" + chartdiv)
+              .append("div")
+                .attr("class", "class_chartTitle")
+                .append("h4")
+                .text(chartTitles[chartdiv]);
+
+            var active_link = "0"; //to control legend selections and hover
+            var legendClicked; //to control legend selections
+            var legendClassArray = []; //store legend classes to select bars in plotSingle()
+            var legendClassArray_orig = []; //orig (with spaces)
+            var sortDescending = false; //if true, bars are sorted by height in descending order
+            var restoreXFlag = false; //restore order of bars back to original
+            var fadeOpacity = 0.3; //opacity value for de-selected countries
+
+            var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+              
+            // Read in datafile for stacked bar chart  
+            // ======================================
+            d3.tsv(fname, function(error, data) {
+              if (error) throw error;
+
+              color.domain(d3.keys(data[0]).filter(function(key) {
+                if (key) {
+                  console.log("key: ", key)
+                  return key !== "RCLASS"; //Region names
+                }                
+              }));
+              
+              console.log("color: ", color.domain())
+
+              data.forEach(function(d) {
+                var y0 = 0;
+                d.sources = color.domain().map(function(name) {
+                  return {
+                    country: d.RCLASS,
+                    name: name,
+                    y0: y0,
+                    y1: y0 += +d[name],
+                    value: d[name],
+                    ycoord_corrected: 0
+                  };
+                });
+                d.total = d.sources[d.sources.length - 1].y1;
+
+                d["Gasflaring"] = d["Gas flaring"]; // to handle the space
+
+              });
+
+              // sort totals in descending order
+              data.sort(function(a, b) { return b.total - a.total; });
+
+              x.domain(data.map(function(d) { return d.RCLASS; }));
+              y.domain([0, d3.max(data, function(d) { return d.total; })]);              
+
+              svg3.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis)
+                .selectAll("text") //http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
+                .text(function(d, i) {                  
+                  return d + " " + formatX(i + 1);
+                })
+                .style("fill", "#2f2f2f")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-65)");
+
+              svg3.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")                
+                .style("text-anchor", "end");
+              //.text("Population");
+
+              svg3.append("g")
+                .attr("class", "grid")
+                .call(make_y_axis()
+                  .tickSize(-width, 0, 0)
+                  .tickFormat("")
+                )            
+              
+              // country nodes
+              var state = svg3.selectAll(".state")
+                .data(data)
+                .enter().append("g")
+                .attr("class", function (d) {
+                  // tag g node of stacked bars with country name
+                  return "g Country";
+                })
+                .attr("id", function (d) {
+                  return "id_" + d.RCLASS.replace(/\s/g, '');
+                });              
+
+              // country rects  
+              height_diff = 0;
+              state.selectAll("rect")
+                .data(function(d) {
+                  return d.sources;
+                })
+                .enter().append("rect")
+                .attr("width", x.rangeBand())
+                .attr("y", function(d) {
+                  h_orig = y(d.y0) - y(d.y1); //based on stacked values (inaccurate)
+                  h_correct = y(0) - y(d.value); //based on data value in csv file
+                  height_diff = height_diff + h_orig - h_correct;
+
+                  //correct y-coord
+                  ycoord_corrected = y(d.y1) + height_diff;
+                  d.ycoord_corrected = ycoord_corrected //store in d for later use in restorePlot()
+
+                  if (d.name === "Cement") height_diff = 0; //reset for next set of stacked bars
+
+                  return ycoord_corrected;
+                  // return y(d.y1);  //orig, but not accurate  
+
+                })
+                .attr("x", function(d) { //add to stock code
+                  return x(d.country)
+                })
+                .attr("height", function(d) {
+                  return y(0) - y(d.value); //heights calculated based on data value (accurate)
+                })
+                .attr("class", function(d) {
+                  classLabel = d.name.replace(/\s/g, ''); //remove spaces
+                  return "bars class" + classLabel;
+                })
+                .style("fill", function(d) {
+                  console.log("color(d.name): ", d.name)
+                  return color(d.name);
+                });
+
+              // country rects event handlers
+              state.selectAll("rect")
+                .on("mouseenter", function(d) {
+                  
+                  if (d3.select(this).style("opacity") != 0) {
+                    var xPos = parseFloat(d3.select(this).attr("x"));
+                    var yPos = parseFloat(d3.select(this).attr("y"));
+                    var height = parseFloat(d3.select(this).attr("height"))
+
+                    format = d3.format("5.1f");
+                    div.transition().style("opacity", .9);
+                    div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
+                      " " + chartTitles[chartdiv] + "</b>")
+                      .style("left", (d3.event.pageX + 20) + "px")
+                      .style("top", (d3.event.pageY - 20) + "px");
+                  }
+                })
+                .on("mouseout", function() {                                  
+                  div.transition().style("opacity", 0);
+                })
+                .on("click", function(d) { //highlight all bars belonging to same country
+                  // clear any previous highlights                  
+                                    
+                  if ( whichCountry != d3.select(this.parentNode)[0][0].id ) {
+
+                    if (whichCountry) {//turn ON                      
+                      whichCountry = d3.select(this.parentNode)[0][0].id;                      
+                      d3.selectAll("#" + whichCountry)
+                        .selectAll("rect")
+                        .style("opacity", 1.0);
+                    }              
+
+                    whichCountry = d3.select(this.parentNode)[0][0].id;                   
+
+                    d3.selectAll("g.Country:not(#" + whichCountry + ")")
+                      .selectAll('rect')
+                      .style("opacity", fadeOpacity);
+
+
+                  } else if ( whichCountry === d3.select(this.parentNode)[0][0].id ) {                    
+                    // restore rects to orig opacity
+                    d3.selectAll("g.Country")
+                      .selectAll('rect')
+                      .style("opacity", 1.0);
+                    
+                    whichCountry = d3.select(this.parentNode).attr("class").split("g ").pop();
+                  }                                          
+                 
+                });
+              
+
+              // restore graph after a single selection
+              function restorePlot(d) {
+                class_keep = d.replace(/\s/g, '');                
+
+                // restore opacity of erased bars    
+                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
+                  .selectAll(".bars:not(.class" + class_keep + ")")
+                  .transition()
+                  .duration(500)
+                  .delay(function() {
+                    if (restoreXFlag) return 2000;
+                    else return 750;
+                  })
+                  .attr("width", x.rangeBand()) //restore bar width
+                  .style("opacity", function(d) {
+                    if (whichCountry && whichCountry.startsWith("id_")) {//country selected                    
+                      return (d.country.replace(/\s/g, '') === whichCountry.split("id_").pop()) 
+                              ? 1 : fadeOpacity;
+                    } else return 1; //no country selected                    
+                  });
+
+                d3.selectAll("#" + whichCountry).selectAll(".bars").style("opacity", 1);
+
+                // translate bars back up to original y-posn
+                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
+                  .selectAll(".class" + class_keep)
+                  //.attr("x", function(d) { return x(d.country); })
+                  .transition()
+                  .duration(500)
+                  .delay(function() {
+                    if (restoreXFlag) return 1000; //bars need time to be restored to orig posn
+                    else return 0;
+                  })
+                  .attr("y", function(d) {
+                    //return y(d.y1); //not exactly correct since not based on raw data value
+                    return d.ycoord_corrected;
+                  });
+
+                //reset
+                restoreXFlag = false;
+
+              }
+
+              // plot only a single legend selection
+              function plotSingle(d) {
+                // store which chart legend user clicks on for all selections in 
+                // plotSingle() and restorePlot()                
+
+                class_keep = d.id.split("id").pop();
+                idx = legendClassArray.indexOf(class_keep);
+
+                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
+                  .selectAll(".bars:not(.class" + class_keep + ")")
+                  .transition()
+                  .duration(500)
+                  .attr("width", 0) // svg has no zindex mechanism so hide the bars (opacity set to 0) other bar unselectable if drawn after
+                  .style("opacity", 0);
+
+                // lower the bars to start on x-axis  
+                state.selectAll("rect").forEach(function(d, i) {
+
+                  // get height and y posn of base bar and selected bar
+                  h_keep = d3.select(d[idx]).attr("height");
+                  y_keep = d3.select(d[idx]).attr("y");
+
+                  h_base = d3.select(d[0]).attr("height");
+                  y_base = d3.select(d[0]).attr("y");
+
+                  h_shift = h_keep - h_base;
+                  y_new = y_base - h_shift;
+
+                  // reposition selected bars
+                  d3.select(d[idx])
+                    .transition()
+                    .ease("bounce")
+                    .duration(500)
+                    .delay(750)
+                    .attr("y", y_new);
+                })
+
+              }
+
+              // adapted change() fn in http://bl.ocks.org/mbostock/3885705
+              function sorting() {                
+
+                if (this.checked) {
+                  sortDescending = true;          
+                  y.domain([0, d3.max(data, function(d) {
+                    return +d[class_keep];
+                  })]);
+                } else {
+                  sortDescending = false;          
+                  y.domain([0, d3.max(data, function(d) {
+                    return d.total;
+                  })]);
+                }                
+
+                // rescale the y-axis to match range of selected data
+                svg3.select(".y.axis")
+                  .call(yAxis);
+
+                colName = legendClassArray_orig[sortBy];
+
+                var x0 = x.domain(data.sort(sortDescending ? function(a, b) {
+                      return b[colName] - a[colName];
+                    } : function(a, b) {
+                      return b.total - a.total;
+                    })
+                    .map(function(d, i) {
+                      return d.Country;
+                    }))
+                  .copy(); 
+
+                state.selectAll(".class" + active_link)
+                  .sort(function(a, b) {
+                    return x0(a.country) - x0(b.country);
+                  });
+
+                var transition = svg3.transition().duration(500),
+                  delay = function(d, i) {
+                    return i * 5;
+                  }; // if transition is not fast enough, bars cannot be restored properly        
+
+                // sort bars
+                transition.selectAll(".class" + active_link)
+                  .delay(delay)
+                  .attr("x", function(d) {
+                    return x0(d.country);
+                  })
+                  .attr("y", function(d) {
+                    return y(d.value);
+                  })
+                  .attr("height", function(d) {
+                    return y(0) - y(d.value);
+                  });
+
+                // sort x-labels accordingly    
+                transition.select(".x.axis")
+                  .call(xAxis)
+                  .selectAll("text")
+                  .text(function(d, i) {
+                    return d + " " + formatX(i + 1);
+                  })
+                  .style("text-anchor", "end")
+                  .attr("dx", "-.8em")
+                  .attr("dy", ".15em")
+                  .attr("transform", "rotate(-65)");
+
+              }
+
+            });
+
+          } //end showStackedBars()
+
+        </script>
+
+        <p style='width: 1000px;'>
+          <ul<i><b>Sources:</b> <br> - <a href='http://www.globalcarbonproject.org' target="_blank">Global Carbon Project</a> (with data from <a href='http://www.globalcarbonatlas.org' target="_blank">Global Carbon Atlas</a>) <br> - <a href='http://cdiac.ornl.gov' target="_blank">Carbon Dioxide Information Analysis Center (CDIAC) </a>
+
+            </ul>
+
+            </i>
+        </p>
+
+
+    </div>
+    <!-- /.container -->
+  </div>
+  <!-- /.wrap -->
+
+  <!--<div id="footer">
+    <div class="container">
+      <p class="text-muted credit"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span> &nbsp;<img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 1.3 - 2016/02/05 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Authors: Cathy Nangini, Patrick Brockmann.</p>
+
+    </div>
+  </div>-->
+
+</body>
+
+</html>
