@@ -96,8 +96,7 @@ d3.json("refs/all_nameM_idC.topojson", function(error, us) {
       })
       .on("click", clicked);
 
-  g.append("path")
-      //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+  g.append("path")      
       .datum(topojson.mesh(us, us.objects.Continents, function(a, b) { return a !== b; }))
       .attr("class", "mesh")
       .attr("d", path);          

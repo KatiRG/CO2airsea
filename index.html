@@ -107,7 +107,7 @@
 
   #infotext, #infotext2 {
     position: relative;
-    top: 115px;
+    top: 100px;
     left: 16px;
   }
   
@@ -157,7 +157,7 @@
 
   .class_chartTitle {
     position: relative;
-    left: 314px;
+    left: 290px;
     top: -429px;
     width: 500px;
 
@@ -227,7 +227,7 @@
 
       <p id="chart">
        
-        <ul class="nytg-sort" style='position: absolute; left: 1110px; top: 50px;'>
+        <ul class="nytg-sort" style='position: absolute; left: 1134px; top: 50px;'>
           <li id="sortButton">Sort</li>
         </ul>
 
@@ -356,9 +356,8 @@
                 d3.select("#infotext2").style("display", "none"); //hide histogram info text
                 
                 d3.select("#sortButton").text("Sort");
-                units = "MtCO2";
-                //d3.json("emissions_MtCO2.json", function(error, graph) {
-                d3.json("sankey_flux.json", function(error, graph) {  
+                units = "Tg/yr";                
+                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) { //sankey_flux.json              
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -378,7 +377,7 @@
                 d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
                 d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
-                fname = "orca05.tsv"; //"MtCO2_byCountry.tsv";
+                fname = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
                 mapname = "all_nameM_idC.topojson";
                 chartdiv = "Mchart";
                 mapdiv = "Mmap";
@@ -390,9 +389,8 @@
             });
 
           // load the data
-          units = "MtCO2";
-          //d3.json("emissions_MtCO2.json", function(error, graph) {
-          d3.json("sankey_flux.json", function(error, graph) {  
+          units = "Tg/yr";          
+          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {//sankey_flux.json
             make(graph);
           });
 
@@ -694,7 +692,7 @@
             // http://bl.ocks.org/yuuniverse4444/8325617
             // http://bl.ocks.org/mbostock/3885705
 
-            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of unit area [mol C / (m² yr)] and region area [mol C / km²]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg/yr]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
               .style("display", "block");            
 
             // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
@@ -783,7 +781,7 @@
               .append("div")
                 .attr("class", "class_chartTitle")
                 .append("h4")
-                .text("MtCO2");
+                .text("Tg/yr");
            
 
             var div = d3.select("body").append("div")
@@ -918,7 +916,7 @@
                     format = d3.format("5.1f");
                     div.transition().style("opacity", .9);
                     div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
-                      " " + "MtCO2" + "</b>")
+                      " " + "Tg/yr" + "</b>")
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
@@ -1008,8 +1006,7 @@
           d3.json("refs/all_nameM_idC.topojson", function(error, us) {
             if (error) throw error;
 
-            g.selectAll("path")
-                //.data(topojson.feature(us, us.objects.states).features)
+            g.selectAll("path")                
                 .data(topojson.feature(us, us.objects.Continents).features)
               .enter().append("path")
                 .attr("d", path)
