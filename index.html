@@ -107,7 +107,7 @@
 
   #infotext, #infotext2 {
     position: relative;
-    top: 115px;
+    top: 100px;
     left: 16px;
   }
   
@@ -157,7 +157,7 @@
 
   .class_chartTitle {
     position: relative;
-    left: 314px;
+    left: 290px;
     top: -429px;
     width: 500px;
 
@@ -227,7 +227,7 @@
 
       <p id="chart">
        
-        <ul class="nytg-sort" style='position: absolute; left: 1110px; top: 50px;'>
+        <ul class="nytg-sort" style='position: absolute; left: 1134px; top: 50px;'>
           <li id="sortButton">Sort</li>
         </ul>
 
@@ -356,9 +356,8 @@
                 d3.select("#infotext2").style("display", "none"); //hide histogram info text
                 
                 d3.select("#sortButton").text("Sort");
-                units = "MtCO2";
-                //d3.json("emissions_MtCO2.json", function(error, graph) {
-                d3.json("sankey_flux.json", function(error, graph) {  
+                units = "Tg/yr";                
+                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) { //sankey_flux.json              
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -378,7 +377,7 @@
                 d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
                 d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
-                fname = "orca05.tsv"; //"MtCO2_byCountry.tsv";
+                fname = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
                 mapname = "all_nameM_idC.topojson";
                 chartdiv = "Mchart";
                 mapdiv = "Mmap";
@@ -390,16 +389,15 @@
             });
 
           // load the data
-          units = "MtCO2";
-          //d3.json("emissions_MtCO2.json", function(error, graph) {
-          d3.json("sankey_flux.json", function(error, graph) {  
+          units = "Tg/yr";          
+          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {//sankey_flux.json
             make(graph);
           });
 
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes per unit area from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake in each MARCATS class and its distibution over the MARCATS regions it contains." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -571,8 +569,8 @@
                       if (d.x === col_xcoord[1]) { //selects last col (countries)
                         var idx_place = yheight.indexOf(d.dy); //order for sorted names
                         //handle case when ynames contains two (or more) equal numbers
-                        if (idx_place < ynames.length) idx_place = ynames.length;
-                        ynames[idx_place] = d.name;
+                        //if (idx_place < ynames.length) console.log("idx_place in here: ", ynames.length)
+                        ynames[idx_place] = d.name;                        
                       }
                     });
 
@@ -597,11 +595,21 @@
                             return colour_sequence[6];
                           })
                           .style("stroke-width", "2px")
-                          .style("stroke", "#555");
+                          .style("stroke", "#555")
+                          .attr("id", "sort-" + idx); //use later for tooltip
+                          // .append("title")
+                          // .text(function(d) { 
+                          //   return "Tooltip"; 
+                          // });
 
                         idx++;
                       }
                     }) //end d.x filter
+
+                  // tooltip div for sorted rects
+                  var myTooltip = d3.select("#sortCol").append("div")
+                      .attr("class", "tooltip")
+                      .style("opacity", 0);
 
                   // add text
                   svg2.selectAll("g")
@@ -617,6 +625,25 @@
                     })
                     .style("stroke-width", "2px")
                     .style("fill", "#555");
+
+                // Tooltip not working, no text gets attached to the div element   
+                //   svg2.selectAll("g").selectAll("rect")
+                //     .on("mouseover", function (d) {
+                //       console.log("d3.select(this): ", d3.select(this))
+                //       console.log("d3.select(this) id: ", d3.select(this).attr("id"))
+                //       myTooltip.transition()                
+                //          .style("opacity", .9)
+                //          .style("display", "block")
+                //       myTooltip.html("ooola")
+                //       //div.html(d.name + "<br><b>" + format(d.value) + " " + units + "</b>")
+                //         .style("left", (d3.event.pageX) + "px")
+                //         .style("top", (d3.event.pageY) + "px");
+                // //   .on("mouseout", function(d) {
+                // //     div.transition()
+                // //       .style("opacity", 0);
+                //   });
+
+
 
                 } //end button toggle check
               }); //end 'sort All' button action
@@ -694,7 +721,7 @@
             // http://bl.ocks.org/yuuniverse4444/8325617
             // http://bl.ocks.org/mbostock/3885705
 
-            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of unit area [mol C / (m² yr)] and region area [mol C / km²]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg/yr]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
               .style("display", "block");            
 
             // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
@@ -726,14 +753,15 @@
             // GasFlaring_color = "#f99a1c";
             // Cement_color = "#666688";
 
-            var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-                             "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
-                             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
-                             "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
-                             "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
-                             "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
-                             "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
-                             "#ffd59b", "#db4551", "#edf8fb"];
+            var marcat_colors = 
+              ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
+               "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+               "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
+               "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
+               "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
+               "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
+               "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
+               "#ffd59b", "#db4551", "#edf8fb"];
 
             // Dictionary for MARCATS regions
             marcats_dict = {
@@ -783,7 +811,7 @@
               .append("div")
                 .attr("class", "class_chartTitle")
                 .append("h4")
-                .text("MtCO2");
+                .text("Tg/yr");
            
 
             var div = d3.select("body").append("div")
@@ -918,7 +946,7 @@
                     format = d3.format("5.1f");
                     div.transition().style("opacity", .9);
                     div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
-                      " " + "MtCO2" + "</b>")
+                      " " + "Tg/yr" + "</b>")
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
@@ -1008,8 +1036,7 @@
           d3.json("refs/all_nameM_idC.topojson", function(error, us) {
             if (error) throw error;
 
-            g.selectAll("path")
-                //.data(topojson.feature(us, us.objects.states).features)
+            g.selectAll("path")                
                 .data(topojson.feature(us, us.objects.Continents).features)
               .enter().append("path")
                 .attr("d", path)
