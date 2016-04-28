@@ -1034,6 +1034,7 @@
            
 
           d3.json("refs/all_nameM_idC.topojson", function(error, us) {
+          //d3.json("refs/Continental_Shelf_mapshaper_1pc_marcatsid.topojson", function(error, us) {  
             if (error) throw error;
 
             g.selectAll("path")                
@@ -1042,7 +1043,8 @@
                 .attr("d", path)
                 //.attr("class", "feature")
                 .attr("class", function (d) {                  
-                  return "feature" + " marcat-" + d.properties.name; 
+                  return "feature" + " marcat-" + d.properties.name;
+                  //return "feature" + " marcat-" + d.properties.MARCATS;
                 })
                 .on("click", clicked);
 

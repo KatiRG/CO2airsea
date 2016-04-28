@@ -38,3 +38,16 @@ Now try converting temp.shp to topojson:
 topojson --id-property COSCAT -p name=COSCAT -p name=MARCATS -o merge_nameM_idC.topojson GIS_FILES/temp.shp
 
 Doesn't work: see index_merge.html
+
+mapshaper is able to convert Continental_Shelf.shp to topojson.
+GUI output:  Continental_Shelf_mapshaper.topojson
+
+commandline:
+mapshaper -i GIS_FILES/Continental_Shelf.shp -simplify 50% -o Continental_Shelf_mapshaper_50pc.topojson
+
+but this does not have any property, so try:
+
+mapshaper -i GIS_FILES/Continental_Shelf.shp -simplify 1% -o id-field="MARCATS" -o mapshp_test.topojson
+
+1% simplification seems good:
+mapshaper -i GIS_FILES/Continental_Shelf.shp -simplify 1% -o id-field="MARCATS" -o Continental_Shelf_mapshaper_1pc_marcatsid.topojson
