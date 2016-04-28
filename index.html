@@ -3,6 +3,7 @@
 
 <script src="d3.v3.min.js"></script>
 <script src="lib/jquery-1.10.2.min.js"></script>
+<script src="lib/topojson.v1.min.js"></script>
 <!--bootstrap 3.0.2 -->
 <link href="lib/bootstrap.css" rel="stylesheet">
 <script src="lib/bootstrap.min.js"></script>
@@ -106,7 +107,7 @@
 
   #infotext, #infotext2 {
     position: relative;
-    top: 115px;
+    top: 100px;
     left: 16px;
   }
   
@@ -156,7 +157,7 @@
 
   .class_chartTitle {
     position: relative;
-    left: 314px;
+    left: 290px;
     top: -429px;
     width: 500px;
 
@@ -168,20 +169,33 @@
     height: 600px;
   }
 
-  #GDPchart {
+  #Mmap {
     position: relative;
-    top: -765px;
+    top: -725px;
     left: 651px;
     height: 600px;
   }
 
-  #POPchart {
-    position: relative;
-    top: -930px;
-    left: 651px;
-    height: 600px;
+  .background {
+    fill: none;
+    pointer-events: all;
   }
 
+  .feature {
+    fill: #ccc;
+    cursor: pointer;
+  }
+
+  .feature.active {
+    fill: orange;
+  }
+
+  .mesh {
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 
 </style>
 
@@ -213,7 +227,7 @@
 
       <p id="chart">
        
-        <ul class="nytg-sort" style='position: absolute; left: 1110px; top: 50px;'>
+        <ul class="nytg-sort" style='position: absolute; left: 1134px; top: 50px;'>
           <li id="sortButton">Sort</li>
         </ul>
 
@@ -342,9 +356,8 @@
                 d3.select("#infotext2").style("display", "none"); //hide histogram info text
                 
                 d3.select("#sortButton").text("Sort");
-                units = "MtCO2";
-                //d3.json("emissions_MtCO2.json", function(error, graph) {
-                d3.json("sankey_flux.json", function(error, graph) {  
+                units = "Tg/yr";                
+                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) { //sankey_flux.json              
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -364,33 +377,27 @@
                 d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
                 d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
-                fname = "orca05.tsv"; //"MtCO2_byCountry.tsv";
+                histfile = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
+                mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson"; //"all_nameM_idC.topojson";
                 chartdiv = "Mchart";
-                showStackedBars(chartdiv);  
+                mapdiv = "Mmap";
 
-                // fname = "MtCO2perGDP_byCountry.tsv";
-                // chartdiv = "GDPchart";
-                // showStackedBars(chartdiv);
-
-                // fname = "MtCO2perPop_byCountry.tsv";
-                // chartdiv = "POPchart";
-                // showStackedBars(chartdiv);
+                plotHistogram(chartdiv, mapdiv);
               }
 
 
             });
 
           // load the data
-          units = "MtCO2";
-          //d3.json("emissions_MtCO2.json", function(error, graph) {
-          d3.json("sankey_flux.json", function(error, graph) {  
+          units = "Tg/yr";          
+          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {//sankey_flux.json
             make(graph);
           });
 
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 fluxes per unit area from five major region classes and their distibution over region." + "<br/>" + "<br/>" + "<p>" + "In this view, the emissions of each country are cumulative across sources. To see the breakdown, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake in each MARCATS class and its distibution over the MARCATS regions it contains." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -562,8 +569,8 @@
                       if (d.x === col_xcoord[1]) { //selects last col (countries)
                         var idx_place = yheight.indexOf(d.dy); //order for sorted names
                         //handle case when ynames contains two (or more) equal numbers
-                        if (idx_place < ynames.length) idx_place = ynames.length;
-                        ynames[idx_place] = d.name;
+                        //if (idx_place < ynames.length) console.log("idx_place in here: ", ynames.length)
+                        ynames[idx_place] = d.name;                        
                       }
                     });
 
@@ -588,11 +595,21 @@
                             return colour_sequence[6];
                           })
                           .style("stroke-width", "2px")
-                          .style("stroke", "#555");
+                          .style("stroke", "#555")
+                          .attr("id", "sort-" + idx); //use later for tooltip
+                          // .append("title")
+                          // .text(function(d) { 
+                          //   return "Tooltip"; 
+                          // });
 
                         idx++;
                       }
                     }) //end d.x filter
+
+                  // tooltip div for sorted rects
+                  var myTooltip = d3.select("#sortCol").append("div")
+                      .attr("class", "tooltip")
+                      .style("opacity", 0);
 
                   // add text
                   svg2.selectAll("g")
@@ -608,6 +625,25 @@
                     })
                     .style("stroke-width", "2px")
                     .style("fill", "#555");
+
+                // Tooltip not working, no text gets attached to the div element   
+                //   svg2.selectAll("g").selectAll("rect")
+                //     .on("mouseover", function (d) {
+                //       console.log("d3.select(this): ", d3.select(this))
+                //       console.log("d3.select(this) id: ", d3.select(this).attr("id"))
+                //       myTooltip.transition()                
+                //          .style("opacity", .9)
+                //          .style("display", "block")
+                //       myTooltip.html("ooola")
+                //       //div.html(d.name + "<br><b>" + format(d.value) + " " + units + "</b>")
+                //         .style("left", (d3.event.pageX) + "px")
+                //         .style("top", (d3.event.pageY) + "px");
+                // //   .on("mouseout", function(d) {
+                // //     div.transition()
+                // //       .style("opacity", 0);
+                //   });
+
+
 
                 } //end button toggle check
               }); //end 'sort All' button action
@@ -678,22 +714,10 @@
           } // end fn make(graph)
           
 
-          function showStackedBars(chartdiv) {
-            // Interactive, Sortable Stacked Bar Chart
-            // http://bl.ocks.org/katirg/f7d064cd9c3efbc3c360
-            // http://bl.ocks.org/mbostock/3886208
-            // http://bl.ocks.org/yuuniverse4444/8325617
-            // http://bl.ocks.org/mbostock/3885705
+          function plotHistogram(chartdiv, mapdiv) {                
 
-            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of unit area [mol C / (m² yr)] and region area [mol C / km²]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
-              .style("display", "block");
-            
-         
-            chartTitles = {
-              "Mchart": "MtCO2    ",
-              "GDPchart": "kgCO2/GDP",
-              "POPchart": "tCO2/person"
-            };
+            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg/yr]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+              .style("display", "block");            
 
             // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
             function make_y_axis() {
@@ -709,8 +733,8 @@
                 bottom: 120,
                 left: 50
               },
-              width = 660 - margin.left - margin.right,
-              height = 420 - margin.top - margin.bottom;
+              width = 600 - margin.left - margin.right,
+              height = 400 - margin.top - margin.bottom;
 
             var x = d3.scale.ordinal()
               .rangeRoundBands([0, width], .1);
@@ -724,21 +748,40 @@
             // GasFlaring_color = "#f99a1c";
             // Cement_color = "#666688";
 
-            var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-                             "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
-                             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
-                             "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
-                             "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
-                             "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
-                             "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
-                             "#ffd59b", "#db4551", "#edf8fb"];
+            var marcat_colors = 
+              ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
+               "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+               "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
+               "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
+               "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
+               "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
+               "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
+               "#ffd59b", "#db4551", "#edf8fb"];
 
+            // Dictionary for MARCATS regions
+            marcats_dict = {
+              "NorthEasternPacific": "1", "CaliforniaCurrent": "2", "TropicalEasternPacific": "3",
+              "PeruvianUpwellingCurrent": "4", "SouthernAmerica": "5", "BrazilianCurrent": "6",
+              "TropicalWesternAtlantic": "7", "CarribeanSea": "8", "GulfofMexico": "9",
+              "FloridaUpwelling": "10", "SeaofLabrador": "11", "HudsonBay": "12",
+              "CanadianArchipeloagos": "13", "NorthernGreenland": "14", "SouthernGreenland": "15",
+              "NorwegianBasin": "16", "NorthEasternAtlantic": "17", "BalticSea": "18",
+              "IberianUpwelling": "19", "MediterraneanSea": "20", "BlackSea": "21",
+              "MoroccanUpwelling": "22", "TropicalEasternAtlantic": "23", "SouthernWesternAfrica": "24",
+              "AgulhasCurrent": "25", "TropicalWesternIndian": "26", "WesternArabianSea": "27",
+              "RedSea": "28", "PersianGulf": "29", "EasternArabianSea": "30",
+              "BayofBengal": "31", "TropicalEasternIndian": "32", "LeeuwinCurrent": "33",
+              "SouthernAustralia": "34", "EasternAustrialianCurrent": "35", "NewZealand": "36",
+              "NorthernAustralia": "37", "SouthEastAsia": "38", "ChinaSea&Kuroshio": "39",
+              "SeaofJapan": "40", "SeaofOkhotsk": "41", "NorthWesternPacific": "42",
+              "SiberianShelves": "43", "Barents&KaraSea": "44", "AntarcticShelves": "45"              
+            };  
 
             var color = d3.scale.ordinal()
               // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
               .range(marcat_colors);
             
-
+            var active_bar = d3.select(null);
 
             var xAxis = d3.svg.axis()
               .scale(x)
@@ -750,7 +793,7 @@
               //.tickFormat(d3.format(".2s"))
               .tickFormat(d3.format(".1f"));
 
-            // append the svg to the chart div corresponding to the measure selected
+            // append the chart div to <p id="chart">
             var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
               .append("svg")
               .attr("width", width + margin.left + margin.right)
@@ -763,15 +806,8 @@
               .append("div")
                 .attr("class", "class_chartTitle")
                 .append("h4")
-                .text(chartTitles[chartdiv]);
-
-            var active_link = "0"; //to control legend selections and hover
-            var legendClicked; //to control legend selections
-            var legendClassArray = []; //store legend classes to select bars in plotSingle()
-            var legendClassArray_orig = []; //orig (with spaces)
-            var sortDescending = false; //if true, bars are sorted by height in descending order
-            var restoreXFlag = false; //restore order of bars back to original
-            var fadeOpacity = 0.3; //opacity value for de-selected countries
+                .text("Tg/yr");
+           
 
             var div = d3.select("body").append("div")
               .attr("class", "tooltip")
@@ -779,17 +815,14 @@
               
             // Read in datafile for stacked bar chart  
             // ======================================
-            d3.tsv(fname, function(error, data) {
+            d3.tsv(histfile, function(error, data) {
               if (error) throw error;
 
               color.domain(d3.keys(data[0]).filter(function(key) {
-                if (key) {
-                  console.log("key: ", key)
+                if (key) {                  
                   return key !== "RCLASS"; //Region names
                 }                
-              }));
-              
-              console.log("color: ", color.domain())
+              }));                          
 
               data.forEach(function(d) {
                 var y0 = 0;
@@ -803,9 +836,7 @@
                     ycoord_corrected: 0
                   };
                 });
-                d.total = d.sources[d.sources.length - 1].y1;
-
-                d["Gasflaring"] = d["Gas flaring"]; // to handle the space
+                d.total = d.sources[d.sources.length - 1].y1;            
 
               });
 
@@ -877,8 +908,7 @@
 
                   if (d.name === "Cement") height_diff = 0; //reset for next set of stacked bars
 
-                  return ycoord_corrected;
-                  // return y(d.y1);  //orig, but not accurate  
+                  return ycoord_corrected;                 
 
                 })
                 .attr("x", function(d) { //add to stock code
@@ -891,8 +921,7 @@
                   classLabel = d.name.replace(/\s/g, ''); //remove spaces
                   return "bars class" + classLabel;
                 })
-                .style("fill", function(d) {
-                  console.log("color(d.name): ", d.name)
+                .style("fill", function(d) {                  
                   return color(d.name);
                 });
 
@@ -908,198 +937,167 @@
                     format = d3.format("5.1f");
                     div.transition().style("opacity", .9);
                     div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
-                      " " + chartTitles[chartdiv] + "</b>")
+                      " " + "Tg/yr" + "</b>")
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
                 })
-                .on("mouseout", function() {                                  
+                .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight all bars belonging to same country
-                  // clear any previous highlights                  
-                                    
-                  if ( whichCountry != d3.select(this.parentNode)[0][0].id ) {
+                .on("click", function(d) { //highlight corresponding region in map      
 
-                    if (whichCountry) {//turn ON                      
-                      whichCountry = d3.select(this.parentNode)[0][0].id;                      
-                      d3.selectAll("#" + whichCountry)
-                        .selectAll("rect")
-                        .style("opacity", 1.0);
-                    }              
-
-                    whichCountry = d3.select(this.parentNode)[0][0].id;                   
-
-                    d3.selectAll("g.Country:not(#" + whichCountry + ")")
-                      .selectAll('rect')
-                      .style("opacity", fadeOpacity);
-
-
-                  } else if ( whichCountry === d3.select(this.parentNode)[0][0].id ) {                    
-                    // restore rects to orig opacity
-                    d3.selectAll("g.Country")
-                      .selectAll('rect')
-                      .style("opacity", 1.0);
+                  // toggle active state
+                  if (active_bar.node() === this) return reset_bar();
+                  active_bar.classed("active_bar", false);
                     
-                    whichCountry = d3.select(this.parentNode).attr("class").split("g ").pop();
-                  }                                          
+                  // clear any previously clicked bar/map region
+                  active_bar.attr("stroke", null);
+                  active_bar = d3.select(this).classed("active_bar", true);
+                  d3.selectAll('.feature.active').classed("active", false)
+
+                  // highlight with black outline
+                  d3.select(this)
+                    .attr("stroke", "#000")
+                    .attr("stroke-width", 2.5);
+                    
+                  // highlight corresponding areas on map
+                  var full_class = active_bar.attr("class"),
+                      extract_class = marcats_dict[full_class.split("bars class").pop().split(" ", 1)[0]],
+                      class_to_match = ".marcat-" + extract_class;
+                                   
+                  d3.selectAll(class_to_match).classed("active", true);
+                                           
                  
-                });
-              
+                }); //end on.click
 
-              // restore graph after a single selection
-              function restorePlot(d) {
-                class_keep = d.replace(/\s/g, '');                
+                function reset_bar() {
+                  active_bar.classed("active_bar", false);
+                  active_bar.attr("stroke", null)
 
-                // restore opacity of erased bars    
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".bars:not(.class" + class_keep + ")")
-                  .transition()
-                  .duration(500)
-                  .delay(function() {
-                    if (restoreXFlag) return 2000;
-                    else return 750;
-                  })
-                  .attr("width", x.rangeBand()) //restore bar width
-                  .style("opacity", function(d) {
-                    if (whichCountry && whichCountry.startsWith("id_")) {//country selected                    
-                      return (d.country.replace(/\s/g, '') === whichCountry.split("id_").pop()) 
-                              ? 1 : fadeOpacity;
-                    } else return 1; //no country selected                    
-                  });
+                  active_bar = d3.select(null);
 
-                d3.selectAll("#" + whichCountry).selectAll(".bars").style("opacity", 1);
+                  // clear any previously clicked map region                  
+                  d3.selectAll('.feature.active').classed("active", false)
+                }
 
-                // translate bars back up to original y-posn
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".class" + class_keep)
-                  //.attr("x", function(d) { return x(d.country); })
-                  .transition()
-                  .duration(500)
-                  .delay(function() {
-                    if (restoreXFlag) return 1000; //bars need time to be restored to orig posn
-                    else return 0;
-                  })
-                  .attr("y", function(d) {
-                    //return y(d.y1); //not exactly correct since not based on raw data value
-                    return d.ycoord_corrected;
-                  });
+            }); //d3.tsv(histfile)
 
-                //reset
-                restoreXFlag = false;
+          //===================================================
+          //MAP
+          // append the mapdiv to <p id="chart">
+          var m_width = 960, 
+              m_height = 700,
+              active = d3.select(null);
 
-              }
+          var projection = d3.geo.mercator()
+              .translate([m_width / 2, m_height / 1.5]);
 
-              // plot only a single legend selection
-              function plotSingle(d) {
-                // store which chart legend user clicks on for all selections in 
-                // plotSingle() and restorePlot()                
+          var path = d3.geo.path().projection(projection);
+          var t = projection.translate(); // the projection's default translation
+          var s = projection.scale(110) // the projection's default scale        
 
-                class_keep = d.id.split("id").pop();
-                idx = legendClassArray.indexOf(class_keep);
+          var path = d3.geo.path()
+              .projection(projection);
 
-                d3.select("#" + whichChart) //select only bars in the specific chart clicked on
-                  .selectAll(".bars:not(.class" + class_keep + ")")
-                  .transition()
-                  .duration(500)
-                  .attr("width", 0) // svg has no zindex mechanism so hide the bars (opacity set to 0) other bar unselectable if drawn after
-                  .style("opacity", 0);
+          var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
+              .append("svg")
+              .attr("width", m_width + margin.left + margin.right)
+              .attr("height", m_height + margin.top + margin.bottom);
+              //.append("g")
+              //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");    
 
-                // lower the bars to start on x-axis  
-                state.selectAll("rect").forEach(function(d, i) {
+          svg4.append("rect")
+              .attr("class", "background")
+              .attr("width", m_width)
+              .attr("height", m_height)
+              //.on("click", reset);
 
-                  // get height and y posn of base bar and selected bar
-                  h_keep = d3.select(d[idx]).attr("height");
-                  y_keep = d3.select(d[idx]).attr("y");
+          var g = svg4.append("g")
+              .style("stroke-width", "1.5px");
 
-                  h_base = d3.select(d[0]).attr("height");
-                  y_base = d3.select(d[0]).attr("y");
+          var zoom = d3.behavior.zoom()
+              .on("zoom", zoomed);    
 
-                  h_shift = h_keep - h_base;
-                  y_new = y_base - h_shift;
+          svg4
+              .call(zoom); // delete this line to disable free zooming
+           
 
-                  // reposition selected bars
-                  d3.select(d[idx])
-                    .transition()
-                    .ease("bounce")
-                    .duration(500)
-                    .delay(750)
-                    .attr("y", y_new);
+          d3.json("refs/" + mapfile, function(error, us) {          
+            if (error) throw error;          
+
+            g.selectAll("path")                
+                .data(topojson.feature(us, us.objects.Continental_Shelf).features)
+              .enter().append("path")
+                .attr("d", path)
+                //.attr("class", "feature")
+                .attr("class", function (d) {                  
+                  //return "feature" + " marcat-" + d.properties.name;
+                  return "feature" + " marcat-" + d.properties.MARCATS;
                 })
+                .on("click", clicked);
 
-              }
+            g.append("path")
+                //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+                .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) { return a !== b; }))
+                .attr("class", "mesh")
+                .attr("d", path);          
+          }); //end d3.json
 
-              // adapted change() fn in http://bl.ocks.org/mbostock/3885705
-              function sorting() {                
+          //=================
+          // Fns for map
+          function clicked(d) {
+            if (active.node() === this) return reset();
+            active.classed("active", false);
+            active = d3.select(this).classed("active", true);
 
-                if (this.checked) {
-                  sortDescending = true;          
-                  y.domain([0, d3.max(data, function(d) {
-                    return +d[class_keep];
-                  })]);
-                } else {
-                  sortDescending = false;          
-                  y.domain([0, d3.max(data, function(d) {
-                    return d.total;
-                  })]);
-                }                
+            var bounds = path.bounds(d),
+                dx = bounds[1][0] - bounds[0][0],
+                dy = bounds[1][1] - bounds[0][1],
+                x = (bounds[0][0] + bounds[1][0]) / 2,
+                y = (bounds[0][1] + bounds[1][1]) / 2,
+                scale = .9 / Math.max(dx / m_width, dy / m_height),
+                translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
-                // rescale the y-axis to match range of selected data
-                svg3.select(".y.axis")
-                  .call(yAxis);
+            g.transition()
+                .duration(750)
+                .style("stroke-width", 1.5 / scale + "px")
+                .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+          }
 
-                colName = legendClassArray_orig[sortBy];
+          function reset() {            
+            active.classed("active", false);
+            active = d3.select(null);
 
-                var x0 = x.domain(data.sort(sortDescending ? function(a, b) {
-                      return b[colName] - a[colName];
-                    } : function(a, b) {
-                      return b.total - a.total;
-                    })
-                    .map(function(d, i) {
-                      return d.Country;
-                    }))
-                  .copy(); 
+            g.transition()
+                .duration(750)
+                .style("stroke-width", "1.5px")
+                .attr("transform", "");
+          }
 
-                state.selectAll(".class" + active_link)
-                  .sort(function(a, b) {
-                    return x0(a.country) - x0(b.country);
-                  });
+          function zoomed() {
+            //http://bl.ocks.org/biovisualize/2322933
+            // d3.event.translate (an array) stores the current translation from the parent SVG element
+            // t (an array) stores the projection's default translation
+            // we add the x and y vales in each array to determine the projection's new translation
+            var tx = t[0] * d3.event.scale + d3.event.translate[0];
+            var ty = t[1] * d3.event.scale + d3.event.translate[1];
+            
+            projection.translate([tx, ty]);
 
-                var transition = svg3.transition().duration(500),
-                  delay = function(d, i) {
-                    return i * 5;
-                  }; // if transition is not fast enough, bars cannot be restored properly        
+            // now we determine the projection's new scale, but there's a problem:
+            // the map doesn't 'zoom onto the mouse point'
+            projection.scale(s * d3.event.scale);
+   
+            // redraw the map
+            svg4.selectAll("path").attr("d", path);
+          }
 
-                // sort bars
-                transition.selectAll(".class" + active_link)
-                  .delay(delay)
-                  .attr("x", function(d) {
-                    return x0(d.country);
-                  })
-                  .attr("y", function(d) {
-                    return y(d.value);
-                  })
-                  .attr("height", function(d) {
-                    return y(0) - y(d.value);
-                  });
 
-                // sort x-labels accordingly    
-                transition.select(".x.axis")
-                  .call(xAxis)
-                  .selectAll("text")
-                  .text(function(d, i) {
-                    return d + " " + formatX(i + 1);
-                  })
-                  .style("text-anchor", "end")
-                  .attr("dx", "-.8em")
-                  .attr("dy", ".15em")
-                  .attr("transform", "rotate(-65)");
 
-              }
 
-            });
 
-          } //end showStackedBars()
+          } //end plotHistogram()
 
         </script>
 
