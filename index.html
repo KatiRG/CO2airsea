@@ -377,8 +377,8 @@
                 d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
                 d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
-                fname = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
-                mapname = "all_nameM_idC.topojson";
+                histfile = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
+                mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson"; //"all_nameM_idC.topojson";
                 chartdiv = "Mchart";
                 mapdiv = "Mmap";
 
@@ -714,12 +714,7 @@
           } // end fn make(graph)
           
 
-          function plotHistogram(chartdiv, mapdiv) {
-            // Interactive, Sortable Stacked Bar Chart
-            // http://bl.ocks.org/katirg/f7d064cd9c3efbc3c360
-            // http://bl.ocks.org/mbostock/3886208
-            // http://bl.ocks.org/yuuniverse4444/8325617
-            // http://bl.ocks.org/mbostock/3885705
+          function plotHistogram(chartdiv, mapdiv) {                
 
             d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg/yr]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
               .style("display", "block");            
@@ -779,7 +774,7 @@
               "SouthernAustralia": "34", "EasternAustrialianCurrent": "35", "NewZealand": "36",
               "NorthernAustralia": "37", "SouthEastAsia": "38", "ChinaSea&Kuroshio": "39",
               "SeaofJapan": "40", "SeaofOkhotsk": "41", "NorthWesternPacific": "42",
-              "SiberianShelves": "43", "Barents&Kara Sea": "44", "AntarcticShelves": "45"              
+              "SiberianShelves": "43", "Barents&KaraSea": "44", "AntarcticShelves": "45"              
             };  
 
             var color = d3.scale.ordinal()
@@ -820,7 +815,7 @@
               
             // Read in datafile for stacked bar chart  
             // ======================================
-            d3.tsv(fname, function(error, data) {
+            d3.tsv(histfile, function(error, data) {
               if (error) throw error;
 
               color.domain(d3.keys(data[0]).filter(function(key) {
@@ -956,9 +951,7 @@
                 })
                 .on("click", function(d) { //highlight corresponding region in map                  
                   // console.log("active_bar.node(): ", active_bar.node())
-                  // console.log("d3.select(this): ", d3.select(this))
-
-                  
+                  // console.log("d3.select(this): ", d3.select(this))         
 
                   // toggle active state
                   if (active_bar.node() === this) return reset_bar();
@@ -989,9 +982,12 @@
                   active_bar.attr("stroke", null)
 
                   active_bar = d3.select(null);
+
+                  // clear any previously clicked map region                  
+                  d3.selectAll('.feature.active').classed("active", false)
                 }
 
-            }); //d3.tsv(fname)
+            }); //d3.tsv(histfile)
 
           //===================================================
           //MAP
@@ -1005,7 +1001,7 @@
 
           var path = d3.geo.path().projection(projection);
           var t = projection.translate(); // the projection's default translation
-          var s = projection.scale() // the projection's default scale        
+          var s = projection.scale(110) // the projection's default scale        
 
           var path = d3.geo.path()
               .projection(projection);
@@ -1033,24 +1029,25 @@
               .call(zoom); // delete this line to disable free zooming
            
 
-          d3.json("refs/all_nameM_idC.topojson", function(error, us) {
-          //d3.json("refs/Continental_Shelf_mapshaper_1pc_marcatsid.topojson", function(error, us) {  
+          d3.json("refs/" + mapfile, function(error, us) {          
             if (error) throw error;
 
+            console.log('us.objects: ', us.objects)
+
             g.selectAll("path")                
-                .data(topojson.feature(us, us.objects.Continents).features)
+                .data(topojson.feature(us, us.objects.Continental_Shelf).features)
               .enter().append("path")
                 .attr("d", path)
                 //.attr("class", "feature")
                 .attr("class", function (d) {                  
-                  return "feature" + " marcat-" + d.properties.name;
-                  //return "feature" + " marcat-" + d.properties.MARCATS;
+                  //return "feature" + " marcat-" + d.properties.name;
+                  return "feature" + " marcat-" + d.properties.MARCATS;
                 })
                 .on("click", clicked);
 
             g.append("path")
                 //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-                .datum(topojson.mesh(us, us.objects.Continents, function(a, b) { return a !== b; }))
+                .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) { return a !== b; }))
                 .attr("class", "mesh")
                 .attr("d", path);          
           }); //end d3.json
