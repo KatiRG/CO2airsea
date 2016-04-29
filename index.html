@@ -754,6 +754,31 @@
 
           //===================================================
           //MAP
+
+          // Read in flux values per unit area
+          // ======================================
+          d3.tsv("orca05.tsv", function(error, unitdata) {
+            if (error) throw error;
+
+            color.domain(d3.keys(unitdata[0]).filter(function(key) {
+              if (key) {
+                return key !== "RCLASS"; //Region names
+              }
+            }));
+
+            unitdata.forEach(function(d) {
+              d.sources = color.domain().map(function(name) {
+                return {
+                  country: d.RCLASS,
+                  name: name,
+                  value: d[name]
+                };
+              });
+            });
+            console.log("unitdata: ", unitdata)
+          })
+
+
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
               m_height = 700,
