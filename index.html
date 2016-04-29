@@ -725,7 +725,7 @@
                   active_bar = d3.select(this).classed("active_bar", true);
                   d3.selectAll('.feature.active').classed("active", false)
 
-                  // highlight with black outline
+                  // highlight bar with black outline
                   d3.select(this)
                     .attr("stroke", "#000")
                     .attr("stroke-width", 2.5);
@@ -757,7 +757,8 @@
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
               m_height = 700,
-              active = d3.select(null);
+              outline = d3.select(null);
+              //active = d3.select(null);
 
           var projection = d3.geo.mercator()
               .translate([m_width / 2, m_height / 1.5]);
@@ -818,9 +819,9 @@
           //=================
           // Fns for map
           function clicked(d) {
-            if (active.node() === this) return reset();
-            active.classed("active", false);
-            active = d3.select(this).classed("active", true);
+            if (outline.node() === this) return reset();
+            outline.classed("outline", false);
+            outline = d3.select(this).classed("outline", true);
 
             var bounds = path.bounds(d),
                 dx = bounds[1][0] - bounds[0][0],
@@ -837,8 +838,8 @@
           }
 
           function reset() {            
-            active.classed("active", false);
-            active = d3.select(null);
+            outline.classed("outline", false);
+            outline = d3.select(null);
 
             g.transition()
                 .duration(750)
