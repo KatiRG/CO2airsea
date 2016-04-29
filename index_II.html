@@ -1,0 +1,171 @@
+<!--https://bl.ocks.org/mbostock/9656675-->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.feature {
+  fill: #ccc;
+  cursor: pointer;
+}
+
+.feature.active {
+  fill: orange;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+</style>
+<body>
+<script src="d3.v3.min.js"></script>
+<script src="lib/topojson.v1.min.js"></script>
+<script>
+
+var width = 960,
+    height = 500,
+    active = d3.select(null);
+
+var projection = d3.geo.mercator()
+    .scale(130)
+    .translate([width / 2, height / 1.5]); //t: [480, 333.3333333333333]
+
+var path = d3.geo.path().projection(projection);
+var t = projection.translate(); // the projection's default translation
+var s = projection.scale() // the projection's default scale  
+
+console.log("t: ", t)  
+
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", stopped, true);
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", reset);
+
+var g = svg.append("g");
+
+svg
+    .call(zoom); // delete this line to disable free zooming
+    //.call(zoom.event);
+
+d3.json("refs/Continental_Shelf_mapshaper_1pc_marcatsid.topojson", function(error, us) {
+  if (error) throw error;
+
+  g.selectAll("path")
+      .data(topojson.feature(us, us.objects.Continental_Shelf).features)
+    .enter().append("path")
+      .attr("d", path)
+      .attr("class", "feature")
+      .on("click", clicked);
+
+  g.append("path")
+      .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) { return a !== b; }))
+      .attr("class", "mesh")
+      .attr("d", path);
+});
+
+function clicked(d) {
+  console.log("in clicked")
+
+  if (active.node() === this) return reset();
+  active.classed("active", false);
+  active = d3.select(this).classed("active", true);
+
+  var bounds = path.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = .9 / Math.max(dx / width, dy / height),
+      //translate = [width / 2 - 9*x, height / 2 - 8.5*y];
+      translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+      console.log("scale: ", scale)
+
+  // svg.transition()
+  //     .duration(750)
+  //     .call(zoom.translate(translate).scale(scale).event);
+
+  g.transition()
+      .duration(750)
+      .style("stroke-width", 1.5 / scale + "px")
+      .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+
+
+
+}
+
+function reset() {
+  active.classed("active", false);
+  active = d3.select(null);
+
+  // svg.transition()
+  //     .duration(750)
+  //     .call(zoom.translate([0, 0]).scale(1).event);
+
+  g.transition()
+    .duration(750)
+    .style("stroke-width", "1.5px")
+    .attr("transform", "");    
+}
+
+function zoomed() { //for panning
+  console.log("in zoomed d3.event.scale: ", d3.event.scale)
+  console.log("d3.event.translate: ", d3.event.translate)
+
+  //http://stackoverflow.com/questions/20314671/d3-geo-transform-and-scale
+  // var transform = 
+  //   "translate(" + width/2 + "," + height/2 + ")"  +
+  //   "scale(" + .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height) + ")"
+  //   +
+  //   "translate(" + -(b[1][0] + b[0][0]) / 2 + "," + -(b[1][1] + b[0][1]) / 2 + ")";
+  g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
+
+  //proj
+  var tx = t[0] * d3.event.scale + d3.event.translate[0];
+  var ty = t[1] * d3.event.scale + d3.event.translate[1];
+
+  //projection.translate([tx, ty]);
+
+  // now we determine the projection's new scale, but there's a problem:
+  // the map doesn't 'zoom onto the mouse point'
+  //projection.scale(s * d3.event.scale);
+
+  // redraw the map
+  //svg.selectAll("path").attr("d", path);
+
+
+
+}
+
+// If the drag behavior prevents the default click,
+// also stop propagation so we don’t click-to-zoom.
+function stopped() {
+  if (d3.event.defaultPrevented) d3.event.stopPropagation();
+}
+
+</script>
