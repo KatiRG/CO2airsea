@@ -838,22 +838,22 @@
                 .attr("transform", "");
           }
 
-          function zoomed() {
-            //http://bl.ocks.org/biovisualize/2322933
-            // d3.event.translate (an array) stores the current translation from the parent SVG element
-            // t (an array) stores the projection's default translation
-            // we add the x and y vales in each array to determine the projection's new translation
-            var tx = t[0] * d3.event.scale + d3.event.translate[0];
-            var ty = t[1] * d3.event.scale + d3.event.translate[1];
+          function zoomed() {//for panning. NOT WORKING PROPERLY
+            // //http://bl.ocks.org/biovisualize/2322933
+            // // d3.event.translate (an array) stores the current translation from the parent SVG element
+            // // t (an array) stores the projection's default translation
+            // // we add the x and y vales in each array to determine the projection's new translation
+            // var tx = t[0] * d3.event.scale + d3.event.translate[0];
+            // var ty = t[1] * d3.event.scale + d3.event.translate[1];
             
-            projection.translate([tx, ty]);
+            // projection.translate([tx, ty]);
 
-            // now we determine the projection's new scale, but there's a problem:
-            // the map doesn't 'zoom onto the mouse point'
-            projection.scale(s * d3.event.scale);
+            // // now we determine the projection's new scale, but there's a problem:
+            // // the map doesn't 'zoom onto the mouse point'
+            // projection.scale(s * d3.event.scale);
    
-            // redraw the map
-            svg4.selectAll("path").attr("d", path);
+            // // redraw the map
+            // svg4.selectAll("path").attr("d", path);
           }
 
 
