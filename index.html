@@ -160,7 +160,7 @@
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg/yr] in each MARCATS class (left column) and the contribution of the MARCATS regions in the class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg/yr] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
