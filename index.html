@@ -96,56 +96,6 @@
           var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
           var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
 
-          // arrays to hold list of countries
-          Africa = ['Africa', 'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi', 'Cape Verde', 'Central African Republic',
-            'Chad', 'Comoros', 'Congo', "C\xf4te d'Ivoire", 'Democratic Republic of the Congo', 'Djibouti', 'Egypt',
-            'Equatorial Guinea', 'Eritrea', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea', 'Guinea-Bissau', 'Kenya',
-            'Lesotho', 'Liberia', 'Libya', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius', 'Morocco', 'Mozambique',
-            'Namibia', 'Niger', 'Nigeria', 'Cameroon', 'R\xe9union', 'Rwanda', 'Sao Tome and Principe', 'Senegal',
-            'Seychelles', 'Sierra Leone', 'Somalia', 'South Africa', 'Sudan', 'Swaziland', 'Togo', 'Tunisia',
-            'Uganda', 'Tanzania', 'Zambia', 'Zimbabwe'
-          ];
-          Asia = ['Asia', 'Afghanistan', 'Armenia', 'Azerbaijan', 'Bangladesh', 'Bhutan', 'Brunei Darussalam', 'Cambodia', 'China',
-            'North Korea', 'Georgia', 'Hong Kong', 'India', 'Indonesia', 'Japan', 'Kazakhstan', 'Kyrgyzstan', 'Laos',
-            'Macao', 'Malaysia', 'Maldives', 'Mongolia', 'Myanmar', 'Nepal', 'Pakistan', 'Papua New Guinea',
-            'Philippines', 'South Korea', 'Singapore', 'Sri Lanka', 'Taiwan', 'Tajikistan', 'Thailand', 'Timor-Leste',
-            'Turkmenistan', 'Uzbekistan', 'Viet Nam'
-          ];
-          Europe = ['Europe', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
-            'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Faeroe Islands',
-            'Finland', 'France', 'Germany', 'Gibraltar', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia',
-            'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia (Republic of)', 'Malta', 'Montenegro', 'Netherlands',
-            'Norway', 'Poland', 'Portugal', 'Moldova', 'Romania', 'Russian Federation', 'Serbia', 'Slovakia',
-            'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Ukraine', 'United Kingdom'
-          ];
-          MiddleEast = ['Middle East', 'Bahrain', 'Iraq', 'Iran', 'Israel', 'Jordan', 'Kuwait', 'Lebanon', 'Occupied Palestinian Territory',
-            'Oman', 'Qatar', 'Saudi Arabia', 'Syria', 'Turkey', 'United Arab Emirates', 'Yemen'
-          ];
-          NorthAmerica = ['North America', 'Canada', 'Greenland', 'Mexico', 'Saint Pierre and Miquelon', 'USA'];
-          Oceania = ['Oceania', 'Australia', 'Cook Islands', 'Micronesia (Federated States of)', 'Fiji', 'French Polynesia',
-            'Kiribati', 'Marshall Islands', 'Nauru', 'New Caledonia', 'New Zealand', 'Niue', 'Palau',
-            'Samoa', 'Solomon Islands', 'Tonga', 'Vanuatu', 'Wallis and Futuna Islands'
-          ];
-          CentralAmerica = ['Central America', 'Anguilla', 'Antigua and Barbuda', 'Aruba', 'Bahamas', 'Barbados', 'Belize', 'Bermuda', 'British Virgin Islands',
-            'Cayman Islands', 'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'El Salvador', 'Grenada', 'Guadeloupe',
-            'Guatemala', 'Haiti', 'Honduras', 'Jamaica', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Nicaragua',
-            'Panama', 'Saint Helena', 'Saint Lucia', 'Saint Kitts and Nevis', 'Saint Vincent and the Grenadines',
-            'Trinidad and Tobago', 'Turks and Caicos Islands'
-          ];
-          SouthAmerica = ['South America', 'Argentina', 'Brazil', 'Chile', 'Colombia', 'Ecuador', 'Falkland Islands (Malvinas)',
-            'French Guiana', 'Guyana', 'Paraguay', 'Peru', 'Bolivia', 'Suriname', 'Uruguay', 'Venezuela'
-          ];
-
-          Africa_color = '#FFD880';
-          Asia_color = '#FF80AF';
-          CentralAmerica_color = '#9FD3C8';
-          Europe_color = '#A6D4FF';
-          MiddleEast_color = '#E0E67F';
-          NorthAmerica_color = '#C399D9';
-          Oceania_color = '#FFBFDA';
-          SouthAmerica_color = '#FFA899';
-          CentralAmerica_color = '#9FD3C8';
-
           Coal_color = "#3B3131";
           Oil_color = "#886666";
           Gas_color = "#AEC7E8";
@@ -170,7 +120,7 @@
                 
                 d3.select("#sortButton").text("Sort");
                 units = "Tg/yr";                
-                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) { //sankey_flux.json              
+                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -203,14 +153,14 @@
 
           // load the data
           units = "Tg/yr";          
-          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {//sankey_flux.json
+          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
             make(graph);
           });
 
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake in each MARCATS class and its distibution over the MARCATS regions it contains." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg/yr] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
