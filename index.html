@@ -96,6 +96,8 @@
           var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
           var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
 
+          var units = "Tg C yr <sup>-1</sup>";
+
           Coal_color = "#3B3131";
           Oil_color = "#886666";
           Gas_color = "#AEC7E8";
@@ -119,7 +121,6 @@
                 d3.select("#infotext2").style("display", "none"); //hide histogram info text
                 
                 d3.select("#sortButton").text("Sort");
-                units = "Tg/yr";                
                 d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
@@ -151,8 +152,7 @@
 
             });
 
-          // load the data
-          units = "Tg/yr";          
+          // load the data          
           d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
             make(graph);
           });
@@ -160,7 +160,7 @@
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg/yr] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg C yr <sup>-1</sup>] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -473,13 +473,12 @@
               d3.select("#link-" + id).style("stroke-opacity", opacity);
             }
 
-
           } // end fn make(graph)
           
 
           function plotHistogram(chartdiv, mapdiv) {                
 
-            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg/yr]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg C yr <sup>-1</sup>]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
               .style("display", "block");            
 
             // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
@@ -569,7 +568,8 @@
               .append("div")
                 .attr("class", "class_chartTitle")
                 .append("h4")
-                .text("Tg/yr");
+                .text("Tg C yr")
+                .append('sup').text("-1");
            
 
             var div = d3.select("body").append("div")
@@ -582,13 +582,10 @@
               if (error) throw error;
 
               color.domain(d3.keys(data[0]).filter(function(key) {
-                if (key) {
-                  console.log("key: ", key)
+                if (key) {                  
                   return key !== "RCLASS"; //Region names
                 }                
-              }));
-              
-              console.log("color: ", color.domain())
+              }));                          
 
               data.forEach(function(d) {
                 var y0 = 0;
@@ -687,8 +684,7 @@
                   classLabel = d.name.replace(/\s/g, ''); //remove spaces
                   return "bars class" + classLabel;
                 })
-                .style("fill", function(d) {
-                  console.log("color(d.name): ", d.name)
+                .style("fill", function(d) {                  
                   return color(d.name);
                 });
 
@@ -704,7 +700,7 @@
                     format = d3.format("5.1f");
                     div.transition().style("opacity", .9);
                     div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
-                      " " + "Tg/yr" + "</b>")
+                      " " + units + "</b>")
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
@@ -712,9 +708,7 @@
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight corresponding region in map                  
-                  // console.log("active_bar.node(): ", active_bar.node())
-                  // console.log("d3.select(this): ", d3.select(this))         
+                .on("click", function(d) { //highlight corresponding region in map      
 
                   // toggle active state
                   if (active_bar.node() === this) return reset_bar();
@@ -792,17 +786,15 @@
               .call(zoom); // delete this line to disable free zooming
            
 
-          d3.json("refs/" + mapfile, function(error, us) {          
-            if (error) throw error;
-
-            console.log('us.objects: ', us.objects)
+          d3.json("refs/" + mapfile, function(error, us) {
+            if (error) throw error;          
 
             g.selectAll("path")                
                 .data(topojson.feature(us, us.objects.Continental_Shelf).features)
               .enter().append("path")
                 .attr("d", path)
                 //.attr("class", "feature")
-                .attr("class", function (d) {                  
+                .attr("class", function (d) {
                   //return "feature" + " marcat-" + d.properties.name;
                   return "feature" + " marcat-" + d.properties.MARCATS;
                 })
