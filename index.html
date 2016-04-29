@@ -8,196 +8,9 @@
 <link href="lib/bootstrap.css" rel="stylesheet">
 <script src="lib/bootstrap.min.js"></script>
 <link href="lib/sticky-footer-navbar.css" rel="stylesheet">
+<link href="style.css" rel="stylesheet" type="text/css">
 
 <title>CO2 Fluxes</title>
-<style>
-  body {
-    /*font-family: Arial;*/
-    color: #555;
-  }
-  
-  .container {
-    margin-left: 10px;
-  }
-  
-  .node rect {
-    cursor: crosshair;
-    fill-opacity: 1.0;
-    shape-rendering: crispEdges;
-  }
-  
-  .node text {
-    pointer-events: none;
-    fill: #555;
-  }
-  
-  .link {
-    cursor: crosshair;
-    fill: none;
-    stroke: #000;
-    stroke-opacity: .5;
-  }
-  
-  .link:hover {
-    stroke-opacity: 1.0 !important;
-  }
-  
-  div.tooltip {
-    position: absolute;
-    padding: 5px;
-    text-align: center;
-    font: 12px sans-serif;
-    color: #000;
-    background: #AAA;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #000;
-    border-radius: 8px;
-  }
-  
-  .nytg-navigation li.selected {
-    background: none repeat scroll 0 0 #e9e9e9;
-    border-color: #aaa;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2) inset;
-    color: #555;
-  }
-  
-  .nytg-navigation li:first-of-type {
-    border-radius: 4px 0 0 4px;
-  }
-  
-  .nytg-navigation li:last-of-type {
-    border-radius: 0 4px 4px 0;
-    border-right: 1px solid #ccc;
-  }
-  
-  .nytg-navigation li {
-    background: none repeat scroll 0 0 #f9f9f9;
-    border-bottom: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-top: 1px solid #ccc;
-    color: #999;
-    cursor: pointer;
-    float: left;
-    font-size: 14px;
-    margin: 0;
-    padding: 10px 18px;
-    border-radius: 4px 4px 4px 4px;
-  }
-  
-  ul {
-    list-style: outside none none;
-    margin-top: 80px;
-  }
-
-   .nytg-sort li {
-    background: none repeat scroll 0 0 #f9f9f9;
-    border-bottom: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    border-top: 1px solid #ccc;
-    color: #999;
-    cursor: pointer;
-    float: left;
-    font-size: 14px;
-    margin: 0;
-    padding: 10px 18px;
-    border-radius: 4px 4px 4px 4px;
-  }
-
-  #infotext, #infotext2 {
-    position: relative;
-    top: 100px;
-    left: 16px;
-  }
-  
-  #sortCol {
-    position: relative;
-    top: -715px;
-    left: 1142px;
-  }
-  
-  /*css for stacked bar charts*/
-  .axis path,
-  .axis line {
-    fill: none;
-    stroke: #b3b3b3;
-    shape-rendering: crispEdges;
-  }
-
-  .axis text {
-     fill: #2f2f2f;
-  }
-
-  .y.axis, .x.axis {
-    font-size: 10px;
-    color: #2f2f2f;
-  }
-  
-  .bar {
-    fill: steelblue;
-  }
-  
-  .x.axis path {
-    display: none;
-  }
-  
-  label {
-    position: relative;
-    left: 564px;
-    top: -315px;    
-    font: 10px sans-serif;
-  }
-  
-  .grid {
-    stroke: lightgrey;
-    opacity: 0.7;
-    shape-rendering: crispEdges;
-  }
-
-  .class_chartTitle {
-    position: relative;
-    left: 290px;
-    top: -429px;
-    width: 500px;
-
-  }
-
-  #Mchart {
-    position: relative;
-    top: 100px;
-    height: 600px;
-  }
-
-  #Mmap {
-    position: relative;
-    top: -725px;
-    left: 651px;
-    height: 600px;
-  }
-
-  .background {
-    fill: none;
-    pointer-events: all;
-  }
-
-  .feature {
-    fill: #ccc;
-    cursor: pointer;
-  }
-
-  .feature.active {
-    fill: orange;
-  }
-
-  .mesh {
-    fill: none;
-    stroke: #fff;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-</style>
 
 <body>
   <div id="wrap">
@@ -283,56 +96,6 @@
           var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
           var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
 
-          // arrays to hold list of countries
-          Africa = ['Africa', 'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi', 'Cape Verde', 'Central African Republic',
-            'Chad', 'Comoros', 'Congo', "C\xf4te d'Ivoire", 'Democratic Republic of the Congo', 'Djibouti', 'Egypt',
-            'Equatorial Guinea', 'Eritrea', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea', 'Guinea-Bissau', 'Kenya',
-            'Lesotho', 'Liberia', 'Libya', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius', 'Morocco', 'Mozambique',
-            'Namibia', 'Niger', 'Nigeria', 'Cameroon', 'R\xe9union', 'Rwanda', 'Sao Tome and Principe', 'Senegal',
-            'Seychelles', 'Sierra Leone', 'Somalia', 'South Africa', 'Sudan', 'Swaziland', 'Togo', 'Tunisia',
-            'Uganda', 'Tanzania', 'Zambia', 'Zimbabwe'
-          ];
-          Asia = ['Asia', 'Afghanistan', 'Armenia', 'Azerbaijan', 'Bangladesh', 'Bhutan', 'Brunei Darussalam', 'Cambodia', 'China',
-            'North Korea', 'Georgia', 'Hong Kong', 'India', 'Indonesia', 'Japan', 'Kazakhstan', 'Kyrgyzstan', 'Laos',
-            'Macao', 'Malaysia', 'Maldives', 'Mongolia', 'Myanmar', 'Nepal', 'Pakistan', 'Papua New Guinea',
-            'Philippines', 'South Korea', 'Singapore', 'Sri Lanka', 'Taiwan', 'Tajikistan', 'Thailand', 'Timor-Leste',
-            'Turkmenistan', 'Uzbekistan', 'Viet Nam'
-          ];
-          Europe = ['Europe', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
-            'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Faeroe Islands',
-            'Finland', 'France', 'Germany', 'Gibraltar', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia',
-            'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia (Republic of)', 'Malta', 'Montenegro', 'Netherlands',
-            'Norway', 'Poland', 'Portugal', 'Moldova', 'Romania', 'Russian Federation', 'Serbia', 'Slovakia',
-            'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Ukraine', 'United Kingdom'
-          ];
-          MiddleEast = ['Middle East', 'Bahrain', 'Iraq', 'Iran', 'Israel', 'Jordan', 'Kuwait', 'Lebanon', 'Occupied Palestinian Territory',
-            'Oman', 'Qatar', 'Saudi Arabia', 'Syria', 'Turkey', 'United Arab Emirates', 'Yemen'
-          ];
-          NorthAmerica = ['North America', 'Canada', 'Greenland', 'Mexico', 'Saint Pierre and Miquelon', 'USA'];
-          Oceania = ['Oceania', 'Australia', 'Cook Islands', 'Micronesia (Federated States of)', 'Fiji', 'French Polynesia',
-            'Kiribati', 'Marshall Islands', 'Nauru', 'New Caledonia', 'New Zealand', 'Niue', 'Palau',
-            'Samoa', 'Solomon Islands', 'Tonga', 'Vanuatu', 'Wallis and Futuna Islands'
-          ];
-          CentralAmerica = ['Central America', 'Anguilla', 'Antigua and Barbuda', 'Aruba', 'Bahamas', 'Barbados', 'Belize', 'Bermuda', 'British Virgin Islands',
-            'Cayman Islands', 'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'El Salvador', 'Grenada', 'Guadeloupe',
-            'Guatemala', 'Haiti', 'Honduras', 'Jamaica', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Nicaragua',
-            'Panama', 'Saint Helena', 'Saint Lucia', 'Saint Kitts and Nevis', 'Saint Vincent and the Grenadines',
-            'Trinidad and Tobago', 'Turks and Caicos Islands'
-          ];
-          SouthAmerica = ['South America', 'Argentina', 'Brazil', 'Chile', 'Colombia', 'Ecuador', 'Falkland Islands (Malvinas)',
-            'French Guiana', 'Guyana', 'Paraguay', 'Peru', 'Bolivia', 'Suriname', 'Uruguay', 'Venezuela'
-          ];
-
-          Africa_color = '#FFD880';
-          Asia_color = '#FF80AF';
-          CentralAmerica_color = '#9FD3C8';
-          Europe_color = '#A6D4FF';
-          MiddleEast_color = '#E0E67F';
-          NorthAmerica_color = '#C399D9';
-          Oceania_color = '#FFBFDA';
-          SouthAmerica_color = '#FFA899';
-          CentralAmerica_color = '#9FD3C8';
-
           Coal_color = "#3B3131";
           Oil_color = "#886666";
           Gas_color = "#AEC7E8";
@@ -357,7 +120,7 @@
                 
                 d3.select("#sortButton").text("Sort");
                 units = "Tg/yr";                
-                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) { //sankey_flux.json              
+                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
                   svg.selectAll("*").remove();
                   svg2.selectAll("*").remove(); //clears sort rects
                   make(graph);
@@ -390,14 +153,14 @@
 
           // load the data
           units = "Tg/yr";          
-          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {//sankey_flux.json
+          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
             make(graph);
           });
 
           function make(graph) {
             // Display info text for Sankey diagram
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake in each MARCATS class and its distibution over the MARCATS regions it contains." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
+            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg/yr] in each MARCATS class (left column) and the contribution of the MARCATS regions in the class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "To localize these uptakes on the world map, click the 'Histograms' button above.")
               .style("display", "block");
 
             d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
@@ -819,10 +582,13 @@
               if (error) throw error;
 
               color.domain(d3.keys(data[0]).filter(function(key) {
-                if (key) {                  
+                if (key) {
+                  console.log("key: ", key)
                   return key !== "RCLASS"; //Region names
                 }                
-              }));                          
+              }));
+              
+              console.log("color: ", color.domain())
 
               data.forEach(function(d) {
                 var y0 = 0;
@@ -921,7 +687,8 @@
                   classLabel = d.name.replace(/\s/g, ''); //remove spaces
                   return "bars class" + classLabel;
                 })
-                .style("fill", function(d) {                  
+                .style("fill", function(d) {
+                  console.log("color(d.name): ", d.name)
                   return color(d.name);
                 });
 
@@ -945,7 +712,9 @@
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight corresponding region in map      
+                .on("click", function(d) { //highlight corresponding region in map                  
+                  // console.log("active_bar.node(): ", active_bar.node())
+                  // console.log("d3.select(this): ", d3.select(this))         
 
                   // toggle active state
                   if (active_bar.node() === this) return reset_bar();
@@ -1024,7 +793,9 @@
            
 
           d3.json("refs/" + mapfile, function(error, us) {          
-            if (error) throw error;          
+            if (error) throw error;
+
+            console.log('us.objects: ', us.objects)
 
             g.selectAll("path")                
                 .data(topojson.feature(us, us.objects.Continental_Shelf).features)
