@@ -45,7 +45,13 @@
         </ul>
 
         <div id="sortCol"></div>
-    
+
+        <ul class="nytg-sort" style='position: absolute; left: 770px; top: 50px;'>
+          <li id="resetMap">Reset</li>
+        </ul>
+
+      </p> 
+      
         <script src="sankey.js"></script>
         <script>
           // Sankey diagram with highlight and tooltip
@@ -107,11 +113,15 @@
           //https://www.colorcodehex.com/eff3ff/
           colour_sequence = ["#CBD8FF", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"];
 
+          d3.select("#resetMap").style("display", "none"); //hide reset map button
+
           // http://chimera.labs.oreilly.com/books/1230000000345/ch09.html#_changing_the_data
-          // Sankey button
+          // Show Sankey diagram
           d3.select("#TA")
             .on("click", function() {
               if (d3.select(this).attr("class") != "selected") {
+                d3.select("#resetMap").style("display", "none"); //hide reset map button
+
                 //toggle button  
                 d3.selectAll("#TB").attr("class", ""); //inactivate histogram button
                 d3.select(this).attr("class", "selected");  //activate sankey button    
@@ -129,7 +139,7 @@
               }
             });
 
-          // Sankey and histogram buttons
+          // Show stacked bar and map
           d3.select("#TB")
             .on("click", function() {
               if (d3.select(this).attr("class") != "selected") {
@@ -145,6 +155,8 @@
                 mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson"; //"all_nameM_idC.topojson";
                 chartdiv = "Mchart";
                 mapdiv = "Mmap";
+
+                d3.select("#resetMap").style("display", "list-item");
 
                 plotHistogram(chartdiv, mapdiv);
               }
@@ -295,7 +307,7 @@
             //=================================================
             // action for 'Sort all' button
             d3.select("#sortButton")
-              .on("click", function() {                
+              .on("click", function() {
                 //toggle button
                 if (d3.select("#sortButton").text() === "Clear") {
                   svg2.selectAll("*").remove(); //clears sort rects
@@ -708,8 +720,7 @@
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight corresponding region in map      
-
+                .on("click", function(d) { //highlight corresponding region in map
                   // toggle active state
                   if (active_bar.node() === this) return reset_bar();
                   active_bar.classed("active_bar", false);
@@ -719,7 +730,7 @@
                   active_bar = d3.select(this).classed("active_bar", true);
                   d3.selectAll('.feature.active').classed("active", false)
 
-                  // highlight with black outline
+                  // highlight bar with black outline
                   d3.select(this)
                     .attr("stroke", "#000")
                     .attr("stroke-width", 2.5);
@@ -748,10 +759,12 @@
 
           //===================================================
           //MAP
+
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
               m_height = 700,
-              active = d3.select(null);
+              outline = d3.select(null);
+              //active = d3.select(null);
 
           var projection = d3.geo.mercator()
               .translate([m_width / 2, m_height / 1.5]);
@@ -761,7 +774,7 @@
           var s = projection.scale(110) // the projection's default scale        
 
           var path = d3.geo.path()
-              .projection(projection);
+              .projection(projection);          
 
           var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
               .append("svg")
@@ -784,9 +797,12 @@
 
           svg4
               .call(zoom); // delete this line to disable free zooming
-           
 
-          d3.json("refs/" + mapfile, function(error, us) {
+          // reset map button
+          d3.select("#resetMap")
+            .on("click", function() { return reset(); });           
+
+          d3.json("refs/" + mapfile, function(error, us) {          
             if (error) throw error;          
 
             g.selectAll("path")                
@@ -794,7 +810,7 @@
               .enter().append("path")
                 .attr("d", path)
                 //.attr("class", "feature")
-                .attr("class", function (d) {
+                .attr("class", function (d) {                  
                   //return "feature" + " marcat-" + d.properties.name;
                   return "feature" + " marcat-" + d.properties.MARCATS;
                 })
@@ -810,16 +826,16 @@
           //=================
           // Fns for map
           function clicked(d) {
-            if (active.node() === this) return reset();
-            active.classed("active", false);
-            active = d3.select(this).classed("active", true);
+            if (outline.node() === this) return reset();
+            outline.classed("outline", false);
+            outline = d3.select(this).classed("outline", true);
 
             var bounds = path.bounds(d),
                 dx = bounds[1][0] - bounds[0][0],
                 dy = bounds[1][1] - bounds[0][1],
                 x = (bounds[0][0] + bounds[1][0]) / 2,
                 y = (bounds[0][1] + bounds[1][1]) / 2,
-                scale = .9 / Math.max(dx / m_width, dy / m_height),
+                scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
                 translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
             g.transition()
@@ -829,8 +845,8 @@
           }
 
           function reset() {            
-            active.classed("active", false);
-            active = d3.select(null);
+            outline.classed("outline", false);
+            outline = d3.select(null);
 
             g.transition()
                 .duration(750)
@@ -838,7 +854,7 @@
                 .attr("transform", "");
           }
 
-          function zoomed() {//for panning. NOT WORKING PROPERLY
+          function zoomed() { //for panning. NOT WORKING PROPERLY
             // //http://bl.ocks.org/biovisualize/2322933
             // // d3.event.translate (an array) stores the current translation from the parent SVG element
             // // t (an array) stores the projection's default translation

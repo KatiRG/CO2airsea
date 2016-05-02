@@ -177,6 +177,10 @@
     fill: orange;
   }
 
+  .feature.outline {
+    stroke: #000;
+  }
+
   .mesh {
     fill: none;
     stroke: #fff;
