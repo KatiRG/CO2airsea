@@ -868,7 +868,7 @@
                 dy = bounds[1][1] - bounds[0][1],
                 x = (bounds[0][0] + bounds[1][0]) / 2,
                 y = (bounds[0][1] + bounds[1][1]) / 2,
-                scale = .9 / Math.max(dx / m_width, dy / m_height),
+                scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
                 translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
             g.transition()
