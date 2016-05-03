@@ -9,6 +9,7 @@
 <script src="lib/bootstrap.min.js"></script>
 <link href="lib/sticky-footer-navbar.css" rel="stylesheet">
 <link href="style.css" rel="stylesheet" type="text/css">
+<script src="lib/colorbrewer.js"></script>
 
 <title>CO2 Fluxes</title>
 
@@ -532,7 +533,7 @@
                "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
                "#ffd59b", "#db4551", "#edf8fb"];
 
-            // Dictionary for MARCATS regions
+            // Dictionary for MARCATS regions: RCLASS
             marcats_dict = {
               "NorthEasternPacific": "1", "CaliforniaCurrent": "2", "TropicalEasternPacific": "3",
               "PeruvianUpwellingCurrent": "4", "SouthernAmerica": "5", "BrazilianCurrent": "6",
@@ -554,6 +555,8 @@
             var color = d3.scale.ordinal()
               // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
               .range(marcat_colors);
+
+
             
             var active_bar = d3.select(null);
 
@@ -769,27 +772,46 @@
 
           // Read in flux values per unit area
           // ======================================
-          d3.tsv("orca05.tsv", function(error, unitdata) {
+ 
+          d3.tsv("orca05_absAnthroUnitArea.tsv", function(error, unitdata) {
             if (error) throw error;
 
-            color.domain(d3.keys(unitdata[0]).filter(function(key) {
-              if (key) {
-                return key !== "RCLASS"; //Region names
-              }
-            }));
+            // color.domain(d3.keys(unitdata[0]).filter(function(key) {
+            //   if (key) {
+            //     return key !== "RCLASS"; //Region names
+            //   }
+            // }));
 
+          //   unitdata.forEach(function(d) {
+          //     d.sources = color.domain().map(function(name) {
+          //       return {
+          //         country: d.RCLASS,
+          //         name: name,
+          //         value: d[name]
+          //       };
+          //     });
+          //   });
+          //   console.log("unitdata: ", unitdata)
+          // })
+            var minflux = 99999, maxflux=-99999;
             unitdata.forEach(function(d) {
-              d.sources = color.domain().map(function(name) {
-                return {
-                  country: d.RCLASS,
-                  name: name,
-                  value: d[name]
-                };
-              });
-            });
-            console.log("unitdata: ", unitdata)
+              d.abs_anthro = +d.abs_anthro; //set to num
+              minflux = d.abs_anthro < minflux ? d.abs_anthro : minflux;
+              maxflux = d.abs_anthro > maxflux ? d.abs_anthro : maxflux
+            });           
+
+            var map_colourbar = d3.scale.ordinal()
+              .domain([minflux, maxflux])
+              .range(colorbrewer.Greys[5]);
+            console.log("map_colourbar: ", map_colourbar(0.01))  
+            console.log("map_colourbar: ", map_colourbar(0.86))
+
+            plotMap(unitdata);
+
           })
 
+          function plotMap(unitdata) {
+            console.log("unitdata in fn: ", unitdata)
 
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
@@ -906,7 +928,7 @@
           }
 
 
-
+        } //end fn plotMap()
 
 
           } //end plotHistogram()
