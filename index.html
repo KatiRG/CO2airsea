@@ -559,6 +559,7 @@
 
             
             var active_bar = d3.select(null);
+            var store_fill; //store fill colour of map region corresponding to clicked stacked bar
 
             var xAxis = d3.svg.axis()
               .scale(x)
@@ -727,12 +728,11 @@
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
                 })
-                .on("click", function(d) { //highlight corresponding region in map                  
-                  // console.log("active_bar.node(): ", active_bar.node())
-                  // console.log("d3.select(this): ", d3.select(this))         
+                .on("click", function(d) { //highlight corresponding region in map
+                  //console.log("active_bar.node(): ", active_bar.node())
 
                   // toggle active state
-                  if (active_bar.node() === this) return reset_bar();
+                  if (active_bar.node() === this) return reset_bar(store_fill);
                   active_bar.classed("active_bar", false);
                     
                   // clear any previously clicked bar/map region
@@ -749,20 +749,25 @@
                   var full_class = active_bar.attr("class"),
                       extract_class = marcats_dict[full_class.split("bars class").pop().split(" ", 1)[0]],
                       class_to_match = ".marcat-" + extract_class;
-                                   
-                  d3.selectAll(class_to_match).classed("active", true);
-                                           
-                 
+                  store_fill = d3.select(class_to_match).style("fill"); //sets global var
+
+                  d3.selectAll(class_to_match)
+                    .classed("active", true)
+                    .style("fill", "orange");
+     
                 }); //end on.click
 
-                function reset_bar() {
+                function reset_bar(store_fill) {
+                  console.log("store_fill in reset_bar: ", store_fill)
                   active_bar.classed("active_bar", false);
                   active_bar.attr("stroke", null)
 
                   active_bar = d3.select(null);
 
-                  // clear any previously clicked map region                  
-                  d3.selectAll('.feature.active').classed("active", false)
+                  // clear any previously clicked map region
+                  d3.selectAll('.feature.active')
+                    .classed("active", false)
+                    .style("fill", store_fill);
                 }
 
             }); //d3.tsv(histfile)
@@ -775,27 +780,32 @@
  
           d3.tsv("orca05_absAnthroUnitArea.tsv", function(error, unitdata) {
             if (error) throw error;
- 
+
+            // Create an array to store unit flux values, indexed by MARCATS_ID
+            var unit_dict = new Array();
+            unit_dict[0] = -999; //there is no MARCAT_ID = 0
+
+            // Store min and max unit flux values for map colourbar
             var minflux = 99999, maxflux=-99999;
             unitdata.forEach(function(d) {
               d.abs_anthro = +d.abs_anthro; //set to num
               d.MARCATS_ID = +d.MARCATS_ID;
               minflux = d.abs_anthro < minflux ? d.abs_anthro : minflux;
-              maxflux = d.abs_anthro > maxflux ? d.abs_anthro : maxflux
-            });           
+              maxflux = d.abs_anthro > maxflux ? d.abs_anthro : maxflux;
+
+              unit_dict[d.MARCATS_ID] = d.abs_anthro;
+        
+            });          
 
             var map_colourbar = d3.scale.ordinal()
               .domain([minflux, maxflux])
               .range(colorbrewer.Greys[5]);
 
-            plotMap(unitdata, map_colourbar);
+            plotMap(unit_dict, map_colourbar);
 
           })
 
-          function plotMap(unitdata, map_colourbar) {
-            console.log("unitdata in fn: ", unitdata)
-            console.log("map_colourbar in fn: ", map_colourbar(0.86))
-
+          function plotMap(unit_dict, map_colourbar) {
 
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
@@ -837,12 +847,10 @@
 
           // reset map button
           d3.select("#resetMap")
-            .on("click", function() { return reset(); });           
+            .on("click", function() { return reset(); });
 
           d3.json("refs/" + mapfile, function(error, us) {          
             if (error) throw error;
-
-            console.log('us.objects: ', us.objects)
 
             g.selectAll("path")                
                 .data(topojson.feature(us, us.objects.Continental_Shelf).features)
@@ -854,10 +862,8 @@
                   return "feature" + " marcat-" + d.properties.MARCATS;
                 })
                 .style("fill", function (d) {
-                  console.log("d in fill: ", d)
-                  console.log("d.marcats in fill: ", d.properties.MARCATS)
-                  //marcats_dict[full_class
-                  //return "red";
+                  var unit_flux = unit_dict[d.properties.MARCATS];
+                  return map_colourbar(unit_flux);
                 })
                 .on("click", clicked);
 
