@@ -539,7 +539,7 @@
               "PeruvianUpwellingCurrent": "4", "SouthernAmerica": "5", "BrazilianCurrent": "6",
               "TropicalWesternAtlantic": "7", "CarribeanSea": "8", "GulfofMexico": "9",
               "FloridaUpwelling": "10", "SeaofLabrador": "11", "HudsonBay": "12",
-              "CanadianArchipeloagos": "13", "NorthernGreenland": "14", "SouthernGreenland": "15",
+              "CanadianArchipelagos": "13", "NorthernGreenland": "14", "SouthernGreenland": "15",
               "NorwegianBasin": "16", "NorthEasternAtlantic": "17", "BalticSea": "18",
               "IberianUpwelling": "19", "MediterraneanSea": "20", "BlackSea": "21",
               "MoroccanUpwelling": "22", "TropicalEasternAtlantic": "23", "SouthernWesternAfrica": "24",
@@ -598,12 +598,12 @@
 
               color.domain(d3.keys(data[0]).filter(function(key) {
                 if (key) {
-                  console.log("key: ", key)
+                  //console.log("key: ", key)
                   return key !== "RCLASS"; //Region names
                 }                
               }));
               
-              console.log("color: ", color.domain())
+              //console.log("color: ", color.domain())
 
               data.forEach(function(d) {
                 var y0 = 0;
@@ -703,7 +703,7 @@
                   return "bars class" + classLabel;
                 })
                 .style("fill", function(d) {
-                  console.log("color(d.name): ", d.name)
+                  //console.log("color(d.name): ", d.name)
                   return color(d.name);
                 });
 
@@ -775,27 +775,11 @@
  
           d3.tsv("orca05_absAnthroUnitArea.tsv", function(error, unitdata) {
             if (error) throw error;
-
-            // color.domain(d3.keys(unitdata[0]).filter(function(key) {
-            //   if (key) {
-            //     return key !== "RCLASS"; //Region names
-            //   }
-            // }));
-
-          //   unitdata.forEach(function(d) {
-          //     d.sources = color.domain().map(function(name) {
-          //       return {
-          //         country: d.RCLASS,
-          //         name: name,
-          //         value: d[name]
-          //       };
-          //     });
-          //   });
-          //   console.log("unitdata: ", unitdata)
-          // })
+ 
             var minflux = 99999, maxflux=-99999;
             unitdata.forEach(function(d) {
               d.abs_anthro = +d.abs_anthro; //set to num
+              d.MARCATS_ID = +d.MARCATS_ID;
               minflux = d.abs_anthro < minflux ? d.abs_anthro : minflux;
               maxflux = d.abs_anthro > maxflux ? d.abs_anthro : maxflux
             });           
@@ -803,15 +787,15 @@
             var map_colourbar = d3.scale.ordinal()
               .domain([minflux, maxflux])
               .range(colorbrewer.Greys[5]);
-            console.log("map_colourbar: ", map_colourbar(0.01))  
-            console.log("map_colourbar: ", map_colourbar(0.86))
 
-            plotMap(unitdata);
+            plotMap(unitdata, map_colourbar);
 
           })
 
-          function plotMap(unitdata) {
+          function plotMap(unitdata, map_colourbar) {
             console.log("unitdata in fn: ", unitdata)
+            console.log("map_colourbar in fn: ", map_colourbar(0.86))
+
 
           // append the mapdiv to <p id="chart">
           var m_width = 960, 
@@ -865,9 +849,15 @@
               .enter().append("path")
                 .attr("d", path)
                 //.attr("class", "feature")
-                .attr("class", function (d) {                  
-                  //return "feature" + " marcat-" + d.properties.name;
+                .attr("class", function (d) {
+                  //return "feature" + " marcat-" + d.properties.MARCATS;
                   return "feature" + " marcat-" + d.properties.MARCATS;
+                })
+                .style("fill", function (d) {
+                  console.log("d in fill: ", d)
+                  console.log("d.marcats in fill: ", d.properties.MARCATS)
+                  //marcats_dict[full_class
+                  //return "red";
                 })
                 .on("click", clicked);
 
