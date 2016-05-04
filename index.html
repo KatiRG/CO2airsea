@@ -746,7 +746,16 @@
 
             // country rects event handlers
             state.selectAll("rect")
-              .on("mouseenter", function(d) {
+              .on("mouseenter", function(d) {                
+                d3.select(this).style("cursor", "pointer");
+
+                active_bar = d3.select(this).classed("active_bar", true);
+                active_bar.attr("stroke", "#000")
+                          .attr("stroke-width", 2.5);
+    
+                // toggle active state of stacked bar to outline/de-outline it
+                // if (active_bar.node() === this) return reset_bar();
+                // active_bar.classed("active_bar", false);
 
                 if (d3.select(this).style("opacity") != 0) {
                   var xPos = parseFloat(d3.select(this).attr("x"));
@@ -771,16 +780,25 @@
 
               })
               .on("mouseout", function() {
+
+                // remove outline on stacked bar
+                reset_bar();
+
+                d3.select(this).style("cursor", "auto");
+                
+                // remove tooltip display
                 div.transition().style("opacity", 0);
+
+                // restore map region to orig colour
                 d3.selectAll(class_to_match)
                   .classed("active", true)
                   .style("fill", fill_orig);
+                  
               })
-              .on("click", function(d) { //highlight corresponding region in map
-                //console.log("active_bar.node(): ", active_bar.node())
+              .on("click", function(d) {              
 
-                // toggle active state
-                if (active_bar.node() === this) return reset_bar(store_fill);
+                // toggle active state of stacked bar
+                if (active_bar.node() === this) return reset_bar();
                 active_bar.classed("active_bar", false);
 
                 // clear any previously clicked bar/map region
@@ -788,10 +806,13 @@
                 active_bar = d3.select(this).classed("active_bar", true);
                 d3.selectAll('.feature.active').classed("active", false)
 
-                // highlight bar with black outline
+                // highlight stacked bar with black outline
                 d3.select(this)
                   .attr("stroke", "#000")
                   .attr("stroke-width", 2.5);
+
+                // zoom on corresponding map region
+                zoomMap();  
 
                 // // highlight corresponding areas on map
                 // var full_class = active_bar.attr("class"),
@@ -805,8 +826,7 @@
 
               }); //end on.click
 
-            function reset_bar(store_fill) {
-              console.log("store_fill in reset_bar: ", store_fill)
+            function reset_bar() {              
               active_bar.classed("active_bar", false);
               active_bar.attr("stroke", null)
 
@@ -822,6 +842,10 @@
               var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
                 class_to_match = ".marcat-" + extract_class;
               return class_to_match;
+            }
+
+            function zoomMap() {
+              console.log("zoomMap!")
             }
 
           }); //d3.tsv(histfile)
@@ -894,11 +918,11 @@
             var g = svg4.append("g")
               .style("stroke-width", "1.5px");
 
-            var zoom = d3.behavior.zoom()
-              .on("zoom", zoomed);
+            // var zoom = d3.behavior.zoom()
+            //   .on("zoom", zoomed);
 
-            svg4
-              .call(zoom); // delete this line to disable free zooming
+            // svg4
+            //   .call(zoom); // delete this line to disable free zooming
 
             // reset map button
             d3.select("#resetMap")
@@ -933,57 +957,41 @@
                 .attr("d", path);
             }); //end d3.json
 
-            //=================
-            // Fns for map
-            function clicked(d) {
-              if (outline.node() === this) return reset();
-              outline.classed("outline", false);
-              outline = d3.select(this).classed("outline", true);
-
-              var bounds = path.bounds(d),
-                dx = bounds[1][0] - bounds[0][0],
-                dy = bounds[1][1] - bounds[0][1],
-                x = (bounds[0][0] + bounds[1][0]) / 2,
-                y = (bounds[0][1] + bounds[1][1]) / 2,
-                scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
-                translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
-
-              g.transition()
-                .duration(750)
-                .style("stroke-width", 1.5 / scale + "px")
-                .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-            }
-
-            function reset() {
-              outline.classed("outline", false);
-              outline = d3.select(null);
-
-              g.transition()
-                .duration(750)
-                .style("stroke-width", "1.5px")
-                .attr("transform", "");
-            }
-
-            function zoomed() { //for panning. NOT WORKING PROPERLY
-              // //http://bl.ocks.org/biovisualize/2322933
-              // // d3.event.translate (an array) stores the current translation from the parent SVG element
-              // // t (an array) stores the projection's default translation
-              // // we add the x and y vales in each array to determine the projection's new translation
-              // var tx = t[0] * d3.event.scale + d3.event.translate[0];
-              // var ty = t[1] * d3.event.scale + d3.event.translate[1];
-
-              // projection.translate([tx, ty]);
-
-              // // now we determine the projection's new scale, but there's a problem:
-              // // the map doesn't 'zoom onto the mouse point'
-              // projection.scale(s * d3.event.scale);
-
-              // // redraw the map
-              // svg4.selectAll("path").attr("d", path);
-            }
+           
 
 
           } //end fn plotMap()
+
+          //=================
+          // Fns for map
+          function clicked(d) {
+            if (outline.node() === this) return reset();
+            outline.classed("outline", false);
+            outline = d3.select(this).classed("outline", true);
+
+            var bounds = path.bounds(d),
+              dx = bounds[1][0] - bounds[0][0],
+              dy = bounds[1][1] - bounds[0][1],
+              x = (bounds[0][0] + bounds[1][0]) / 2,
+              y = (bounds[0][1] + bounds[1][1]) / 2,
+              scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
+              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
+
+            g.transition()
+              .duration(750)
+              .style("stroke-width", 1.5 / scale + "px")
+              .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+          }
+
+          function reset() {
+            outline.classed("outline", false);
+            outline = d3.select(null);
+
+            g.transition()
+              .duration(750)
+              .style("stroke-width", "1.5px")
+              .attr("transform", "");
+          }
 
 
         } //end plotHistogram()
