@@ -724,9 +724,21 @@
                       .style("left", (d3.event.pageX + 20) + "px")
                       .style("top", (d3.event.pageY - 20) + "px");
                   }
+
+                  // highlight corresponding areas on map
+                  var this_class = d3.select(this).attr("class");
+                  class_to_match = get_mapClass(this_class);
+                  fill_orig = d3.select(class_to_match).style("fill");
+                  d3.selectAll(class_to_match)
+                    .classed("active", true)
+                    .style("fill", "orange");
+
                 })
                 .on("mouseout", function() {
                   div.transition().style("opacity", 0);
+                  d3.selectAll(class_to_match)
+                    .classed("active", true)
+                    .style("fill", fill_orig);
                 })
                 .on("click", function(d) { //highlight corresponding region in map
                   //console.log("active_bar.node(): ", active_bar.node())
@@ -768,6 +780,12 @@
                   d3.selectAll('.feature.active')
                     .classed("active", false)
                     .style("fill", store_fill);
+                }
+
+                function get_mapClass(this_class) {//get class of map region corresponding to stacked bar
+                  var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
+                      class_to_match = ".marcat-" + extract_class;
+                  return class_to_match;
                 }
 
             }); //d3.tsv(histfile)
