@@ -122,6 +122,11 @@ function clicked(d) {
   active.classed("active", false);
   active = d3.select(this).classed("active", true);
 
+  console.log("path: ", path)
+  console.log("d: ", d)
+  console.log("path.bounds(d): ", path.bounds(d))
+  console.log("g: ", g)
+
   var bounds = path.bounds(d),
       dx = bounds[1][0] - bounds[0][0],
       dy = bounds[1][1] - bounds[0][1],
