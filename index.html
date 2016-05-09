@@ -9,6 +9,7 @@
 <script src="lib/bootstrap.min.js"></script>
 <link href="lib/sticky-footer-navbar.css" rel="stylesheet">
 <link href="style.css" rel="stylesheet" type="text/css">
+<script src="lib/colorbrewer.js"></script>
 
 <title>CO2 Fluxes</title>
 
@@ -39,7 +40,7 @@
       <div id="infotext2" style="width: 615px;"></div>
 
       <p id="chart">
-       
+
         <ul class="nytg-sort" style='position: absolute; left: 1134px; top: 50px;'>
           <li id="sortButton">Sort</li>
         </ul>
@@ -50,356 +51,356 @@
           <li id="resetMap">Reset</li>
         </ul>
 
-      </p> 
-      
-        <script src="sankey.js"></script>
-        <script>
-          // Sankey diagram with highlight and tooltip
-          // http://bost.ocks.org/mike/sankey/
-          // http://bl.ocks.org/git-ashish/8959771
+      </p>
 
-          var whichCountry; //for histograms
+      <script src="sankey.js"></script>
+      <script>
+        // Sankey diagram with highlight and tooltip
+        // http://bost.ocks.org/mike/sankey/
+        // http://bl.ocks.org/git-ashish/8959771
 
-          var margin = {
-              top: 100,
-              right: 10,
-              bottom: 10,
-              left: 10
-            },
-            width = 1100 - margin.left - margin.right,
-            height = 700 - margin.top - margin.bottom;
+        var whichCountry; //for histograms
 
-          var formatNumber = d3.format(".2f"),
-            format = function(d) {
-              return formatNumber(d);
-            },
-            color = d3.scale.category20();
+        var margin = {
+            top: 100,
+            right: 10,
+            bottom: 10,
+            left: 10
+          },
+          width = 1100 - margin.left - margin.right,
+          height = 700 - margin.top - margin.bottom;
 
-          // append the svg canvas to the page
-          var svg = d3.select("#chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+        var formatNumber = d3.format(".2f"),
+          format = function(d) {
+            return formatNumber(d);
+          },
+          color = d3.scale.category20();
 
-          // create svg for sorted column
-          var svg2 = d3.select("#sortCol").append("svg")
-            .attr("width", 200 + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+        // append the svg canvas to the page
+        var svg = d3.select("#chart").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
-          // set the sankey diagram properties
-          var sankey = d3.sankey()
-            .nodeWidth(20)
-            .nodePadding(10)
-            .size([width, height]);
+        // create svg for sorted column
+        var svg2 = d3.select("#sortCol").append("svg")
+          .attr("width", 200 + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
-          var path = sankey.link();
+        // set the sankey diagram properties
+        var sankey = d3.sankey()
+          .nodeWidth(20)
+          .nodePadding(10)
+          .size([width, height]);
 
-          var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
-          var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
+        var path = sankey.link();
 
-          var units = "Tg C yr <sup>-1</sup>";
+        var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
+        var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
 
-          Coal_color = "#3B3131";
-          Oil_color = "#886666";
-          Gas_color = "#AEC7E8";
-          GasFlaring_color = "#AEC7E8";
-          Cement_color = "#666688";
+        var units = "Tg C yr <sup>-1</sup>";
 
-          //https://www.colorcodehex.com/eff3ff/
-          colour_sequence = ["#CBD8FF", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"];
+        Coal_color = "#3B3131";
+        Oil_color = "#886666";
+        Gas_color = "#AEC7E8";
+        GasFlaring_color = "#AEC7E8";
+        Cement_color = "#666688";
 
-          d3.select("#resetMap").style("display", "none"); //hide reset map button
+        //https://www.colorcodehex.com/eff3ff/
+        colour_sequence = ["#CBD8FF", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"];
 
-          // http://chimera.labs.oreilly.com/books/1230000000345/ch09.html#_changing_the_data
-          // Show Sankey diagram
-          d3.select("#TA")
-            .on("click", function() {
-              if (d3.select(this).attr("class") != "selected") {
-                d3.select("#resetMap").style("display", "none"); //hide reset map button
+        d3.select("#resetMap").style("display", "none"); //hide reset map button
 
-                //toggle button  
-                d3.selectAll("#TB").attr("class", ""); //inactivate histogram button
-                d3.select(this).attr("class", "selected");  //activate sankey button    
+        // http://chimera.labs.oreilly.com/books/1230000000345/ch09.html#_changing_the_data
+        // Show Sankey diagram
+        d3.select("#TA")
+          .on("click", function() {
+            if (d3.select(this).attr("class") != "selected") {
+              d3.select("#resetMap").style("display", "none"); //hide reset map button
 
-                d3.select("#chart").selectAll("div").remove(); //remove all stacked bar charts
-                d3.select('#chart').select("svg").style("display", "inline"); //un-hide Sankey
-                d3.select("#infotext2").style("display", "none"); //hide histogram info text
-                
-                d3.select("#sortButton").text("Sort");
-                d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
-                  svg.selectAll("*").remove();
-                  svg2.selectAll("*").remove(); //clears sort rects
-                  make(graph);
-                })
-              }
-            });
+              //toggle button  
+              d3.selectAll("#TB").attr("class", ""); //inactivate histogram button
+              d3.select(this).attr("class", "selected"); //activate sankey button    
 
-          // Show stacked bar and map
-          d3.select("#TB")
-            .on("click", function() {
-              if (d3.select(this).attr("class") != "selected") {
-                d3.selectAll("#TA").attr("class", "");
-                d3.select(this).attr("class", "selected");
+              d3.select("#chart").selectAll("div").remove(); //remove all stacked bar charts
+              d3.select('#chart').select("svg").style("display", "inline"); //un-hide Sankey
+              d3.select("#infotext2").style("display", "none"); //hide histogram info text
 
-                d3.select('#chart').select("svg").style("display", "none"); //hides Sankey diagram
-                svg2.selectAll("*").remove(); //clears any sort rects displayed
-                d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
-                d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
-
-                histfile = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
-                mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson"; //"all_nameM_idC.topojson";
-                chartdiv = "Mchart";
-                mapdiv = "Mmap";
-
-                d3.select("#resetMap").style("display", "list-item");
-
-                plotHistogram(chartdiv, mapdiv);
-              }
-
-
-            });
-
-          // load the data          
-          d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
-            make(graph);
+              d3.select("#sortButton").text("Sort");
+              d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
+                svg.selectAll("*").remove();
+                svg2.selectAll("*").remove(); //clears sort rects
+                make(graph);
+              })
+            }
           });
 
-          function make(graph) {
-            // Display info text for Sankey diagram
+        // Show stacked bar and map
+        d3.select("#TB")
+          .on("click", function() {
+            if (d3.select(this).attr("class") != "selected") {
+              d3.selectAll("#TA").attr("class", "");
+              d3.select(this).attr("class", "selected");
 
-            d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg C yr <sup>-1</sup>] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
-              .style("display", "block");
+              d3.select('#chart').select("svg").style("display", "none"); //hides Sankey diagram
+              svg2.selectAll("*").remove(); //clears any sort rects displayed
+              d3.select("#infotext").style("display", "none"); //hide info text (do not use remove!)
+              d3.select("#sortButton").style("display", "none"); //hides sort button (do not use remove!)
 
-            d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
+              histfile = "orca05_absAnthroPerArea_TgPerYr.tsv"; //orca05.tsv
+              mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson"; //"all_nameM_idC.topojson";
+              chartdiv = "Mchart";
+              mapdiv = "Mmap";
 
-            var nodeMap = {};
-            graph.nodes.forEach(function(x) {
-              nodeMap[x.name] = x;
+              d3.select("#resetMap").style("display", "list-item");
+
+              plotHistogram(chartdiv, mapdiv);
+            }
+
+
+          });
+
+        // load the data          
+        d3.json("sankey_orca05_anthroflux_perSurfaceArea.json", function(error, graph) {
+          make(graph);
+        });
+
+        function make(graph) {
+          // Display info text for Sankey diagram
+
+          d3.select("#infotext").html("This Sankey diagram represents anthropogenic CO2 uptake [Tg C yr <sup>-1</sup>] in each MARCATS class (left column) and the breakdown over MARCATS regions, sorted in descending order in each class (right column). Note that these values are weighted by the surface area of each region." + "<br/>" + "<br/>" + "<p>" + "Click the 'Sort' button to sort the uptake of all MARCATS regions in descending order.")
+            .style("display", "block");
+
+          d3.select("#sortButton").style("display", "inline-block"); //un-hide sort button
+
+          var nodeMap = {};
+          graph.nodes.forEach(function(x) {
+            nodeMap[x.name] = x;
+          });
+          graph.links = graph.links.map(function(x) {
+            return {
+              source: nodeMap[x.source],
+              target: nodeMap[x.target],
+              value: x.value
+            };
+          });
+
+          graph.nodes.sort(function(a, b) {
+            return d3.descending(a.value, b.value);
+          });
+
+          sankey
+            .nodes(graph.nodes)
+            .links(graph.links)
+            .layout(32);
+
+          // tooltip div
+          var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+          // add in the links
+          var link = svg.append("g").selectAll(".link")
+            .data(graph.links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", path)
+            .attr("id", function(d, i) {
+              d.id = i;
+              return "link-" + i;
+            })
+            .style("stroke-width", function(d) {
+              return Math.max(1, d.dy);
+            })
+            .style("stroke", function(d) {
+              if (d.source.name === "EBC") return colour_sequence[0];
+              else if (d.source.name === "Indian margins") return colour_sequence[1];
+              else if (d.source.name === "Marginal sea") return colour_sequence[2];
+              else if (d.source.name === "Polar") return colour_sequence[3];
+              else if (d.source.name === "Subpolar") return colour_sequence[4];
+              else if (d.source.name === "Tropical") return colour_sequence[5];
+              else return colour_sequence[6];
+            })
+            .sort(function(a, b) {
+              return b.dy - a.dy;
             });
-            graph.links = graph.links.map(function(x) {
-              return {
-                source: nodeMap[x.source],
-                target: nodeMap[x.target],
-                value: x.value
-              };
+
+          // add the link tooltip
+          link.on("mouseover", function(d) {
+              div.transition()
+                .style("opacity", .9);
+              div.html(d.source.name + " → " + d.target.name +
+                  "<br><b>" + format(d.value) + " " + units + "</b>")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            })
+            .on("mouseout", function(d) {
+              div.transition()
+                .style("opacity", 0);
             });
 
-            graph.nodes.sort(function(a, b) {
-              return d3.descending(a.value, b.value);
+          // add in the nodes
+          var node = svg.append("g").selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function(d) {
+              col_xcoord.push(d.x); //x-coord of each Sankey col
+              return "translate(" + d.x + "," + d.y + ")";
+            })
+            .on("click", highlight_node_links);
+          col_xcoord = uniques(col_xcoord);
+
+          // add the rectangles for the nodes
+          node.append("rect")
+            .attr("height", function(d) {
+              return d.dy;
+            })
+            .attr("width", sankey.nodeWidth())
+            .style("fill", function(d) {
+              if (d.name === "EBC") return colour_sequence[0];
+              else if (d.name === "Indian margins") return colour_sequence[1];
+              else if (d.name === "Marginal sea") return colour_sequence[2];
+              else if (d.name === "Polar") return colour_sequence[3];
+              else if (d.name === "Subpolar") return colour_sequence[4];
+              else if (d.name === "Tropical") return colour_sequence[5];
+              else return colour_sequence[6];
+            })
+            .style("stroke-width", "2px")
+            .style("stroke", "#555");
+
+          // add the node tooltip
+          node.on("mouseover", function(d) {
+              div.transition()
+                .style("opacity", .9);
+              div.html(d.name + "<br><b>" + format(d.value) + " " + units + "</b>")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            })
+            .on("mouseout", function(d) {
+              div.transition()
+                .style("opacity", 0);
             });
 
-            sankey
-              .nodes(graph.nodes)
-              .links(graph.links)
-              .layout(32);
+          // add in the title for the nodes
+          node.append("text")
+            .attr("x", -6)
+            .attr("y", function(d) {
+              return d.dy / 2;
+            })
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .attr("transform", null)
+            .text(function(d) {
+              return d.name;
+            })
+            .filter(function(d) {
+              return d.x < width / 2;
+            })
+            .attr("x", 6 + sankey.nodeWidth())
+            .attr("text-anchor", "start");
 
-            // tooltip div
-            var div = d3.select("body").append("div")
-              .attr("class", "tooltip")
-              .style("opacity", 0);
+          //=================================================
+          // action for 'Sort all' button
+          d3.select("#sortButton")
+            .on("click", function() {
+              //toggle button
+              if (d3.select("#sortButton").text() === "Clear") {
+                svg2.selectAll("*").remove(); //clears sort rects
+                d3.select("#sortButton").text("Sort");
+              } else {
+                var idx = 0;
+                var yheight = []; //array to store sorted rect height array
+                var yval = []; //array to store calculated ycoords
+                var ynames = []; //array to store sorted names
+                delta = 10; //spacing between rects                  
 
-            // add in the links
-            var link = svg.append("g").selectAll(".link")
-              .data(graph.links)
-              .enter().append("path")
-              .attr("class", "link")
-              .attr("d", path)
-              .attr("id", function(d, i) {
-                d.id = i;
-                return "link-" + i;
-              })
-              .style("stroke-width", function(d) {
-                return Math.max(1, d.dy);
-              })
-              .style("stroke", function (d) {                
-                if (d.source.name === "EBC") return colour_sequence[0];
-                else if (d.source.name === "Indian margins") return colour_sequence[1];
-                else if (d.source.name === "Marginal sea") return colour_sequence[2];
-                else if (d.source.name === "Polar") return colour_sequence[3];
-                else if (d.source.name === "Subpolar") return colour_sequence[4];
-                else if (d.source.name === "Tropical") return colour_sequence[5];
-                else return colour_sequence[6];
-              })   
-              .sort(function(a, b) {
-                return b.dy - a.dy;
-              });
+                //d3.select(this).attr("class", "selected");
+                d3.select(this).text("Clear");
 
-            // add the link tooltip
-            link.on("mouseover", function(d) {
-                div.transition()
-                  .style("opacity", .9);
-                div.html(d.source.name + " → " + d.target.name + 
-                    "<br><b>" + format(d.value) + " " + units + "</b>")
-                  .style("left", (d3.event.pageX) + "px")
-                  .style("top", (d3.event.pageY) + "px");
-              })
-              .on("mouseout", function(d) {
-                div.transition()
+                // Sort the rect heights by decreasing size and store in array      
+                d3.selectAll("g.node")
+                  .filter(function(d) {
+                    if (d.x === col_xcoord[1]) { //select rects in last column (countries)
+                      yheight.push(d.dy);
+                      yheight.sort(sortDescending);
+
+                      return yheight;
+                    }
+
+                    function sortDescending(a, b) {
+                      return b - a; //use a - b to sort in increasing order
+                    }
+
+                  });
+
+                //Find names corresponding to yheight
+                d3.selectAll("g.node")
+                  .filter(function(d, i) {
+                    if (d.x === col_xcoord[1]) { //selects last col (countries)
+                      var idx_place = yheight.indexOf(d.dy); //order for sorted names
+                      //handle case when ynames contains two (or more) equal numbers
+                      //if (idx_place < ynames.length) console.log("idx_place in here: ", ynames.length)
+                      ynames[idx_place] = d.name;
+                    }
+                  });
+
+                // Plot rects in order of increasing height on an svg2 canvas
+                d3.selectAll("g.node")
+                  .filter(function(d) {
+                    if (d.x === col_xcoord[1]) { //selects last col (countries)
+                      var rect = svg2.append("g")
+                        .append("rect")
+                        .attr("height", function(d) {
+                          return yheight[idx];
+                        })
+                        .attr("width", sankey.nodeWidth())
+                        .attr("transform", function(d) {
+                          if (idx === 0) yval[idx] = 0; //first rect is at (0,0)
+                          else {
+                            yval[idx] = yval[idx - 1] + yheight[idx - 1] + delta;
+                          }
+                          return "translate(" + 0 + "," + yval[idx] + ")";
+                        })
+                        .style("fill", function(d) {
+                          return colour_sequence[6];
+                        })
+                        .style("stroke-width", "2px")
+                        .style("stroke", "#555")
+                        .attr("id", "sort-" + idx); //use later for tooltip
+                      // .append("title")
+                      // .text(function(d) { 
+                      //   return "Tooltip"; 
+                      // });
+
+                      idx++;
+                    }
+                  }) //end d.x filter
+
+                // tooltip div for sorted rects
+                var myTooltip = d3.select("#sortCol").append("div")
+                  .attr("class", "tooltip")
                   .style("opacity", 0);
-              });
 
-            // add in the nodes
-            var node = svg.append("g").selectAll(".node")
-              .data(graph.nodes)
-              .enter().append("g")
-              .attr("class", "node")
-              .attr("transform", function (d) {
-                col_xcoord.push(d.x); //x-coord of each Sankey col
-                return "translate(" + d.x + "," + d.y + ")";
-              })
-              .on("click", highlight_node_links);
-              col_xcoord = uniques(col_xcoord);              
-
-            // add the rectangles for the nodes
-            node.append("rect")
-              .attr("height", function(d) {
-                return d.dy;
-              })
-              .attr("width", sankey.nodeWidth())
-              .style("fill", function (d) {                
-                if (d.name === "EBC") return colour_sequence[0];
-                else if (d.name === "Indian margins") return colour_sequence[1];
-                else if (d.name === "Marginal sea") return colour_sequence[2];
-                else if (d.name === "Polar") return colour_sequence[3];
-                else if (d.name === "Subpolar") return colour_sequence[4];
-                else if (d.name === "Tropical") return colour_sequence[5];
-                else return colour_sequence[6];
-              })
-              .style("stroke-width", "2px")
-              .style("stroke", "#555");
-
-            // add the node tooltip
-            node.on("mouseover", function(d) {
-                div.transition()
-                  .style("opacity", .9);
-                div.html(d.name + "<br><b>" + format(d.value) + " " + units + "</b>")
-                  .style("left", (d3.event.pageX) + "px")
-                  .style("top", (d3.event.pageY) + "px");
-              })
-              .on("mouseout", function(d) {
-                div.transition()
-                  .style("opacity", 0);
-              });
-
-            // add in the title for the nodes
-            node.append("text")
-              .attr("x", -6)
-              .attr("y", function(d) {
-                return d.dy / 2;
-              })
-              .attr("dy", ".35em")
-              .attr("text-anchor", "end")
-              .attr("transform", null)
-              .text(function(d) {
-                return d.name;
-              })
-              .filter(function(d) {
-                return d.x < width / 2;
-              })
-              .attr("x", 6 + sankey.nodeWidth())
-              .attr("text-anchor", "start");
-
-            //=================================================
-            // action for 'Sort all' button
-            d3.select("#sortButton")
-              .on("click", function() {
-                //toggle button
-                if (d3.select("#sortButton").text() === "Clear") {
-                  svg2.selectAll("*").remove(); //clears sort rects
-                  d3.select("#sortButton").text("Sort");
-                } else {
-                  var idx = 0;
-                  var yheight = []; //array to store sorted rect height array
-                  var yval = []; //array to store calculated ycoords
-                  var ynames = []; //array to store sorted names
-                  delta = 10; //spacing between rects                  
-
-                  //d3.select(this).attr("class", "selected");
-                  d3.select(this).text("Clear");
-
-                  // Sort the rect heights by decreasing size and store in array      
-                  d3.selectAll("g.node")
-                    .filter(function (d) {
-                      if (d.x === col_xcoord[1]) { //select rects in last column (countries)
-                        yheight.push(d.dy);
-                        yheight.sort(sortDescending);
-
-                        return yheight;
-                      }
-
-                      function sortDescending(a, b) {
-                        return b - a; //use a - b to sort in increasing order
-                      }
-
-                    });
-
-                  //Find names corresponding to yheight
-                  d3.selectAll("g.node")
-                    .filter(function (d, i) {
-                      if (d.x === col_xcoord[1]) { //selects last col (countries)
-                        var idx_place = yheight.indexOf(d.dy); //order for sorted names
-                        //handle case when ynames contains two (or more) equal numbers
-                        //if (idx_place < ynames.length) console.log("idx_place in here: ", ynames.length)
-                        ynames[idx_place] = d.name;                        
-                      }
-                    });
-
-                  // Plot rects in order of increasing height on an svg2 canvas
-                  d3.selectAll("g.node")
-                    .filter(function(d) {
-                      if (d.x === col_xcoord[1]) { //selects last col (countries)
-                        var rect = svg2.append("g")
-                          .append("rect")
-                          .attr("height", function(d) {
-                            return yheight[idx] ;
-                          })
-                          .attr("width", sankey.nodeWidth())
-                          .attr("transform", function(d) {
-                            if (idx === 0) yval[idx] = 0; //first rect is at (0,0)
-                            else {
-                              yval[idx] = yval[idx - 1] + yheight[idx - 1] + delta;
-                            }
-                            return "translate(" + 0 + "," + yval[idx] + ")";
-                          })
-                          .style("fill", function(d) {
-                            return colour_sequence[6];
-                          })
-                          .style("stroke-width", "2px")
-                          .style("stroke", "#555")
-                          .attr("id", "sort-" + idx); //use later for tooltip
-                          // .append("title")
-                          // .text(function(d) { 
-                          //   return "Tooltip"; 
-                          // });
-
-                        idx++;
-                      }
-                    }) //end d.x filter
-
-                  // tooltip div for sorted rects
-                  var myTooltip = d3.select("#sortCol").append("div")
-                      .attr("class", "tooltip")
-                      .style("opacity", 0);
-
-                  // add text
-                  svg2.selectAll("g")
-                    .append("text")
-                    .attr("x", 26)
-                    .attr("y", function(d, i) {
-                      return yval[i] + yheight[i] / 2;
-                    })
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", "start")
-                    .text(function (d, i) {
-                      return formatX(i + 1) + " " + ynames[i];
-                    })
-                    .style("stroke-width", "2px")
-                    .style("fill", "#555");
+                // add text
+                svg2.selectAll("g")
+                  .append("text")
+                  .attr("x", 26)
+                  .attr("y", function(d, i) {
+                    return yval[i] + yheight[i] / 2;
+                  })
+                  .attr("dy", ".35em")
+                  .attr("text-anchor", "start")
+                  .text(function(d, i) {
+                    return formatX(i + 1) + " " + ynames[i];
+                  })
+                  .style("stroke-width", "2px")
+                  .style("fill", "#555");
 
                 // Tooltip not working, no text gets attached to the div element   
                 //   svg2.selectAll("g").selectAll("rect")
@@ -420,473 +421,615 @@
 
 
 
-                } //end button toggle check
-              }); //end 'sort All' button action
+              } //end button toggle check
+            }); //end 'sort All' button action
 
-            //=================================================
-            // FUNCTIONS
-            //=================================================
-            // http://stackoverflow.com/questions/1960473/unique-values-in-an-array
-            function uniques(arr) {
-              var a = [];
-              for (var i=0, l=arr.length; i<l; i++)
-                if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
-                  a.push(arr[i]);
-                return a;
+          //=================================================
+          // FUNCTIONS
+          //=================================================
+          // http://stackoverflow.com/questions/1960473/unique-values-in-an-array
+          function uniques(arr) {
+            var a = [];
+            for (var i = 0, l = arr.length; i < l; i++)
+              if (a.indexOf(arr[i]) === -1 && arr[i] !== '')
+                a.push(arr[i]);
+            return a;
+          }
+
+          function sortAscending(a, b) {
+            return a - b;
+          }
+
+          // http://bl.ocks.org/git-ashish/8959771
+          function highlight_node_links(node, i) {
+
+            var remainingNodes = [],
+              nextNodes = [];
+
+            var stroke_opacity = 0;
+            if (d3.select(this).attr("data-clicked") == "1") {
+              d3.select(this).attr("data-clicked", "0");
+              stroke_opacity = 0.5;
+            } else {
+              d3.select(this).attr("data-clicked", "1");
+              stroke_opacity = 1.0;
             }
 
-            function sortAscending(a, b) {
-              return a - b;
-            }
+            var traverse = [{
+              linkType: "sourceLinks",
+              nodeType: "target"
+            }, {
+              linkType: "targetLinks",
+              nodeType: "source"
+            }];
 
-            // http://bl.ocks.org/git-ashish/8959771
-            function highlight_node_links(node, i) {
-
-              var remainingNodes = [],
-                nextNodes = [];
-
-              var stroke_opacity = 0;
-              if (d3.select(this).attr("data-clicked") == "1") {
-                d3.select(this).attr("data-clicked", "0");
-                stroke_opacity = 0.5;
-              } else {
-                d3.select(this).attr("data-clicked", "1");
-                stroke_opacity = 1.0;
-              }
-
-              var traverse = [{
-                linkType: "sourceLinks",
-                nodeType: "target"
-              }, {
-                linkType: "targetLinks",
-                nodeType: "source"
-              }];
-
-              traverse.forEach(function(step) {
-                node[step.linkType].forEach(function(link) {
-                  remainingNodes.push(link[step.nodeType]);
-                  highlight_link(link.id, stroke_opacity);
-                });
-
-                while (remainingNodes.length) {
-                  nextNodes = [];
-                  remainingNodes.forEach(function(node) {
-                    node[step.linkType].forEach(function(link) {
-                      nextNodes.push(link[step.nodeType]);
-                      highlight_link(link.id, stroke_opacity);
-                    });
-                  });
-                  remainingNodes = nextNodes;
-                }
+            traverse.forEach(function(step) {
+              node[step.linkType].forEach(function(link) {
+                remainingNodes.push(link[step.nodeType]);
+                highlight_link(link.id, stroke_opacity);
               });
-            }
 
-            function highlight_link(id, opacity) {
-              d3.select("#link-" + id).style("stroke-opacity", opacity);
-            }
+              while (remainingNodes.length) {
+                nextNodes = [];
+                remainingNodes.forEach(function(node) {
+                  node[step.linkType].forEach(function(link) {
+                    nextNodes.push(link[step.nodeType]);
+                    highlight_link(link.id, stroke_opacity);
+                  });
+                });
+                remainingNodes = nextNodes;
+              }
+            });
+          }
 
-          } // end fn make(graph)
-          
+          function highlight_link(id, opacity) {
+            d3.select("#link-" + id).style("stroke-opacity", opacity);
+          }
 
-          function plotHistogram(chartdiv, mapdiv) {                
+        } // end fn make(graph)
 
-            d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg C yr <sup>-1</sup>]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
-              .style("display", "block");            
 
-            // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
-            function make_y_axis() {
-              return d3.svg.axis()
-                .scale(y)
-                .orient("left")
-                .ticks(10)
-            }      
+        function plotHistogram(chartdiv, mapdiv) {
 
-            var margin = {
-                top: 25,
-                right: 20,
-                bottom: 120,
-                left: 50
-              },
-              width = 600 - margin.left - margin.right,
-              height = 400 - margin.top - margin.bottom;
+          d3.select("#infotext2").html("These histograms show the anthropogenic carbon fluxes emitted by region class in terms of MARCATS surface area [Tg C yr <sup>-1</sup>]." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar to find flux value for the corresponding MARCAT region." + "<br/>" + "<br/>" + "<p>")
+            .style("display", "block");
 
-            var x = d3.scale.ordinal()
-              .rangeRoundBands([0, width], .1);
-
-            var y = d3.scale.linear()
-              .rangeRound([height, 0]);
-            
-            // Coal_color = "#3B3131";
-            // Oil_color = "#886666";
-            // Gas_color = "#AEC7E8";
-            // GasFlaring_color = "#f99a1c";
-            // Cement_color = "#666688";
-
-            var marcat_colors = 
-              ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-               "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
-               "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
-               "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
-               "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
-               "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
-               "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
-               "#ffd59b", "#db4551", "#edf8fb"];
-
-            // Dictionary for MARCATS regions
-            marcats_dict = {
-              "NorthEasternPacific": "1", "CaliforniaCurrent": "2", "TropicalEasternPacific": "3",
-              "PeruvianUpwellingCurrent": "4", "SouthernAmerica": "5", "BrazilianCurrent": "6",
-              "TropicalWesternAtlantic": "7", "CarribeanSea": "8", "GulfofMexico": "9",
-              "FloridaUpwelling": "10", "SeaofLabrador": "11", "HudsonBay": "12",
-              "CanadianArchipeloagos": "13", "NorthernGreenland": "14", "SouthernGreenland": "15",
-              "NorwegianBasin": "16", "NorthEasternAtlantic": "17", "BalticSea": "18",
-              "IberianUpwelling": "19", "MediterraneanSea": "20", "BlackSea": "21",
-              "MoroccanUpwelling": "22", "TropicalEasternAtlantic": "23", "SouthernWesternAfrica": "24",
-              "AgulhasCurrent": "25", "TropicalWesternIndian": "26", "WesternArabianSea": "27",
-              "RedSea": "28", "PersianGulf": "29", "EasternArabianSea": "30",
-              "BayofBengal": "31", "TropicalEasternIndian": "32", "LeeuwinCurrent": "33",
-              "SouthernAustralia": "34", "EasternAustrialianCurrent": "35", "NewZealand": "36",
-              "NorthernAustralia": "37", "SouthEastAsia": "38", "ChinaSea&Kuroshio": "39",
-              "SeaofJapan": "40", "SeaofOkhotsk": "41", "NorthWesternPacific": "42",
-              "SiberianShelves": "43", "Barents&KaraSea": "44", "AntarcticShelves": "45"              
-            };  
-
-            var color = d3.scale.ordinal()
-              // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
-              .range(marcat_colors);
-            
-            var active_bar = d3.select(null);
-
-            var xAxis = d3.svg.axis()
-              .scale(x)
-              .orient("bottom");
-
-            var yAxis = d3.svg.axis()
+          // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+          function make_y_axis() {
+            return d3.svg.axis()
               .scale(y)
               .orient("left")
-              //.tickFormat(d3.format(".2s"))
-              .tickFormat(d3.format(".1f"));
+              .ticks(10)
+          }
 
-            // append the chart div to <p id="chart">
-            var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
-              .append("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          var margin = {
+              top: 25,
+              right: 20,
+              bottom: 120,
+              left: 50
+            },
+            width = 600 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
 
-            // add chart title
-            d3.select("#" + chartdiv)
-              .append("div")
-                .attr("class", "class_chartTitle")
-                .append("h4")
-                .text("Tg C yr")
-                .append('sup').text("-1");
-           
+          var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
 
-            var div = d3.select("body").append("div")
-              .attr("class", "tooltip")
-              .style("opacity", 0);
-              
-            // Read in datafile for stacked bar chart  
-            // ======================================
-            d3.tsv(histfile, function(error, data) {
-              if (error) throw error;
+          var y = d3.scale.linear()
+            .rangeRound([height, 0]);
 
-              color.domain(d3.keys(data[0]).filter(function(key) {
-                if (key) {                  
-                  return key !== "RCLASS"; //Region names
-                }                
-              }));                          
+          // Coal_color = "#3B3131";
+          // Oil_color = "#886666";
+          // Gas_color = "#AEC7E8";
+          // GasFlaring_color = "#f99a1c";
+          // Cement_color = "#666688";
 
-              data.forEach(function(d) {
-                var y0 = 0;
-                d.sources = color.domain().map(function(name) {
-                  return {
-                    country: d.RCLASS,
-                    name: name,
-                    y0: y0,
-                    y1: y0 += +d[name],
-                    value: d[name],
-                    ycoord_corrected: 0
-                  };
-                });
-                d.total = d.sources[d.sources.length - 1].y1;            
+          var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
+            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+            "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
+            "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
+            "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
+            "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
+            "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
+            "#ffd59b", "#db4551", "#edf8fb"
+          ];
 
+          // Dictionary for MARCATS regions: RCLASS
+          marcats_dict = {
+            "NorthEasternPacific": "1",
+            "CaliforniaCurrent": "2",
+            "TropicalEasternPacific": "3",
+            "PeruvianUpwellingCurrent": "4",
+            "SouthernAmerica": "5",
+            "BrazilianCurrent": "6",
+            "TropicalWesternAtlantic": "7",
+            "CarribeanSea": "8",
+            "GulfofMexico": "9",
+            "FloridaUpwelling": "10",
+            "SeaofLabrador": "11",
+            "HudsonBay": "12",
+            "CanadianArchipelagos": "13",
+            "NorthernGreenland": "14",
+            "SouthernGreenland": "15",
+            "NorwegianBasin": "16",
+            "NorthEasternAtlantic": "17",
+            "BalticSea": "18",
+            "IberianUpwelling": "19",
+            "MediterraneanSea": "20",
+            "BlackSea": "21",
+            "MoroccanUpwelling": "22",
+            "TropicalEasternAtlantic": "23",
+            "SouthernWesternAfrica": "24",
+            "AgulhasCurrent": "25",
+            "TropicalWesternIndian": "26",
+            "WesternArabianSea": "27",
+            "RedSea": "28",
+            "PersianGulf": "29",
+            "EasternArabianSea": "30",
+            "BayofBengal": "31",
+            "TropicalEasternIndian": "32",
+            "LeeuwinCurrent": "33",
+            "SouthernAustralia": "34",
+            "EasternAustrialianCurrent": "35",
+            "NewZealand": "36",
+            "NorthernAustralia": "37",
+            "SouthEastAsia": "38",
+            "ChinaSea&Kuroshio": "39",
+            "SeaofJapan": "40",
+            "SeaofOkhotsk": "41",
+            "NorthWesternPacific": "42",
+            "SiberianShelves": "43",
+            "Barents&KaraSea": "44",
+            "AntarcticShelves": "45"
+          };
+
+          var color = d3.scale.ordinal()
+            // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
+            .range(marcat_colors);
+
+
+
+          var active_bar = d3.select(null);
+          //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
+          var globalg; //global g for paths
+          var zoomRegion = -999; //global var for region to zoom
+          var pathbds = []; //global var for path bounds of zoomRegion
+
+          var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+          var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            //.tickFormat(d3.format(".2s"))
+            .tickFormat(d3.format(".1f"));
+
+          // append the chart div to <p id="chart">
+          var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          // add chart title
+          d3.select("#" + chartdiv)
+            .append("div")
+            .attr("class", "class_chartTitle")
+            .append("h4")
+            .text("Tg C yr")
+            .append('sup').text("-1");
+
+
+          var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+          // Read in datafile for stacked bar chart  
+          // ======================================
+          d3.tsv(histfile, function(error, data) {
+            if (error) throw error;
+
+            color.domain(d3.keys(data[0]).filter(function(key) {
+              if (key) {
+                //console.log("key: ", key)
+                return key !== "RCLASS"; //Region names
+              }
+            }));
+
+            //console.log("color: ", color.domain())
+
+            data.forEach(function(d) {
+              var y0 = 0;
+              d.sources = color.domain().map(function(name) {
+                return {
+                  country: d.RCLASS,
+                  name: name,
+                  y0: y0,
+                  y1: y0 += +d[name],
+                  value: d[name],
+                  ycoord_corrected: 0
+                };
+              });
+              d.total = d.sources[d.sources.length - 1].y1;
+
+            });
+
+            // sort totals in descending order
+            data.sort(function(a, b) {
+              return b.total - a.total;
+            });
+
+            x.domain(data.map(function(d) {
+              return d.RCLASS;
+            }));
+            y.domain([0, d3.max(data, function(d) {
+              return d.total;
+            })]);
+
+            svg3.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis)
+              .selectAll("text") //http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
+              .text(function(d, i) {
+                return d + " " + formatX(i + 1);
+              })
+              .style("fill", "#2f2f2f")
+              .style("text-anchor", "end")
+              .attr("dx", "-.8em")
+              .attr("dy", ".15em")
+              .attr("transform", "rotate(-65)");
+
+            svg3.append("g")
+              .attr("class", "y axis")
+              .call(yAxis)
+              .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end");
+            //.text("Population");
+
+            svg3.append("g")
+              .attr("class", "grid")
+              .call(make_y_axis()
+                .tickSize(-width, 0, 0)
+                .tickFormat("")
+              )
+
+            // country nodes
+            var state = svg3.selectAll(".state")
+              .data(data)
+              .enter().append("g")
+              .attr("class", function(d) {
+                // tag g node of stacked bars with country name
+                return "g Country";
+              })
+              .attr("id", function(d) {
+                return "id_" + d.RCLASS.replace(/\s/g, '');
               });
 
-              // sort totals in descending order
-              data.sort(function(a, b) { return b.total - a.total; });
+            // country rects  
+            height_diff = 0;
+            state.selectAll("rect")
+              .data(function(d) {
+                return d.sources;
+              })
+              .enter().append("rect")
+              .attr("width", x.rangeBand())
+              .attr("y", function(d) {
+                h_orig = y(d.y0) - y(d.y1); //based on stacked values (inaccurate)
+                h_correct = y(0) - y(d.value); //based on data value in csv file
+                height_diff = height_diff + h_orig - h_correct;
 
-              x.domain(data.map(function(d) { return d.RCLASS; }));
-              y.domain([0, d3.max(data, function(d) { return d.total; })]);              
+                //correct y-coord
+                ycoord_corrected = y(d.y1) + height_diff;
+                d.ycoord_corrected = ycoord_corrected //store in d for later use in restorePlot()
 
-              svg3.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis)
-                .selectAll("text") //http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
-                .text(function(d, i) {                  
-                  return d + " " + formatX(i + 1);
-                })
-                .style("fill", "#2f2f2f")
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-65)");
+                if (d.name === "Cement") height_diff = 0; //reset for next set of stacked bars
 
-              svg3.append("g")
-                .attr("class", "y axis")
-                .call(yAxis)
-                .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")                
-                .style("text-anchor", "end");
-              //.text("Population");
+                return ycoord_corrected;
 
-              svg3.append("g")
-                .attr("class", "grid")
-                .call(make_y_axis()
-                  .tickSize(-width, 0, 0)
-                  .tickFormat("")
-                )            
-              
-              // country nodes
-              var state = svg3.selectAll(".state")
-                .data(data)
-                .enter().append("g")
-                .attr("class", function (d) {
-                  // tag g node of stacked bars with country name
-                  return "g Country";
-                })
-                .attr("id", function (d) {
-                  return "id_" + d.RCLASS.replace(/\s/g, '');
-                });              
+              })
+              .attr("x", function(d) { //add to stock code
+                return x(d.country)
+              })
+              .attr("height", function(d) {
+                return y(0) - y(d.value); //heights calculated based on data value (accurate)
+              })
+              .attr("class", function(d) {
+                classLabel = d.name.replace(/\s/g, ''); //remove spaces
+                return "bars class" + classLabel;
+              })
+              .style("fill", function(d) {
+                //console.log("color(d.name): ", d.name)
+                return color(d.name);
+              });
 
-              // country rects  
-              height_diff = 0;
-              state.selectAll("rect")
-                .data(function(d) {
-                  return d.sources;
-                })
-                .enter().append("rect")
-                .attr("width", x.rangeBand())
-                .attr("y", function(d) {
-                  h_orig = y(d.y0) - y(d.y1); //based on stacked values (inaccurate)
-                  h_correct = y(0) - y(d.value); //based on data value in csv file
-                  height_diff = height_diff + h_orig - h_correct;
+            // country rects event handlers
+            state.selectAll("rect")
+              .on("mouseenter", function(d) {
+                d3.select(this).style("cursor", "pointer");
 
-                  //correct y-coord
-                  ycoord_corrected = y(d.y1) + height_diff;
-                  d.ycoord_corrected = ycoord_corrected //store in d for later use in restorePlot()
+                active_bar = d3.select(this).classed("active_bar", true);
+                active_bar.attr("stroke", "#000")
+                  .attr("stroke-width", 2.5);
 
-                  if (d.name === "Cement") height_diff = 0; //reset for next set of stacked bars
+                // toggle active state of stacked bar to outline/de-outline it
+                // if (active_bar.node() === this) return reset_bar();
+                // active_bar.classed("active_bar", false);
 
-                  return ycoord_corrected;                 
+                if (d3.select(this).style("opacity") != 0) {
+                  var xPos = parseFloat(d3.select(this).attr("x"));
+                  var yPos = parseFloat(d3.select(this).attr("y"));
+                  var height = parseFloat(d3.select(this).attr("height"))
 
-                })
-                .attr("x", function(d) { //add to stock code
-                  return x(d.country)
-                })
-                .attr("height", function(d) {
-                  return y(0) - y(d.value); //heights calculated based on data value (accurate)
-                })
-                .attr("class", function(d) {
-                  classLabel = d.name.replace(/\s/g, ''); //remove spaces
-                  return "bars class" + classLabel;
-                })
-                .style("fill", function(d) {                  
-                  return color(d.name);
-                });
-
-              // country rects event handlers
-              state.selectAll("rect")
-                .on("mouseenter", function(d) {
-                  
-                  if (d3.select(this).style("opacity") != 0) {
-                    var xPos = parseFloat(d3.select(this).attr("x"));
-                    var yPos = parseFloat(d3.select(this).attr("y"));
-                    var height = parseFloat(d3.select(this).attr("height"))
-
-                    format = d3.format("5.1f");
-                    div.transition().style("opacity", .9);
-                    div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) + 
+                  format = d3.format("5.1f");
+                  div.transition().style("opacity", .9);
+                  div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) +
                       " " + units + "</b>")
-                      .style("left", (d3.event.pageX + 20) + "px")
-                      .style("top", (d3.event.pageY - 20) + "px");
-                  }
-                })
-                .on("mouseout", function() {
-                  div.transition().style("opacity", 0);
-                })
-                .on("click", function(d) { //highlight corresponding region in map
-                  // toggle active state
-                  if (active_bar.node() === this) return reset_bar();
-                  active_bar.classed("active_bar", false);
-                    
-                  // clear any previously clicked bar/map region
-                  active_bar.attr("stroke", null);
-                  active_bar = d3.select(this).classed("active_bar", true);
-                  d3.selectAll('.feature.active').classed("active", false)
-
-                  // highlight bar with black outline
-                  d3.select(this)
-                    .attr("stroke", "#000")
-                    .attr("stroke-width", 2.5);
-                    
-                  // highlight corresponding areas on map
-                  var full_class = active_bar.attr("class"),
-                      extract_class = marcats_dict[full_class.split("bars class").pop().split(" ", 1)[0]],
-                      class_to_match = ".marcat-" + extract_class;
-                                   
-                  d3.selectAll(class_to_match).classed("active", true);
-                                           
-                 
-                }); //end on.click
-
-                function reset_bar() {
-                  active_bar.classed("active_bar", false);
-                  active_bar.attr("stroke", null)
-
-                  active_bar = d3.select(null);
-
-                  // clear any previously clicked map region                  
-                  d3.selectAll('.feature.active').classed("active", false)
+                    .style("left", (d3.event.pageX + 20) + "px")
+                    .style("top", (d3.event.pageY - 20) + "px");
                 }
 
-            }); //d3.tsv(histfile)
+                // highlight corresponding areas on map
+                var this_class = d3.select(this).attr("class");
+                class_to_match = get_mapClass(this_class);
+                fill_orig = d3.select(class_to_match).style("fill");
+                d3.selectAll(class_to_match)
+                  .classed("active", true)
+                  .style("fill", "orange");
+
+              })
+              .on("mouseout", function() {
+                var this_barRegion = marcats_dict[d3.select(this).attr("class").split(/\s+/)[1].split("class").pop()];
+
+                // remove outline on stacked bar if not clicked
+                if (this_barRegion != zoomRegion) reset_bar();
+
+                d3.select(this).style("cursor", "auto");
+
+                // remove tooltip display
+                div.transition().style("opacity", 0);
+
+                // restore map region to orig colour
+                d3.selectAll(class_to_match)
+                  .classed("active", true)
+                  .style("fill", fill_orig);
+
+              })
+              .on("click", function(d) {
+                // zoom corresponding map region
+                zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
+                plotMap();
+
+                // clear any previously clicked stacked bar                
+                d3.selectAll(".active_bar")
+                  .classed("active_bar", false)
+                  .attr("stroke", null);
+
+                // outline clicked stacked bar
+                active_bar = d3.select(this).classed("active_bar", true);
+                active_bar.attr("stroke", "#000")
+                  .attr("stroke-width", 2.5);
+
+                
+              });
+
+            function reset_bar() {
+              active_bar.classed("active_bar", false)
+                        .attr("stroke", null);
+
+              active_bar = d3.select(null);
+
+              // // clear any previously clicked map region
+              // d3.selectAll('.feature.active')
+              //   .classed("active", false)
+              //   .style("fill", store_fill);
+            }
+
+            function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
+              var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
+                class_to_match = ".marcat-" + extract_class;
+              return class_to_match;
+            }
+
+          }); //d3.tsv(histfile)
 
           //===================================================
           //MAP
 
-          // append the mapdiv to <p id="chart">
-          var m_width = 960, 
+          // Read in flux values per unit area
+          // ======================================
+
+          d3.tsv("orca05_absAnthroUnitArea.tsv", function(error, unitdata) {
+              if (error) throw error;
+
+              // Create an array to store unit flux values, indexed by MARCATS_ID
+              var unit_dict = new Array();
+              unit_dict[0] = -999; //there is no MARCAT_ID = 0
+
+              // Store min and max unit flux values for map colourbar
+              var minflux = 99999,
+                maxflux = -99999;
+              unitdata.forEach(function(d) {
+                d.abs_anthro = +d.abs_anthro; //set to num
+                d.MARCATS_ID = +d.MARCATS_ID;
+                minflux = d.abs_anthro < minflux ? d.abs_anthro : minflux;
+                maxflux = d.abs_anthro > maxflux ? d.abs_anthro : maxflux;
+
+                unit_dict[d.MARCATS_ID] = d.abs_anthro;
+
+              });
+
+              var map_colourbar = d3.scale.ordinal()
+                .domain([minflux, maxflux])
+                .range(colorbrewer.Greys[5]);
+
+              plotMap(unit_dict, map_colourbar);
+
+            }) //end d3.tsv
+
+          function plotMap(unit_dict, map_colourbar) {
+
+            // append the mapdiv to <p id="chart">
+            var m_width = 960,
               m_height = 700,
               outline = d3.select(null);
-              //active = d3.select(null);
+            //active = d3.select(null);
 
-          var projection = d3.geo.mercator()
+            var projection = d3.geo.mercator()
               .translate([m_width / 2, m_height / 1.5]);
 
-          var path = d3.geo.path().projection(projection);
-          var t = projection.translate(); // the projection's default translation
-          var s = projection.scale(110) // the projection's default scale        
+            var path = d3.geo.path().projection(projection);
+            var t = projection.translate(); // the projection's default translation
+            var s = projection.scale(110) // the projection's default scale        
 
-          var path = d3.geo.path()
-              .projection(projection);          
+            var path = d3.geo.path()
+              .projection(projection);
 
-          var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
-              .append("svg")
-              .attr("width", m_width + margin.left + margin.right)
-              .attr("height", m_height + margin.top + margin.bottom);
-              //.append("g")
-              //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");    
+            // var zoom = d3.behavior.zoom()
+            //   .on("zoom", zoomed);
+            // svg4
+            //   .call(zoom); // delete this line to disable free zooming
 
-          svg4.append("rect")
-              .attr("class", "background")
-              .attr("width", m_width)
-              .attr("height", m_height)
-              //.on("click", reset);
+            //http://stackoverflow.com/questions/34556761/fixing-zoom-jump-when-scaling-map
+            //world map with zoom and pan: https://bl.ocks.org/d3noob/5189284
 
-          var g = svg4.append("g")
-              .style("stroke-width", "1.5px");
+            // reset map button
+            d3.select("#resetMap")
+              .on("click", function() {
+                return resetMap();
+              });
 
-          var zoom = d3.behavior.zoom()
-              .on("zoom", zoomed);    
+            d3.json("refs/" + mapfile, function(error, us) {
+              if (error) throw error;
 
-          svg4
-              .call(zoom); // delete this line to disable free zooming
+              if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
-          // reset map button
-          d3.select("#resetMap")
-            .on("click", function() { return reset(); });           
+                var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
+                  .append("svg")
+                  .attr("width", m_width + margin.left + margin.right)
+                  .attr("height", m_height + margin.top + margin.bottom);
 
-          d3.json("refs/" + mapfile, function(error, us) {          
-            if (error) throw error;          
+                svg4.append("rect")
+                  .attr("class", "background")
+                  .attr("width", m_width)
+                  .attr("height", m_height)
+                  //.on("click", reset);
 
-            g.selectAll("path")                
-                .data(topojson.feature(us, us.objects.Continental_Shelf).features)
-              .enter().append("path")
-                .attr("d", path)
-                //.attr("class", "feature")
-                .attr("class", function (d) {                  
-                  //return "feature" + " marcat-" + d.properties.name;
-                  return "feature" + " marcat-" + d.properties.MARCATS;
-                })
-                .on("click", clicked);
+                //var g = svg.append("g")
+                globalg = svg4.append("g")
+                  .style("stroke-width", "1.5px");
 
-            g.append("path")
-                //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-                .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) { return a !== b; }))
-                .attr("class", "mesh")
-                .attr("d", path);          
-          }); //end d3.json
+                globalg.selectAll("path")
+                  .data(topojson.feature(us, us.objects.Continental_Shelf).features)
+                  .enter().append("path")
+                  .attr("d", path)
+                  .attr("class", function(d) {
+                    return "feature" + " marcat-" + d.properties.MARCATS;
+                  })
+                  .style("fill", function(d) {
+                    var unit_flux = unit_dict[d.properties.MARCATS];
+                    return map_colourbar(unit_flux);
+                  })
+                  .attr("id", function(d) {
+                    return "id-" + d.properties.COSCAT;
+                  });
+                //.on("click", clicked);
+
+                globalg.append("path")
+                  .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) {
+                    return a !== b;
+                  }))
+                  .attr("class", "mesh")
+                  .attr("d", path);
+
+              } else { //zoom region corresponding to clicked stacked bar                
+
+                globalg.selectAll("path")
+                  // .data(topojson.feature(us, us.objects.Continental_Shelf).features)
+                  // .enter().append("path")
+                  // .attr("d", path)
+                  .filter(function(d) {
+
+                    if (d.properties && d.properties.MARCATS === zoomRegion) {
+                      getBounds(path, d, m_width, m_height);
+                    }
+
+                  });
+              }
+
+
+            }); //end d3.json
+
+          } //end fn plotMap()
 
           //=================
           // Fns for map
-          function clicked(d) {
-            if (outline.node() === this) return reset();
-            outline.classed("outline", false);
-            outline = d3.select(this).classed("outline", true);
+          function getBounds(path, d, m_width, m_height) {
 
             var bounds = path.bounds(d),
-                dx = bounds[1][0] - bounds[0][0],
-                dy = bounds[1][1] - bounds[0][1],
-                x = (bounds[0][0] + bounds[1][0]) / 2,
-                y = (bounds[0][1] + bounds[1][1]) / 2,
-                scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
-                translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
+              dx = bounds[1][0] - bounds[0][0],
+              dy = bounds[1][1] - bounds[0][1],
+              x = (bounds[0][0] + bounds[1][0]) / 2,
+              y = (bounds[0][1] + bounds[1][1]) / 2,
+              scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
+              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
-            g.transition()
-                .duration(750)
-                .style("stroke-width", 1.5 / scale + "px")
-                .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+            globalg.transition()
+              .duration(750)
+              .style("stroke-width", 1.5 / scale + "px")
+              .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+
           }
 
-          function reset() {            
-            outline.classed("outline", false);
-            outline = d3.select(null);
+          // function clicked(d) {
+          //   if (outline.node() === this) return reset();
+          //   outline.classed("outline", false);
+          //   outline = d3.select(this).classed("outline", true);
 
-            g.transition()
-                .duration(750)
-                .style("stroke-width", "1.5px")
-                .attr("transform", "");
-          }
+          //   var bounds = path.bounds(d),
+          //     dx = bounds[1][0] - bounds[0][0],
+          //     dy = bounds[1][1] - bounds[0][1],
+          //     x = (bounds[0][0] + bounds[1][0]) / 2,
+          //     y = (bounds[0][1] + bounds[1][1]) / 2,
+          //     scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
+          //     translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
-          function zoomed() { //for panning. NOT WORKING PROPERLY
-            // //http://bl.ocks.org/biovisualize/2322933
-            // // d3.event.translate (an array) stores the current translation from the parent SVG element
-            // // t (an array) stores the projection's default translation
-            // // we add the x and y vales in each array to determine the projection's new translation
-            // var tx = t[0] * d3.event.scale + d3.event.translate[0];
-            // var ty = t[1] * d3.event.scale + d3.event.translate[1];
+          //   g.transition()
+          //     .duration(750)
+          //     .style("stroke-width", 1.5 / scale + "px")
+          //     .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+          // }
+
+          function resetMap() {
+            // outline.classed("outline", false);
+            // outline = d3.select(null);
+
+            globalg.transition()
+              .duration(750)
+              .style("stroke-width", "1.5px")
+              .attr("transform", "");
             
-            // projection.translate([tx, ty]);
-
-            // // now we determine the projection's new scale, but there's a problem:
-            // // the map doesn't 'zoom onto the mouse point'
-            // projection.scale(s * d3.event.scale);
-   
-            // // redraw the map
-            // svg4.selectAll("path").attr("d", path);
+            // clear outline of clicked stacked bar
+            active_bar.classed("active_bar", false)
+                      .attr("stroke", null);
+            active_bar = d3.select(null);
           }
 
 
+        } //end plotHistogram()
+      </script>
 
+      <p style='width: 1000px;'>
+        <ul<i><b>Sources:</b> <br> - <a href='http://www.globalcarbonproject.org' target="_blank">Global Carbon Project</a> (with data from <a href='http://www.globalcarbonatlas.org' target="_blank">Global Carbon Atlas</a>) <br> - <a href='http://cdiac.ornl.gov' target="_blank">Carbon Dioxide Information Analysis Center (CDIAC) </a>
 
+          </ul>
 
-          } //end plotHistogram()
-
-        </script>
-
-        <p style='width: 1000px;'>
-          <ul<i><b>Sources:</b> <br> - <a href='http://www.globalcarbonproject.org' target="_blank">Global Carbon Project</a> (with data from <a href='http://www.globalcarbonatlas.org' target="_blank">Global Carbon Atlas</a>) <br> - <a href='http://cdiac.ornl.gov' target="_blank">Carbon Dioxide Information Analysis Center (CDIAC) </a>
-
-            </ul>
-
-            </i>
-        </p>
+          </i>
+      </p>
 
 
     </div>
