@@ -783,9 +783,10 @@
 
               })
               .on("mouseout", function() {
+                var this_barRegion = marcats_dict[d3.select(this).attr("class").split(/\s+/)[1].split("class").pop()];
 
-                // remove outline on stacked bar
-                reset_bar();
+                // remove outline on stacked bar if not clicked
+                if (this_barRegion != zoomRegion) reset_bar();
 
                 d3.select(this).style("cursor", "auto");
 
@@ -801,6 +802,12 @@
               .on("click", function(d) {
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
                 plotMap();
+
+                active_bar = d3.select(this).classed("active_bar", true);
+                active_bar.attr("stroke", "#000")
+                  .attr("stroke-width", 2.5);
+
+                
               });
 
             function reset_bar() {
@@ -886,7 +893,7 @@
             // reset map button
             d3.select("#resetMap")
               .on("click", function() {
-                return reset();
+                return resetMap();
               });
 
             d3.json("refs/" + mapfile, function(error, us) {
@@ -990,7 +997,7 @@
           //     .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
           // }
 
-          function reset() {
+          function resetMap() {
             // outline.classed("outline", false);
             // outline = d3.select(null);
 
@@ -998,6 +1005,10 @@
               .duration(750)
               .style("stroke-width", "1.5px")
               .attr("transform", "");
+            
+            active_bar.classed("active_bar", false)
+                      .attr("stroke", null);
+            active_bar = d3.select(null);
           }
 
 
