@@ -591,6 +591,8 @@
           var active_bar = d3.select(null);
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
+          var zoomRegion = -999; //global var for region to zoom
+          var pathbds = []; //global var for path bounds of zoomRegion
 
           var xAxis = d3.svg.axis()
             .scale(x)
@@ -810,10 +812,10 @@
                 // // highlight stacked bar with black outline
                 // d3.select(this)
                 //   .attr("stroke", "#000")
-                //   .attr("stroke-width", 2.5);
+                //   .attr("stroke-width", 2.5);              
 
                 // zoom on corresponding map region
-                zoomMap(d);  
+                zoomMap(d);
 
                 // // highlight corresponding areas on map
                 // var full_class = active_bar.attr("class"),
@@ -847,48 +849,49 @@
 
             function zoomMap(d) {
               //understand paths: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
-              console.log("zoomMap!", mapfile)
-              console.log("d: ", d)
-              zoomRegion = ".feature.marcat-" + marcats_dict[d.name.replace(/\s/g, '')];
+              console.log("zoomMap!", mapfile)              
+              //zoomRegion = ".feature.marcat-" + marcats_dict[d.name.replace(/\s/g, '')];
+              zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
               console.log("zoomRegion: ", zoomRegion)
-              console.log("select zoomRegion: ", d3.select(zoomRegion).attr("d"))
+              plotMap()
+
+       
               //console.log("select zoomRegion node: ", d3.select(zoomRegion).node().pathSegList)
               //for testing only
               //pathbd = [[499.4111190372814, 499.416300216679], [515.5090847123912, 534.8147049464937]];
-              pathbd = [[507.2601718846518, 510.0505457968844], [519.1002322576041, 542.2660768999947]];
               
-              var pathSegList = d3.select(zoomRegion).node().pathSegList;
-              for (var i = 0; i < pathSegList.length; i++) {
-                console.log(pathSegList[i]);
-              }
+              // var pathSegList = d3.select(zoomRegion).node().pathSegList;
+              // for (var i = 0; i < pathSegList.length; i++) {
+              //   console.log(pathSegList[i]);
+              // }
 
-              //http://stackoverflow.com/questions/25384052/convert-svg-path-d-attribute-to-a-array-of-points
-              str = d3.select(zoomRegion).attr("d");
-              var commands = str.split(/(?=[LMC])/);              
-              var pointArrays = commands.map(function(d){
-                  var pointsArray = d.slice(1, d.length).split(',');
-                  var pairsArray = [];
-                  for(var i = 0; i < pointsArray.length; i += 2){
-                      pairsArray.push([+pointsArray[i], +pointsArray[i+1]]);
-                  }
-                  return pairsArray;
-              });
-              console.log("pointArrays: ", pointArrays)
+              // //http://stackoverflow.com/questions/25384052/convert-svg-path-d-attribute-to-a-array-of-points
+              // str = d3.select(zoomRegion).attr("d");
+              // var commands = str.split(/(?=[LMC])/);              
+              // var pointArrays = commands.map(function(d){
+              //     var pointsArray = d.slice(1, d.length).split(',');
+              //     var pairsArray = [];
+              //     for(var i = 0; i < pointsArray.length; i += 2){
+              //         pairsArray.push([+pointsArray[i], +pointsArray[i+1]]);
+              //     }
+              //     return pairsArray;
+              // });
+              // console.log("pointArrays: ", pointArrays)
 
-              var bounds = pathbd,
-              dx = bounds[1][0] - bounds[0][0],
-              dy = bounds[1][1] - bounds[0][1],
-              x = (bounds[0][0] + bounds[1][0]) / 2,
-              y = (bounds[0][1] + bounds[1][1]) / 2,
-              scale = .9 / Math.max(dx / width, dy / height),
-              translate = [width / 2 - scale * x, height / 2 - scale * y];
+              // var bounds = pathbd,
+              // dx = bounds[1][0] - bounds[0][0],
+              // dy = bounds[1][1] - bounds[0][1],
+              // x = (bounds[0][0] + bounds[1][0]) / 2,
+              // y = (bounds[0][1] + bounds[1][1]) / 2,
+              // scale = .9 / Math.max(dx / width, dy / height),
+              // translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-              console.log("bounds: ", bounds)
+              // console.log("bounds: ", bounds)
 
-              globalg.transition()
-                  .duration(750)
-                  .style("stroke-width", 1.5 / scale + "px")
-                  .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+              // globalg.transition()
+              //     .duration(750)
+              //     .style("stroke-width", 1.5 / scale + "px")
+              //     .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 
             }
 
@@ -909,7 +912,7 @@
 
               // Store min and max unit flux values for map colourbar
               var minflux = 99999,
-                maxflux = -99999;
+                  maxflux = -99999;
               unitdata.forEach(function(d) {
                 d.abs_anthro = +d.abs_anthro; //set to num
                 d.MARCATS_ID = +d.MARCATS_ID;
@@ -946,28 +949,12 @@
             var path = d3.geo.path()
               .projection(projection);
 
-            var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
-              .append("svg")
-              .attr("width", m_width + margin.left + margin.right)
-              .attr("height", m_height + margin.top + margin.bottom);
-            //.append("g")
-            //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");    
+            
 
-            svg4.append("rect")
-              .attr("class", "background")
-              .attr("width", m_width)
-              .attr("height", m_height)
-              //.on("click", reset);
-
-            //var g = svg.append("g")
-            globalg = svg4.append("g")
-              .style("stroke-width", "1.5px");
-
-            var pathbds = [];  
+            
 
             // var zoom = d3.behavior.zoom()
             //   .on("zoom", zoomed);
-
             // svg4
             //   .call(zoom); // delete this line to disable free zooming
 
@@ -983,38 +970,73 @@
             d3.json("refs/" + mapfile, function(error, us) {
               if (error) throw error;
 
+            if (zoomRegion === -999) {
+
+                var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
+                .append("svg")
+                .attr("width", m_width + margin.left + margin.right)
+                .attr("height", m_height + margin.top + margin.bottom);
+              //.append("g")
+              //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");    
+
+              svg4.append("rect")
+                .attr("class", "background")
+                .attr("width", m_width)
+                .attr("height", m_height)
+                //.on("click", reset);
+
+              //var g = svg.append("g")
+              globalg = svg4.append("g")
+                .style("stroke-width", "1.5px");
+
               globalg.selectAll("path")
                 .data(topojson.feature(us, us.objects.Continental_Shelf).features)
                 .enter().append("path")
-                .attr("d", path)
-                //.attr("class", "feature")
-                .attr("class", function(d) {                  
-                  //return "feature" + " marcat-" + d.properties.MARCATS;
+                .attr("d", path)                
+                .attr("class", function(d) {                                    
                   return "feature" + " marcat-" + d.properties.MARCATS;
                 })
                 .style("fill", function(d) {
                   var unit_flux = unit_dict[d.properties.MARCATS];
                   return map_colourbar(unit_flux);
                 })
-                .attr("id", function (d) { return d.properties.COSCAT; })
-                .filter(function(d, i) {                  
-                  pathbds[i] = getBounds(path, d, m_width, m_height);
-                  //console.log("pathbds: ", pathbds)
-                  return pathbds;
-                });
+                .attr("id", function (d) { return "id-" + d.properties.COSCAT; });
               //.on("click", clicked);
 
-              // var testbd = getBounds(d);
-              console.log("pathbds: ", pathbds)
-
-
-              globalg.append("path")
-                //.datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+              globalg.append("path")                
                 .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) {
                   return a !== b;
                 }))
                 .attr("class", "mesh")
                 .attr("d", path);
+
+           } else { //get path bds of region corresponding to clicked stacked bar
+             console.log("select globalg: ", globalg.selectAll("path.feature.marcat-" + zoomRegion))
+
+              globalg.selectAll("path")
+                // .data(topojson.feature(us, us.objects.Continental_Shelf).features)
+                // .enter().append("path")
+                // .attr("d", path)
+                .filter(function(d) {
+                  console.log("d in filter: ", d)
+                 
+                  if (d.properties && d.properties.MARCATS === zoomRegion) {
+                    getBounds(path, d, m_width, m_height);
+                  }
+
+                });
+
+                
+
+            }
+              
+              
+              //console.log("pathbds[0]: ", pathbds[0])     //scale         
+              // console.log("pathbds[1][0]: ", pathbds[1][0]) //translate x
+              // console.log("pathbds[1][1]: ", pathbds[1][1]) //translate y
+
+
+              
             }); //end d3.json
 
            
@@ -1025,7 +1047,7 @@
           //=================
           // Fns for map
           function getBounds(path, d, m_width, m_height) {
-            console.log("getBounds")
+            console.log("getBounds d: ", d)
 
             var bounds = path.bounds(d),
               dx = bounds[1][0] - bounds[0][0],
@@ -1035,7 +1057,14 @@
               scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
               translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
-            return [dx, dy];
+              console.log("scale in getBounds: ", scale)
+              console.log("translate in getBounds: ", translate)
+
+              globalg.transition()
+              .duration(750)
+              .style("stroke-width", 1.5 / scale + "px")
+              .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+      
           }
 
           function clicked(d) {

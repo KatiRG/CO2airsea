@@ -116,6 +116,7 @@ d3.json("refs/Continental_Shelf_mapshaper_1pc_marcatsid.topojson", function(erro
 
 function clicked(d) {
   console.log("this:", this)
+  console.log("d: ", d)
   console.log("active.node():", active.node())
 
   if (active.node() === this) return reset();
