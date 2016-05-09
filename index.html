@@ -990,15 +990,15 @@
           //     .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
           // }
 
-          // function reset() {
-          //   outline.classed("outline", false);
-          //   outline = d3.select(null);
+          function reset() {
+            // outline.classed("outline", false);
+            // outline = d3.select(null);
 
-          //   g.transition()
-          //     .duration(750)
-          //     .style("stroke-width", "1.5px")
-          //     .attr("transform", "");
-          // }
+            globalg.transition()
+              .duration(750)
+              .style("stroke-width", "1.5px")
+              .attr("transform", "");
+          }
 
 
         } //end plotHistogram()
