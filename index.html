@@ -800,9 +800,16 @@
 
               })
               .on("click", function(d) {
+                // zoom corresponding map region
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
                 plotMap();
 
+                // clear any previously clicked stacked bar                
+                d3.selectAll(".active_bar")
+                  .classed("active_bar", false)
+                  .attr("stroke", null);
+
+                // outline clicked stacked bar
                 active_bar = d3.select(this).classed("active_bar", true);
                 active_bar.attr("stroke", "#000")
                   .attr("stroke-width", 2.5);
@@ -811,8 +818,8 @@
               });
 
             function reset_bar() {
-              active_bar.classed("active_bar", false);
-              active_bar.attr("stroke", null)
+              active_bar.classed("active_bar", false)
+                        .attr("stroke", null);
 
               active_bar = d3.select(null);
 
@@ -1006,6 +1013,7 @@
               .style("stroke-width", "1.5px")
               .attr("transform", "");
             
+            // clear outline of clicked stacked bar
             active_bar.classed("active_bar", false)
                       .attr("stroke", null);
             active_bar = d3.select(null);
