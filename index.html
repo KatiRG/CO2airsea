@@ -740,8 +740,11 @@
                 return y(0) - y(d.value); //heights calculated based on data value (accurate)
               })
               .attr("class", function(d) {
+                if (d.value != 0) {
                 classLabel = d.name.replace(/\s/g, ''); //remove spaces
-                return "bars class" + classLabel;
+                areaFlux = d.value;
+                return "bars class" + classLabel + " areaflux-" + areaFlux;
+              }
               })
               .style("fill", function(d) {
                 //console.log("color(d.name): ", d.name)
@@ -967,22 +970,22 @@
                       var unitflux = d3.select(this).attr("class")
                                        .split(/\s+/)[2].split("unitflux-").pop();
 
+                      var areaflux = d3.select(".class" + marcats_string)
+                                       .attr("class")
+                                       .split(/\s+/)[2]
+                                       .split("areaflux-").pop();
+
                       var xPos = parseFloat(d3.select(this).attr("x"));
                       var yPos = parseFloat(d3.select(this).attr("y"));
                       var height = parseFloat(d3.select(this).attr("height"))
 
                       format = d3.format("5.1f");
                       div.transition().style("opacity", .9);
-                      div.html(marcats_string 
-                               + "<br><b>" + " " + format(unitflux) + " " + units_unitArea)
+                      div.html(marcats_string + ": " + "<br><b>"
+                               + format(areaflux) + " " + units + "</b>" + "<br>"
+                               + format(unitflux) + " " + units_unitArea)
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
-
-                    //   div.html(d.country + ": " + d.name + "<br><b>" 
-                    //            + format(d.value) + " " + units + "</b>"
-                    //            + "<br>" + format(unitflux) + " " + units_unitArea)
-                    //     .style("left", (d3.event.pageX + 20) + "px")
-                    //     .style("top", (d3.event.pageY - 20) + "px");
                     }
                   });
                 //.on("click", clicked);
