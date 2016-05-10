@@ -767,7 +767,7 @@
 
                   format = d3.format("5.1f");
                   div.transition().style("opacity", .9);
-                  div.html(d.country + " / " + d.name + "<br><b>" + format(d.value) +
+                  div.html(d.country + ": " + d.name + "<br><b>" + format(d.value) +
                       " " + units + "</b>")
                     .style("left", (d3.event.pageX + 20) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
@@ -785,7 +785,7 @@
               .on("mouseout", function() {
                 var this_barRegion = marcats_dict[d3.select(this).attr("class").split(/\s+/)[1].split("class").pop()];
 
-                // remove outline on stacked bar if not clicked
+                // remove outline on stacked bar if not clicked                
                 if (this_barRegion != zoomRegion) reset_bar();
 
                 d3.select(this).style("cursor", "auto");
@@ -830,7 +830,8 @@
             }
 
             function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
-              var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
+              //var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
+              var extract_class = marcats_dict[this_class.split(/\s+/)[1].split("class").pop()],
                 class_to_match = ".marcat-" + extract_class;
               return class_to_match;
             }
@@ -928,7 +929,10 @@
                   .enter().append("path")
                   .attr("d", path)
                   .attr("class", function(d) {
-                    return "feature" + " marcat-" + d.properties.MARCATS;
+                    // add abs anthro unit flux to class so stacked bar can get value
+                    return "feature"
+                           + " marcat-" + d.properties.MARCATS
+                           + " unitflux-" + unit_dict[d.properties.MARCATS];
                   })
                   .style("fill", function(d) {
                     var unit_flux = unit_dict[d.properties.MARCATS];
@@ -1014,9 +1018,11 @@
               .attr("transform", "");
             
             // clear outline of clicked stacked bar
-            active_bar.classed("active_bar", false)
-                      .attr("stroke", null);
-            active_bar = d3.select(null);
+            console.log("active_bar: ", d3.selectAll(".active_bar"))
+            d3.selectAll(".active_bar")
+              .classed("active_bar", false)
+              .attr("stroke", null);
+
           }
 
 
