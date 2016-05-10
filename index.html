@@ -781,8 +781,7 @@
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
 
-                // highlight corresponding areas on map
-                
+                // highlight corresponding areas on map                
                 fill_orig = d3.select(class_to_match).style("fill");
                 d3.selectAll(class_to_match)
                   .classed("active", true)
@@ -947,6 +946,37 @@
                   })
                   .attr("id", function(d) {
                     return "id-" + d.properties.COSCAT;
+                  })
+                  .on("mouseenter", function (d) {                
+
+                    //outline region
+                    //if (outline.node() === this) return resetMap();
+                    outline.classed("outline", false);
+                    outline = d3.select(this).classed("outline", true);
+     
+
+                    // tooltip
+                    var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
+                    if (d3.select(this).style("opacity") != 0) {
+                    //   var unitflux = d3.select(class_to_match).attr("class")
+                    //                    .split(/\s+/)[2].split("unitflux-").pop();
+
+                      var xPos = parseFloat(d3.select(this).attr("x"));
+                      var yPos = parseFloat(d3.select(this).attr("y"));
+                      var height = parseFloat(d3.select(this).attr("height"))
+
+                      format = d3.format("5.1f");
+                      div.transition().style("opacity", .9);
+                      div.html(marcats_string)
+                         .style("left", (d3.event.pageX + 20) + "px")
+                         .style("top", (d3.event.pageY - 20) + "px");
+
+                    //   div.html(d.country + ": " + d.name + "<br><b>" 
+                    //            + format(d.value) + " " + units + "</b>"
+                    //            + "<br>" + format(unitflux) + " " + units_unitArea)
+                    //     .style("left", (d3.event.pageX + 20) + "px")
+                    //     .style("top", (d3.event.pageY - 20) + "px");
+                    }
                   });
                 //.on("click", clicked);
 
@@ -974,6 +1004,15 @@
 
 
             }); //end d3.json
+
+            // use to get reverse of marcats_dict dictionary
+            function getKeyByValue(hash, value) {
+              var key;
+              for(key in hash) {
+                if (hash[key] == value) return key;
+              }
+            }
+
 
           } //end fn plotMap()
 
@@ -1016,8 +1055,9 @@
           // }
 
           function resetMap() {
-            // outline.classed("outline", false);
-            // outline = d3.select(null);
+            console.log("outline.node(): ", outline.node())
+            outline.classed("outline", false);
+            outline = d3.select(null);
 
             globalg.transition()
               .duration(750)
