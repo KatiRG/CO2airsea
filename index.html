@@ -103,7 +103,8 @@
         var formatX = d3.format("02d"); //for numbering countries in sort col and histogram x-axes
         var col_xcoord = []; //x-coords of Sankey cols to avoid hard-coding value in sortButton click
 
-        var units = "Tg C yr <sup>-1</sup>";
+        var units = "Tg C yr <sup>-1</sup>",
+            units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>";
 
         Coal_color = "#3B3131";
         Oil_color = "#886666";
@@ -760,22 +761,28 @@
                 // if (active_bar.node() === this) return reset_bar();
                 // active_bar.classed("active_bar", false);
 
+                var this_class = d3.select(this).attr("class");
+                class_to_match = get_mapClass(this_class);
+
                 if (d3.select(this).style("opacity") != 0) {
+                  var unitflux = d3.select(class_to_match).attr("class")
+                                   .split(/\s+/)[2].split("unitflux-").pop();
+
                   var xPos = parseFloat(d3.select(this).attr("x"));
                   var yPos = parseFloat(d3.select(this).attr("y"));
                   var height = parseFloat(d3.select(this).attr("height"))
 
                   format = d3.format("5.1f");
                   div.transition().style("opacity", .9);
-                  div.html(d.country + ": " + d.name + "<br><b>" + format(d.value) +
-                      " " + units + "</b>")
+                  div.html(d.country + ": " + d.name + "<br><b>" 
+                           + format(d.value) + " " + units + "</b>"
+                           + "<br>" + format(unitflux) + " " + units_unitArea)
                     .style("left", (d3.event.pageX + 20) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
 
                 // highlight corresponding areas on map
-                var this_class = d3.select(this).attr("class");
-                class_to_match = get_mapClass(this_class);
+                
                 fill_orig = d3.select(class_to_match).style("fill");
                 d3.selectAll(class_to_match)
                   .classed("active", true)
@@ -1017,8 +1024,7 @@
               .style("stroke-width", "1.5px")
               .attr("transform", "");
             
-            // clear outline of clicked stacked bar
-            console.log("active_bar: ", d3.selectAll(".active_bar"))
+            // clear outline of clicked stacked bar            
             d3.selectAll(".active_bar")
               .classed("active_bar", false)
               .attr("stroke", null);
