@@ -94,7 +94,7 @@
 
   #infotext, #infotext2 {
     position: relative;
-    top: 100px;
+    top: 26px;
     left: 16px;
   }
   
@@ -170,6 +170,8 @@
 
   .feature {
     fill: #ccc;
+    stroke: #000;
+    stroke-width: 0.2;
     cursor: pointer;
   }
 
@@ -178,7 +180,8 @@
   }
 
   .feature.outline {
-    stroke: #000;
+    stroke: orange;
+    stroke-width: 1.5;
   }
 
   .mesh {
