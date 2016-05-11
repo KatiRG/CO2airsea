@@ -114,6 +114,7 @@
 
   .axis text {
      fill: #2f2f2f;
+     font-size: 12px;
   }
 
   .y.axis, .x.axis {
@@ -124,6 +125,12 @@
   .bar {
     fill: steelblue;
   }
+
+  .active_bar {
+    stroke: #000;
+    stroke-width: 2.5px;
+  }
+  
   
   .x.axis path {
     display: none;
@@ -144,7 +151,7 @@
 
   .class_chartTitle {
     position: relative;
-    left: 290px;
+    left: 200px;
     top: -745px;
     width: 500px;
 
@@ -181,7 +188,7 @@
 
   .feature.outline {
     stroke: orange;
-    stroke-width: 1.5;
+    stroke-width: 0.9;
   }
 
   .mesh {

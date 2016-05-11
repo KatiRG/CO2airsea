@@ -97,7 +97,7 @@
             .rangeRound([height, 0]);
 
           var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
             "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
             "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
@@ -159,7 +159,7 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
-          var active_bar = d3.select(null), //for mouseenter / mouseexit on stacked bar
+          var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
               clicked_bar = d3.select(null); //for clicking stacked bar
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
@@ -188,15 +188,16 @@
             .append("div")
             .attr("class", "class_chartTitle")
             .append("h4")
-            .text("Tg C yr")
-            .append('sup').text("-1");
+            .append("foreignObject")
+            .html("Anthropogenic CO2 flux [Tg C yr<sup>-1</sup>]");
+           
 
 
           var div = d3.select("body").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
 
-          // Read in datafile for stacked bar chart  
+          // Read in datafile for stacked bar chart
           // ======================================
           d3.tsv(histfile, function(error, data) {
             if (error) throw error;
@@ -248,6 +249,7 @@
               })
               .style("fill", "#2f2f2f")
               .style("text-anchor", "end")
+              //.style("font-size","12px")
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)");
@@ -255,7 +257,8 @@
             svg3.append("g")
               .attr("class", "y axis")
               .call(yAxis)
-              .append("text")
+              .append("text")              
+              .style("font-size","12px")
               .attr("transform", "rotate(-90)")
               .attr("y", 6)
               .attr("dy", ".71em")
@@ -327,9 +330,8 @@
                 d3.select(this).style("cursor", "pointer");
                 d3.select(".tooltip").style("display", "block");                
 
-                active_bar = d3.select(this).classed("active_bar", true);
-                active_bar.attr("stroke", "#000")
-                  .attr("stroke-width", 2.5);
+                // outline clicked stacked bar
+                active_bar = d3.select(this).classed("active_bar", true);  
 
                 // toggle active state of stacked bar to outline/de-outline it
                 // if (active_bar.node() === this) return reset_bar();
@@ -355,10 +357,9 @@
                 }
 
                 // highlight corresponding areas on map
-                fill_orig = d3.select(class_to_match).style("fill");
+                //fill_orig = d3.select(class_to_match).style("fill");                
                 d3.selectAll(class_to_match)
-                  .classed("active", true)
-                  .style("fill", "orange");
+                  .classed("outline", true);
 
               })
               .on("mouseout", function() {
@@ -375,14 +376,16 @@
 
                 // restore map region to orig colour
                 d3.selectAll(class_to_match)
-                  .classed("active", true)
-                  .style("fill", fill_orig);
+                  .classed("outline", false);                  
 
               })
               .on("click", function(d) {
                 d3.select(".tooltip").style("display", "block");
 
-                if (clicked_bar.node() === this) return resetMap();
+                if (clicked_bar.node() === this && d3.select(this).classed("clicked_bar") === true) {
+                  clicked_bar = d3.select(this).classed("clicked_bar", false);
+                  return resetMap();
+                }
 
                 clicked_bar = d3.select(this).classed("clicked_bar", true);
 
@@ -396,9 +399,7 @@
                   .attr("stroke", null);
 
                 // outline clicked stacked bar
-                active_bar = d3.select(this).classed("active_bar", true);
-                active_bar.attr("stroke", "#000")
-                  .attr("stroke-width", 2.5);
+                active_bar = d3.select(this).classed("active_bar", true);          
                 
               });
 
@@ -533,15 +534,26 @@
                   .on("mouseenter", function (d) {
                     d3.select(".tooltip").style("display", "block");
 
-                    //outline region
+                    //outline all map regions of same MARCATS
                     outline.classed("outline", false);
-                    outline = d3.select(this).classed("outline", true);
+                    var this_class = d3.select(this).attr("class").split(/\s+/)[1];
+                    outline = d3.selectAll("." + this_class).classed("outline", "true");
+
+                    //outline corresponding stacked bar (and handle '&'' cases)
+                    var matching_barClass = getKeyByValue(marcats_dict, 
+                                               this_class.split("marcat-").pop());
+                    if (matching_barClass === "Barents&KaraSea") 
+                      matching_barClass = "BarentsKaraSea";
+                    else if (matching_barClass === "ChinaSea&Kuroshio") 
+                      matching_barClass = "ChinaSeaKuroshio";                    
+                    d3.select(".class" + matching_barClass).classed("active_bar", true);
 
                     // tooltip
                     var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
                     // Remove & to match class label
                     if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
-                    else if ( marcats_string === "ChinaSea&Kuroshio") marcats_string = "ChinaSeaKuroshio";
+                    else if ( marcats_string === "ChinaSea&Kuroshio") 
+                      marcats_string = "ChinaSeaKuroshio";
 
                     if (d3.select(this).style("opacity") != 0) {
                       var unitflux = d3.select(this).attr("class")
@@ -558,13 +570,20 @@
 
                       // Format to un-camelCase and insert & for two regions
                       var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
-                      if (marcats_string_format === "Barents Kara Sea") marcats_string_format = "Barents & Kara Sea";
-                      else if (marcats_string_format === "China Sea Kuroshio") marcats_string_format = "China Sea & Kuroshio";
-                      else if (marcats_string_format === "Bayof Bengal") marcats_string_format = "Bay of Bengal";
-                      else if (marcats_string_format === "Gulfof Mexico") marcats_string_format = "Gulf of Mexico";
-                      else if (marcats_string_format === "Seaof Japan") marcats_string_format = "Sea of Japan";
-                      else if (marcats_string_format === "Seaof Labrador") marcats_string_format = "Sea of Labrador";
-                      else if (marcats_string_format === "Seaof Okhotsk") marcats_string_format = "Sea of Okhotsk";
+                      if (marcats_string_format === "Barents Kara Sea") 
+                        marcats_string_format = "Barents & Kara Sea";
+                      else if (marcats_string_format === "China Sea Kuroshio") 
+                        marcats_string_format = "China Sea & Kuroshio";
+                      else if (marcats_string_format === "Bayof Bengal") 
+                        marcats_string_format = "Bay of Bengal";
+                      else if (marcats_string_format === "Gulfof Mexico") 
+                        marcats_string_format = "Gulf of Mexico";
+                      else if (marcats_string_format === "Seaof Japan") 
+                        marcats_string_format = "Sea of Japan";
+                      else if (marcats_string_format === "Seaof Labrador") 
+                        marcats_string_format = "Sea of Labrador";
+                      else if (marcats_string_format === "Seaof Okhotsk") 
+                        marcats_string_format = "Sea of Okhotsk";
                       
                       div.transition().style("opacity", .9);
                       div.html(marcats_string_format + ": " + "<br><b>"
@@ -573,8 +592,16 @@
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
                     }
-                  });
-                //.on("click", clicked);
+                  })
+                  .on("mouseout", function (d) {
+                    d3.select(".tooltip").style("display", "none");
+
+                    // remove outline of map regions
+                    d3.selectAll(".outline").classed("outline", false);
+
+                    // remove outline on stackedbar
+                    d3.select(".active_bar").classed("active_bar", false);
+                  });                
 
                 globalg.append("path")
                   .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) {
