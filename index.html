@@ -159,11 +159,11 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
-          var active_bar = d3.select(null);
+          var active_bar = d3.select(null), //for mouseenter / mouseexit on stacked bar
+              clicked_bar = d3.select(null); //for clicking stacked bar
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
           var zoomRegion = -999; //global var for region to zoom
-          var pathbds = []; //global var for path bounds of zoomRegion
 
           var xAxis = d3.svg.axis()
             .scale(x)
@@ -381,6 +381,10 @@
               })
               .on("click", function(d) {
                 d3.select(".tooltip").style("display", "block");
+
+                if (clicked_bar.node() === this) return resetMap();
+
+                clicked_bar = d3.select(this).classed("clicked_bar", true);
 
                 // zoom corresponding map region
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
