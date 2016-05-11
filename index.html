@@ -765,8 +765,7 @@
                 // active_bar.classed("active_bar", false);
 
                 var this_class = d3.select(this).attr("class");
-                class_to_match = get_mapClass(this_class);
-                console.log("class_to_match: ", class_to_match)
+                class_to_match = get_mapClass(this_class);                
 
                 if (d3.select(this).style("opacity") != 0) {
                   var unitflux = d3.select(class_to_match).attr("class")
@@ -785,7 +784,7 @@
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
 
-                // highlight corresponding areas on map                
+                // highlight corresponding areas on map
                 fill_orig = d3.select(class_to_match).style("fill");
                 d3.selectAll(class_to_match)
                   .classed("active", true)
@@ -795,7 +794,7 @@
               .on("mouseout", function() {
                 var this_barRegion = marcats_dict[d3.select(this).attr("class").split(/\s+/)[1].split("class").pop()];
 
-                // remove outline on stacked bar if not clicked                
+                // remove outline on stacked bar if not clicked
                 if (this_barRegion != zoomRegion) reset_bar();
 
                 d3.select(this).style("cursor", "auto");
@@ -814,7 +813,7 @@
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
                 plotMap();
 
-                // clear any previously clicked stacked bar                
+                // clear any previously clicked stacked bar
                 d3.selectAll(".active_bar")
                   .classed("active_bar", false)
                   .attr("stroke", null);
@@ -823,7 +822,6 @@
                 active_bar = d3.select(this).classed("active_bar", true);
                 active_bar.attr("stroke", "#000")
                   .attr("stroke-width", 2.5);
-
                 
               });
 
@@ -956,18 +954,17 @@
                     return "id-" + d.properties.COSCAT;
                   })
                   .on("mouseenter", function (d) {
-                    console.log("map mouseenter")
 
-                    //outline region                    
+                    //outline region
                     outline.classed("outline", false);
                     outline = d3.select(this).classed("outline", true);
 
                     // tooltip
                     var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
+                    // Remove & to match class label
                     if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
                     else if ( marcats_string === "ChinaSea&Kuroshio") marcats_string = "ChinaSeaKuroshio";
-                    console.log("marcats_string: ", marcats_string)
-                    
+
                     if (d3.select(this).style("opacity") != 0) {
                       var unitflux = d3.select(this).attr("class")
                                        .split(/\s+/)[2].split("unitflux-").pop();
@@ -981,9 +978,19 @@
                       var yPos = parseFloat(d3.select(this).attr("y"));
                       var height = parseFloat(d3.select(this).attr("height"))
 
+                      // Format to un-camelCase and insert & for two regions
+                      var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
+                      if (marcats_string_format === "Barents Kara Sea") marcats_string_format = "Barents & Kara Sea";
+                      else if (marcats_string_format === "China Sea Kuroshio") marcats_string_format = "China Sea & Kuroshio";
+                      else if (marcats_string_format === "Bayof Bengal") marcats_string_format = "Bay of Bengal";
+                      else if (marcats_string_format === "Gulfof Mexico") marcats_string_format = "Gulf of Mexico";
+                      else if (marcats_string_format === "Seaof Japan") marcats_string_format = "Sea of Japan";
+                      else if (marcats_string_format === "Seaof Labrador") marcats_string_format = "Sea of Labrador";
+                      else if (marcats_string_format === "Seaof Okhotsk") marcats_string_format = "Sea of Okhotsk";
+
                       format = d3.format("5.1f");
                       div.transition().style("opacity", .9);
-                      div.html(marcats_string + ": " + "<br><b>"
+                      div.html(marcats_string_format + ": " + "<br><b>"
                                + format(areaflux) + " " + units + "</b>" + "<br>"
                                + format(unitflux) + " " + units_unitArea)
                          .style("left", (d3.event.pageX + 20) + "px")
@@ -1001,10 +1008,7 @@
 
               } else { //zoom region corresponding to clicked stacked bar                
 
-                globalg.selectAll("path")
-                  // .data(topojson.feature(us, us.objects.Continental_Shelf).features)
-                  // .enter().append("path")
-                  // .attr("d", path)
+                globalg.selectAll("path") 
                   .filter(function(d) {
 
                     if (d.properties && d.properties.MARCATS === zoomRegion) {
