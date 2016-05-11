@@ -982,6 +982,11 @@
                       var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
                       if (marcats_string_format === "Barents Kara Sea") marcats_string_format = "Barents & Kara Sea";
                       else if (marcats_string_format === "China Sea Kuroshio") marcats_string_format = "China Sea & Kuroshio";
+                      else if (marcats_string_format === "Bayof Bengal") marcats_string_format = "Bay of Bengal";
+                      else if (marcats_string_format === "Gulfof Mexico") marcats_string_format = "Gulf of Mexico";
+                      else if (marcats_string_format === "Seaof Japan") marcats_string_format = "Sea of Japan";
+                      else if (marcats_string_format === "Seaof Labrador") marcats_string_format = "Sea of Labrador";
+                      else if (marcats_string_format === "Seaof Okhotsk") marcats_string_format = "Sea of Okhotsk";
 
                       format = d3.format("5.1f");
                       div.transition().style("opacity", .9);
