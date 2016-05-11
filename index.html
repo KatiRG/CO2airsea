@@ -383,7 +383,10 @@
               .on("click", function(d) {
                 d3.select(".tooltip").style("display", "block");
 
-                if (clicked_bar.node() === this) return resetMap();
+                if (clicked_bar.node() === this && d3.select(this).classed("clicked_bar") === true) {
+                  clicked_bar = d3.select(this).classed("clicked_bar", false);
+                  return resetMap();
+                }
 
                 clicked_bar = d3.select(this).classed("clicked_bar", true);
 
