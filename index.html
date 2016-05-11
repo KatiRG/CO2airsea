@@ -740,8 +740,11 @@
                 return y(0) - y(d.value); //heights calculated based on data value (accurate)
               })
               .attr("class", function(d) {
+                if (d.value != 0) {
                 classLabel = d.name.replace(/\s/g, ''); //remove spaces
-                return "bars class" + classLabel;
+                areaFlux = d.value;
+                return "bars class" + classLabel + " areaflux-" + areaFlux;
+              }
               })
               .style("fill", function(d) {
                 //console.log("color(d.name): ", d.name)
@@ -835,14 +838,22 @@
               //   .style("fill", store_fill);
             }
 
-            function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
+            // function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
+            //   //var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
+            //   var extract_class = marcats_dict[this_class.split(/\s+/)[1].split("class").pop()],
+            //     class_to_match = ".marcat-" + extract_class;
+            //   return class_to_match;
+            // }
+
+          }); //d3.tsv(histfile)
+
+          function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
               //var extract_class = marcats_dict[this_class.split("bars class").pop().split(" ", 1)[0]],
               var extract_class = marcats_dict[this_class.split(/\s+/)[1].split("class").pop()],
                 class_to_match = ".marcat-" + extract_class;
-              return class_to_match;
-            }
 
-          }); //d3.tsv(histfile)
+              return class_to_match;
+          }
 
           //===================================================
           //MAP
@@ -947,19 +958,22 @@
                   .attr("id", function(d) {
                     return "id-" + d.properties.COSCAT;
                   })
-                  .on("mouseenter", function (d) {                
+                  .on("mouseenter", function (d) {
 
-                    //outline region
-                    //if (outline.node() === this) return resetMap();
+                    //outline region                    
                     outline.classed("outline", false);
                     outline = d3.select(this).classed("outline", true);
-     
 
                     // tooltip
                     var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
                     if (d3.select(this).style("opacity") != 0) {
-                    //   var unitflux = d3.select(class_to_match).attr("class")
-                    //                    .split(/\s+/)[2].split("unitflux-").pop();
+                      var unitflux = d3.select(this).attr("class")
+                                       .split(/\s+/)[2].split("unitflux-").pop();
+
+                      var areaflux = d3.select(".class" + marcats_string)
+                                       .attr("class")
+                                       .split(/\s+/)[2]
+                                       .split("areaflux-").pop();
 
                       var xPos = parseFloat(d3.select(this).attr("x"));
                       var yPos = parseFloat(d3.select(this).attr("y"));
@@ -967,15 +981,11 @@
 
                       format = d3.format("5.1f");
                       div.transition().style("opacity", .9);
-                      div.html(marcats_string)
+                      div.html(marcats_string + ": " + "<br><b>"
+                               + format(areaflux) + " " + units + "</b>" + "<br>"
+                               + format(unitflux) + " " + units_unitArea)
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
-
-                    //   div.html(d.country + ": " + d.name + "<br><b>" 
-                    //            + format(d.value) + " " + units + "</b>"
-                    //            + "<br>" + format(unitflux) + " " + units_unitArea)
-                    //     .style("left", (d3.event.pageX + 20) + "px")
-                    //     .style("top", (d3.event.pageY - 20) + "px");
                     }
                   });
                 //.on("click", clicked);
@@ -1055,9 +1065,9 @@
           // }
 
           function resetMap() {
-            console.log("outline.node(): ", outline.node())
-            outline.classed("outline", false);
-            outline = d3.select(null);
+            // outline.classed("outline", false);
+            // outline = d3.select(null);
+            d3.select(".outline").classed("outline", false)
 
             globalg.transition()
               .duration(750)
