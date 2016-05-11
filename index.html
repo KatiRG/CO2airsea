@@ -159,7 +159,7 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
-          var active_bar = d3.select(null), //for mouseenter / mouseexit on stacked bar
+          var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
               clicked_bar = d3.select(null); //for clicking stacked bar
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
@@ -535,7 +535,8 @@
 
                     //outline region
                     outline.classed("outline", false);
-                    outline = d3.select(this).classed("outline", true);
+                    var this_class = d3.select(this).attr("class").split(/\s+/)[1];
+                    outline = d3.selectAll("." + this_class).classed("outline", "true");
 
                     // tooltip
                     var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
@@ -573,8 +574,12 @@
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
                     }
-                  });
-                //.on("click", clicked);
+                  })
+                  .on("mouseout", function (d) {
+                    d3.select(".tooltip").style("display", "none");
+
+                    d3.selectAll(".outline").classed("outline", false);
+                  });                
 
                 globalg.append("path")
                   .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) {
