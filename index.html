@@ -188,10 +188,8 @@
             .append("div")
             .attr("class", "class_chartTitle")
             .append("h4")
-            // .text("Anthropogenic CO2 flux [Tg C yr")
-            // .append("sup").text("-1");
             .append("foreignObject")
-             .html("Anthropogenic CO2 flux [Tg C yr<sup>-1</sup>]");
+            .html("Anthropogenic CO2 flux [Tg C yr<sup>-1</sup>]");
            
 
 
@@ -199,7 +197,7 @@
             .attr("class", "tooltip")
             .style("opacity", 0);
 
-          // Read in datafile for stacked bar chart  
+          // Read in datafile for stacked bar chart
           // ======================================
           d3.tsv(histfile, function(error, data) {
             if (error) throw error;
@@ -332,9 +330,7 @@
                 d3.select(this).style("cursor", "pointer");
                 d3.select(".tooltip").style("display", "block");                
 
-                active_bar = d3.select(this).classed("active_bar", true);
-                active_bar.attr("stroke", "#000")
-                  .attr("stroke-width", 2.5);
+                active_bar = d3.select(this).classed("active_bar", true);  
 
                 // toggle active state of stacked bar to outline/de-outline it
                 // if (active_bar.node() === this) return reset_bar();
@@ -401,9 +397,7 @@
                   .attr("stroke", null);
 
                 // outline clicked stacked bar
-                active_bar = d3.select(this).classed("active_bar", true);
-                active_bar.attr("stroke", "#000")
-                  .attr("stroke-width", 2.5);
+                active_bar = d3.select(this).classed("active_bar", true);          
                 
               });
 

@@ -125,6 +125,12 @@
   .bar {
     fill: steelblue;
   }
+
+  .active_bar {
+    stroke: #000;
+    stroke-width: 2.5px;
+  }
+  
   
   .x.axis path {
     display: none;
