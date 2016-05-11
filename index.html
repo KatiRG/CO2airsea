@@ -57,7 +57,8 @@
             mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid.topojson", //"all_nameM_idC.topojson";
             chartdiv = "Mchart",
             mapdiv = "Mmap",
-            formatX = d3.format("02d"), //for numbering countries in sort col and histogram x-axes
+            formatX = d3.format("02d"), //for numbering countries in stackedbar x-axis
+            format = d3.format("5.2f"), //for tooltip values
             units = "Tg C yr <sup>-1</sup>",
             units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>",
             //https://www.colorcodehex.com/eff3ff/
@@ -87,19 +88,13 @@
               left: 50
             },
             width = 600 - margin.left - margin.right,
-            height = 400 - margin.top - margin.bottom;
+            height = 600 - margin.top - margin.bottom;
 
           var x = d3.scale.ordinal()
             .rangeRoundBands([0, width], .1);
 
           var y = d3.scale.linear()
             .rangeRound([height, 0]);
-
-          // Coal_color = "#3B3131";
-          // Oil_color = "#886666";
-          // Gas_color = "#AEC7E8";
-          // GasFlaring_color = "#f99a1c";
-          // Cement_color = "#666688";
 
           var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
             "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
@@ -164,8 +159,6 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
-
-
           var active_bar = d3.select(null);
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
@@ -180,7 +173,7 @@
             .scale(y)
             .orient("left")
             //.tickFormat(d3.format(".2s"))
-            .tickFormat(d3.format(".1f"));
+            .tickFormat(d3.format(".2f"));
 
           // append the chart div to <p id="chart">
           var svg3 = d3.select("#chart").append("div").attr("id", chartdiv)
@@ -251,7 +244,7 @@
               .call(xAxis)
               .selectAll("text") //http://www.d3noob.org/2013/01/how-to-rotate-text-labels-for-x-axis-of.html
               .text(function(d, i) {
-                return d + " " + formatX(i + 1);
+                return d + " - " + formatX(i + 1);
               })
               .style("fill", "#2f2f2f")
               .style("text-anchor", "end")
@@ -353,7 +346,6 @@
                   var yPos = parseFloat(d3.select(this).attr("y"));
                   var height = parseFloat(d3.select(this).attr("height"))
 
-                  format = d3.format("5.1f");
                   div.transition().style("opacity", .9);
                   div.html(d.country + ": " + d.name + "<br><b>" 
                            + format(d.value) + " " + units + "</b>"
@@ -569,8 +561,7 @@
                       else if (marcats_string_format === "Seaof Japan") marcats_string_format = "Sea of Japan";
                       else if (marcats_string_format === "Seaof Labrador") marcats_string_format = "Sea of Labrador";
                       else if (marcats_string_format === "Seaof Okhotsk") marcats_string_format = "Sea of Okhotsk";
-
-                      format = d3.format("5.1f");
+                      
                       div.transition().style("opacity", .9);
                       div.html(marcats_string_format + ": " + "<br><b>"
                                + format(areaflux) + " " + units + "</b>" + "<br>"
