@@ -188,8 +188,11 @@
             .append("div")
             .attr("class", "class_chartTitle")
             .append("h4")
-            .text("Tg C yr")
-            .append('sup').text("-1");
+            // .text("Anthropogenic CO2 flux [Tg C yr")
+            // .append("sup").text("-1");
+            .append("foreignObject")
+             .html("Anthropogenic CO2 flux [Tg C yr<sup>-1</sup>]");
+           
 
 
           var div = d3.select("body").append("div")
@@ -248,6 +251,7 @@
               })
               .style("fill", "#2f2f2f")
               .style("text-anchor", "end")
+              //.style("font-size","12px")
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)");
@@ -255,7 +259,8 @@
             svg3.append("g")
               .attr("class", "y axis")
               .call(yAxis)
-              .append("text")
+              .append("text")              
+              .style("font-size","12px")
               .attr("transform", "rotate(-90)")
               .attr("y", 6)
               .attr("dy", ".71em")

@@ -114,6 +114,7 @@
 
   .axis text {
      fill: #2f2f2f;
+     font-size: 12px;
   }
 
   .y.axis, .x.axis {
@@ -144,7 +145,7 @@
 
   .class_chartTitle {
     position: relative;
-    left: 290px;
+    left: 200px;
     top: -745px;
     width: 500px;
 
