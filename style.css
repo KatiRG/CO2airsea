@@ -188,7 +188,7 @@
 
   .feature.outline {
     stroke: orange;
-    stroke-width: 2.5;
+    stroke-width: 0.9;
   }
 
   .mesh {

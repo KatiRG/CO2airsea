@@ -330,6 +330,7 @@
                 d3.select(this).style("cursor", "pointer");
                 d3.select(".tooltip").style("display", "block");                
 
+                // outline clicked stacked bar
                 active_bar = d3.select(this).classed("active_bar", true);  
 
                 // toggle active state of stacked bar to outline/de-outline it
@@ -356,10 +357,9 @@
                 }
 
                 // highlight corresponding areas on map
-                fill_orig = d3.select(class_to_match).style("fill");
+                //fill_orig = d3.select(class_to_match).style("fill");                
                 d3.selectAll(class_to_match)
-                  .classed("active", true)
-                  .style("fill", "orange");
+                  .classed("outline", true);
 
               })
               .on("mouseout", function() {
@@ -376,8 +376,7 @@
 
                 // restore map region to orig colour
                 d3.selectAll(class_to_match)
-                  .classed("active", true)
-                  .style("fill", fill_orig);
+                  .classed("outline", false);                  
 
               })
               .on("click", function(d) {
