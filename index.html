@@ -97,7 +97,7 @@
             .rangeRound([height, 0]);
 
           var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#2E2B22", "#b3cde3",
+            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
             "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
             "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
@@ -535,16 +535,26 @@
                   .on("mouseenter", function (d) {
                     d3.select(".tooltip").style("display", "block");
 
-                    //outline region
+                    //outline all map regions of same MARCATS
                     outline.classed("outline", false);
                     var this_class = d3.select(this).attr("class").split(/\s+/)[1];
                     outline = d3.selectAll("." + this_class).classed("outline", "true");
+
+                    //outline corresponding stacked bar (and handle '&'' cases)
+                    var matching_barClass = getKeyByValue(marcats_dict, 
+                                               this_class.split("marcat-").pop());
+                    if (matching_barClass === "Barents&KaraSea") 
+                      matching_barClass = "BarentsKaraSea";
+                    else if (matching_barClass === "ChinaSea&Kuroshio") 
+                      matching_barClass = "ChinaSeaKuroshio";                    
+                    d3.select(".class" + matching_barClass).classed("active_bar", true);
 
                     // tooltip
                     var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
                     // Remove & to match class label
                     if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
-                    else if ( marcats_string === "ChinaSea&Kuroshio") marcats_string = "ChinaSeaKuroshio";
+                    else if ( marcats_string === "ChinaSea&Kuroshio") 
+                      marcats_string = "ChinaSeaKuroshio";
 
                     if (d3.select(this).style("opacity") != 0) {
                       var unitflux = d3.select(this).attr("class")
@@ -561,13 +571,20 @@
 
                       // Format to un-camelCase and insert & for two regions
                       var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
-                      if (marcats_string_format === "Barents Kara Sea") marcats_string_format = "Barents & Kara Sea";
-                      else if (marcats_string_format === "China Sea Kuroshio") marcats_string_format = "China Sea & Kuroshio";
-                      else if (marcats_string_format === "Bayof Bengal") marcats_string_format = "Bay of Bengal";
-                      else if (marcats_string_format === "Gulfof Mexico") marcats_string_format = "Gulf of Mexico";
-                      else if (marcats_string_format === "Seaof Japan") marcats_string_format = "Sea of Japan";
-                      else if (marcats_string_format === "Seaof Labrador") marcats_string_format = "Sea of Labrador";
-                      else if (marcats_string_format === "Seaof Okhotsk") marcats_string_format = "Sea of Okhotsk";
+                      if (marcats_string_format === "Barents Kara Sea") 
+                        marcats_string_format = "Barents & Kara Sea";
+                      else if (marcats_string_format === "China Sea Kuroshio") 
+                        marcats_string_format = "China Sea & Kuroshio";
+                      else if (marcats_string_format === "Bayof Bengal") 
+                        marcats_string_format = "Bay of Bengal";
+                      else if (marcats_string_format === "Gulfof Mexico") 
+                        marcats_string_format = "Gulf of Mexico";
+                      else if (marcats_string_format === "Seaof Japan") 
+                        marcats_string_format = "Sea of Japan";
+                      else if (marcats_string_format === "Seaof Labrador") 
+                        marcats_string_format = "Sea of Labrador";
+                      else if (marcats_string_format === "Seaof Okhotsk") 
+                        marcats_string_format = "Sea of Okhotsk";
                       
                       div.transition().style("opacity", .9);
                       div.html(marcats_string_format + ": " + "<br><b>"
@@ -580,7 +597,11 @@
                   .on("mouseout", function (d) {
                     d3.select(".tooltip").style("display", "none");
 
+                    // remove outline of map regions
                     d3.selectAll(".outline").classed("outline", false);
+
+                    // remove outline on stackedbar
+                    d3.select(".active_bar").classed("active_bar", false);
                   });                
 
                 globalg.append("path")
