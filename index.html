@@ -122,8 +122,8 @@
             "HudsonBay": "12",
             "CanadianArchipelagos": "13",
             "NorthernGreenland": "14",
-            "SouthernGreenland": "15",
-            "NorwegianBasin": "18",
+            "SouthernGreenland": "18",
+            "NorwegianBasin": "15",
             "NorthEasternAtlantic": "17",
             "BalticSea": "16",
             "IberianUpwelling": "19",
@@ -350,9 +350,9 @@
                   var height = parseFloat(d3.select(this).attr("height"))
 
                   div.transition().style("opacity", .9);
-                  div.html(d.country + ": " + d.name + "<br><b>" 
-                           + format(d.value) + " " + units + "</b>"
-                           + "<br>" + format(unitflux) + " " + units_unitArea)
+                  div.html(d.country + ": " + d.name + "<br><br><b>" 
+                           + format(d.value) + " " + units + "  (area flux)" + "</b>"
+                           + "<br>" + format(unitflux) + " " + units_unitArea + "  (unit flux)")
                     .style("left", (d3.event.pageX + 20) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
@@ -588,9 +588,9 @@
                         marcats_string_format = "Sea of Okhotsk";
                       
                       div.transition().style("opacity", .9);
-                      div.html(marcats_string_format + ": " + "<br><b>"
-                               + format(areaflux) + " " + units + "</b>" + "<br>"
-                               + format(unit_flux[i]) + " " + units_unitArea)
+                      div.html(marcats_string_format + ": " + "<br><br><b>"
+                               + format(areaflux) + " " + units + "  (area flux)" + "</b>" + "<br>"
+                               + format(unit_flux[i]) + " " + units_unitArea + "  (unit flux)")
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
                     }
