@@ -127,7 +127,7 @@
   }
 
   .active_bar {
-    stroke: #000;
+    stroke: orange;
     stroke-width: 2.5px;
   }
   
