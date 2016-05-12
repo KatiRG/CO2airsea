@@ -455,9 +455,12 @@
 
               });
 
-              var map_colourbar = d3.scale.ordinal()
+              // must use quantize http://stackoverflow.com/questions/26817035/colorbrewer-scale-only-returning-lightest-values-on-d3-map
+              var map_colourbar = d3.scale.quantize()
                 .domain([minflux, maxflux])
                 .range(colorbrewer.Greys[5]);
+
+                console.log("minflux, maxflux: ", minflux + ", " + maxflux)
 
               plotMap(unit_dict, map_colourbar);
 
@@ -531,6 +534,7 @@
                     unit_flux[i] = unit_dict[d.properties.MARCATS];
                     console.log("name: ", d.properties)
                     console.log("unit_flux in style: ", unit_flux[i])
+                    console.log("map_colourbar(unit_flux): ", map_colourbar(unit_flux[i]))
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
