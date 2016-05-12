@@ -460,8 +460,6 @@
                 .domain([minflux, maxflux])
                 .range(colorbrewer.Greys[5]);
 
-                console.log("minflux, maxflux: ", minflux + ", " + maxflux)
-
               plotMap(unit_dict, map_colourbar);
 
             }) //end d3.tsv
@@ -531,10 +529,7 @@
                            + " unitflux-" + unit_dict[d.properties.MARCATS];
                   })
                   .style("fill", function (d, i) {
-                    unit_flux[i] = unit_dict[d.properties.MARCATS];
-                    console.log("name: ", d.properties)
-                    console.log("unit_flux in style: ", unit_flux[i])
-                    console.log("map_colourbar(unit_flux): ", map_colourbar(unit_flux[i]))
+                    unit_flux[i] = unit_dict[d.properties.MARCATS];                    
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
