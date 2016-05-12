@@ -182,7 +182,7 @@
           link.on("mouseover", function(d) {
               div.transition()
                 .style("opacity", .9);
-              div.html(d.source.name + " → " + d.target.name +
+              div.html(d.source.name + ": " + d.target.name +
                   "<br><b>" + format(d.value) + " " + units + "</b>")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY) + "px");
@@ -293,8 +293,8 @@
                     if (d.x === col_xcoord[1]) { //selects last col (countries)
                       var idx_place = yheight.indexOf(d.dy); //order for sorted names
                       //handle case when ynames contains two (or more) equal numbers
-                      //if (idx_place < ynames.length) console.log("idx_place in here: ", ynames.length)
-                      ynames[idx_place] = d.name;
+                      if (idx_place < ynames.length) idx_place = ynames.length;
+                      ynames[idx_place] = d.name;                      
                     }
                   });
 
@@ -437,15 +437,6 @@
         } // end fn make(graph)
 
       </script>
-
-      <p style='width: 1000px;'>
-        <ul<i><b>Sources:</b> <br> - <a href='http://www.globalcarbonproject.org' target="_blank">Global Carbon Project</a> (with data from <a href='http://www.globalcarbonatlas.org' target="_blank">Global Carbon Atlas</a>) <br> - <a href='http://cdiac.ornl.gov' target="_blank">Carbon Dioxide Information Analysis Center (CDIAC) </a>
-
-          </ul>
-
-          </i>
-      </p>
-
 
     </div>
     <!-- /.container -->
