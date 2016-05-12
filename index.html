@@ -82,7 +82,7 @@
           }
 
           var margin = {
-              top: -40,
+              top: 0,
               right: 20,
               bottom: 120,
               left: 50
@@ -329,7 +329,7 @@
               })
               .style("fill", function(d) {
                 console.log("color(d.name): ", d.name +", "+ color(d.name))
-                return color(d.name);
+                return color(d.name);              
               });
 
             // country rects event handlers
