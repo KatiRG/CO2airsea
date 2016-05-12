@@ -96,6 +96,7 @@
           var y = d3.scale.linear()
             .rangeRound([height, 0]);
 
+          // Alphabetical Order of region names (Agulhas Current, Antarctic Shelves, etc.)
           var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
             "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
             "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
@@ -159,6 +160,10 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
+          // var map_colourbar = d3.scale.quantize()
+          //       .domain([minflux, maxflux])
+          //       .range(colorbrewer.Greys[5]);  
+
           var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
               clicked_bar = d3.select(null); //for clicking stacked bar
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
@@ -209,11 +214,14 @@
               }
             }));
 
-            //console.log("color: ", color.domain())
-
             data.forEach(function(d) {
               var y0 = 0;
-              d.sources = color.domain().map(function(name) {
+              // Stack bars in order of value
+              //http://stackoverflow.com/questions/25253834/sorting-a-d3-js-stacked-bar-chart
+              var order = color.domain().map(function(d) { return d; })
+                 .sort(function(a, b) { return +d[b] - +d[a]; });
+              //d.sources = color.domain().map(function(name) {
+              d.sources = order.map(function(name) {  
                 return {
                   country: d.RCLASS,
                   name: name,
@@ -222,7 +230,7 @@
                   value: d[name],
                   ycoord_corrected: 0
                 };
-              });
+              });              
               d.total = d.sources[d.sources.length - 1].y1;
 
             });
@@ -320,7 +328,7 @@
                 }
               })
               .style("fill", function(d) {
-                //console.log("color(d.name): ", d.name)
+                console.log("color(d.name): ", d.name +", "+ color(d.name))
                 return color(d.name);
               });
 
