@@ -32,7 +32,7 @@
   div.tooltip {
     position: absolute;
     padding: 5px;
-    text-align: center;
+    text-align: left;
     font: 12px sans-serif;
     color: #000;
     background: #AAA;
