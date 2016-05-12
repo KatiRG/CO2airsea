@@ -337,6 +337,7 @@
                 // if (active_bar.node() === this) return reset_bar();
                 // active_bar.classed("active_bar", false);
 
+                // toolip. Get unitflux value stored in class of map region path
                 var this_class = d3.select(this).attr("class");
                 class_to_match = get_mapClass(this_class);                
 
@@ -464,6 +465,8 @@
 
           function plotMap(unit_dict, map_colourbar) {
 
+            var unit_flux = [];
+
             // append the mapdiv to <p id="chart">
             var m_width = 960,
               m_height = 700,
@@ -524,14 +527,16 @@
                            + " marcat-" + d.properties.MARCATS
                            + " unitflux-" + unit_dict[d.properties.MARCATS];
                   })
-                  .style("fill", function(d) {
-                    var unit_flux = unit_dict[d.properties.MARCATS];
-                    return map_colourbar(unit_flux);
+                  .style("fill", function (d, i) {
+                    unit_flux[i] = unit_dict[d.properties.MARCATS];
+                    console.log("name: ", d.properties)
+                    console.log("unit_flux in style: ", unit_flux[i])
+                    return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
                     return "id-" + d.properties.COSCAT;
                   })
-                  .on("mouseenter", function (d) {
+                  .on("mouseenter", function (d, i) {
                     d3.select(".tooltip").style("display", "block");
 
                     //outline all map regions of same MARCATS
@@ -556,9 +561,7 @@
                       marcats_string = "ChinaSeaKuroshio";
 
                     if (d3.select(this).style("opacity") != 0) {
-                      var unitflux = d3.select(this).attr("class")
-                                       .split(/\s+/)[2].split("unitflux-").pop();
-
+                      // Read areaflux stored in class of stackedbar
                       var areaflux = d3.select(".class" + marcats_string)
                                        .attr("class")
                                        .split(/\s+/)[2]
@@ -588,7 +591,7 @@
                       div.transition().style("opacity", .9);
                       div.html(marcats_string_format + ": " + "<br><b>"
                                + format(areaflux) + " " + units + "</b>" + "<br>"
-                               + format(unitflux) + " " + units_unitArea)
+                               + format(unit_flux[i]) + " " + units_unitArea)
                          .style("left", (d3.event.pageX + 20) + "px")
                          .style("top", (d3.event.pageY - 20) + "px");
                     }
