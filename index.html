@@ -97,15 +97,27 @@
             .rangeRound([height, 0]);
 
           // Alphabetical Order of region names (Agulhas Current, Antarctic Shelves, etc.)
-          var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-            "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
-            "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
-            "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
-            "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
-            "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
-            "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
-            "#ffd59b", "#db4551", "#edf8fb"
+          // var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
+          //   "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
+          //   "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
+          //   "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
+          //   "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
+          //   "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
+          //   "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
+          //   "#ffd59b", "#db4551", "#edf8fb"
+          // ];
+
+          var marcat_colors = [
+            "#AEC1BF", "#084594", "#f7fcfd", "#4292c6", "#A6AED4", "#bfd3e6", 
+            "#ADB38D", "#ccece6", "#7FA0FF", "#f47461", "#5a5443", "#8c96c6",
+            "#DAD1B4", "#A09077", "#810f7c", "#8c96c6", "#2ca25f", "#99d8c9",
+            "#88419d", "#66c2a4", "#F9D19C", "#420040", "#BFD0BB", "#C5B1AC",
+            "#8b0000", "#6baed6", "#c6dbef", "#9ebcda", "#C4D4D1", "#e0ecf4",
+            "#8c6bb1", "#FFFBD3", "#4d004b", "#9ecae1", "#b81b34", "#9D928C",
+            "#FCD5D3", "#2171b5", "#006d2c", "#ffd59b", "#3C4055", "#ffa474",
+            "#db4551", "#ffffe0", "#b3cde3"
           ];
+
 
           // Dictionary for MARCATS regions: RCLASS
           marcats_dict = {
@@ -155,6 +167,8 @@
             "Barents&KaraSea": "44",
             "AntarcticShelves": "45"
           };
+
+
 
           var color = d3.scale.ordinal()
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
@@ -328,7 +342,7 @@
                 }
               })
               .style("fill", function(d) {
-                console.log("color(d.name): ", d.name +", "+ color(d.name))
+                //console.log("color(d.name): ", d.name +", "+ color(d.name))
                 return color(d.name);              
               });
 
