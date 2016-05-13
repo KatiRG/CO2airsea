@@ -166,7 +166,17 @@
             "AntarcticShelves": "45"
           };
 
+          // Define marcats groups to select all map regions belonging to same class
 
+          var marcatsGroups_dict = {          
+            "PolarMarcats": ".marcat-13, .marcat-14, .marcat-15, .marcat-18, .marcat-43, .marcat-44, .marcat-45",
+            "MarginalMarcats": ".marcat-9, .marcat-12, .marcat-16, .marcat-17, .marcat-20, .marcat-21, .marcat-28, .marcat-29, .marcat-40, .marcat-41",
+            "SubpolarMarcats": ".marcat-1, .marcat-5, .marcat-11, .marcat-34, .marcat-36, .marcat-42",
+            "TropicalMarcats": ".marcat-3, .marcat-7, .marcat-8, .marcat-23, .marcat-26, .marcat-37, .marcat-38",
+            "WBCMarcats": ".marcat-6, .marcat-10, .marcat-25, .marcat-35, .marcat-39",
+            "EBCMarcats": ".marcat-2, .marcat-4, .marcat-19, .marcat-22, .marcat-24, .marcat-33",
+            "IndianMarcats": ".marcat-27, .marcat-30, .marcat-31, .marcat-32"
+          };    
 
           var color = d3.scale.ordinal()
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
@@ -272,7 +282,15 @@
               //.style("font-size","12px")
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
-              .attr("transform", "rotate(-65)");
+              .attr("transform", "rotate(-65)")
+              .on("mouseenter", function (d) {
+                d3.select(this).style("cursor", "pointer")
+                           
+                var marcatsGroup = d3.select(this).text().split(/\s+/)[0] + "Marcats";                
+                // outline all marcats regions belonging to this class
+                d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", true);
+                
+              });
 
             svg3.append("g")
               .attr("class", "y axis")
@@ -519,7 +537,7 @@
               });
 
             d3.json("refs/" + mapfile, function(error, us) {
-              if (error) throw error;
+              if (error) throw error;            
 
               if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
