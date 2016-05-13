@@ -58,5 +58,3 @@ mapshaper -i GIS_FILES/Continental_Shelf.shp -simplify 1% -o id-field="MARCATS" 
 Update: Timothee fixed problem with continental shelf shapefile where part of mediterranean was included in Caribbean (Continental_Shelf_v5.*). Rerun mapshaper:
 
 mapshaper -i Continental_Shelf_v5.shp -simplify 1% -o id-field="MARCATS" -o Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson
-
->>topojson --id-property MARCATS -p "MARCATS" -p "COSCAT" -o test_v5.topojson Continental_Shelf_v5.shp
