@@ -1,8 +1,8 @@
 MARCATS	RCLASS	abs_anthro	MARCATS_ID
-Southern Greenland	Polar	0.86	18
+Southern Greenland	Polar	0.86	15
 Antarctic Shelves	Polar	0.69	45
 Leeuwin Current	EBC	0.6	33
-Norwegian Basin	Polar	0.6	15
+Norwegian Basin	Polar	0.6	16
 Southern Western Africa	EBC	0.59	24
 Florida Upwelling	WBC	0.56	10
 North Eastern Atlantic	Marginal sea	0.53	17
@@ -43,4 +43,4 @@ Barents & Kara Sea	Polar	0.11	44
 Canadian Archipelagos	Polar	0.09	13
 Hudson Bay	Marginal sea	0.08	12
 Siberian Shelves	Polar	0.05	43
-Baltic Sea	Marginal sea	0.01	16
+Baltic Sea	Marginal sea	0.01	18
