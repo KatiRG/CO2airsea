@@ -197,7 +197,8 @@
           //       .range(colorbrewer.Greys[5]);  
 
           var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
-              clicked_bar = d3.select(null); //for clicking stacked bar
+              clicked_bar = d3.select(null), //for clicking stacked bar
+              outline = d3.select(null); //for clicking on map
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
           var zoomRegion = -999; //global var for region to zoom
@@ -659,10 +660,16 @@
                     d3.select(".tooltip").style("display", "none");
 
                     // remove outline of map regions
+                    console.log("outline.node() in mouseout: ", outline.node())
                     d3.selectAll(".outline").classed("outline", false);
 
                     // remove outline on stackedbar
                     d3.select(".active_bar").classed("active_bar", false);
+                  })
+                  .on("click", function (d) {
+                    console.log("this in click: ", this)                    
+                    _this = this;
+                    clicked(path, d, m_width, m_height, _this)
                   });                
 
                 globalg.append("path")
@@ -717,28 +724,30 @@
 
           }
 
-          // function clicked(d) {
-          //   if (outline.node() === this) return reset();
-          //   outline.classed("outline", false);
-          //   outline = d3.select(this).classed("outline", true);
+          function clicked(path, d, m_width, m_height, _this) {
+            console.log("outline.node(): ", outline.node())
+            console.log("_this: ", _this)            
+            if (outline.node() === _this) return resetMap();
+            outline.classed("outline", false);
+            outline = d3.select(_this).classed("outline", true);
 
-          //   var bounds = path.bounds(d),
-          //     dx = bounds[1][0] - bounds[0][0],
-          //     dy = bounds[1][1] - bounds[0][1],
-          //     x = (bounds[0][0] + bounds[1][0]) / 2,
-          //     y = (bounds[0][1] + bounds[1][1]) / 2,
-          //     scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
-          //     translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
+            var bounds = path.bounds(d),
+              dx = bounds[1][0] - bounds[0][0],
+              dy = bounds[1][1] - bounds[0][1],
+              x = (bounds[0][0] + bounds[1][0]) / 2,
+              y = (bounds[0][1] + bounds[1][1]) / 2,
+              scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
+              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
-          //   g.transition()
-          //     .duration(750)
-          //     .style("stroke-width", 1.5 / scale + "px")
-          //     .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-          // }
+            globalg.transition()
+              .duration(750)
+              .style("stroke-width", 1.5 / scale + "px")
+              .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+          }
 
           function resetMap() {
-            // outline.classed("outline", false);
-            // outline = d3.select(null);
+            outline.classed("outline", false);
+            outline = d3.select(null);
             d3.select(".outline").classed("outline", false)
 
             globalg.transition()
