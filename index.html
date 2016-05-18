@@ -198,7 +198,8 @@
 
           var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
               clicked_bar = d3.select(null), //for clicking stacked bar
-              outline = d3.select(null); //for clicking on map
+              outline = d3.select(null), //for outlining map on mouseover
+              outline_mapclick = d3.select(null); //for outlining map on map click
           //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
           var globalg; //global g for paths
           var zoomRegion = -999; //global var for region to zoom
@@ -479,16 +480,8 @@
 
           }); //d3.tsv(histfile)
 
-          function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
-            
-            var classMarcats = this_class.split(/\s+/)[1];
-            if ( classMarcats === "classBarentsKaraSea") classMarcats = "classBarents&KaraSea";
-            else if ( classMarcats === "classChinaSeaKuroshio") classMarcats = "classChinaSea&Kuroshio";
-            
-            var class_to_match = ".marcat-" + marcats_dict[classMarcats.split("class").pop()];
+          
 
-            return class_to_match;
-          }
 
           //===================================================
           //MAP
@@ -531,16 +524,14 @@
 
             // append the mapdiv to <p id="chart">
             var m_width = 960,
-              m_height = 700,
-              outline = d3.select(null);
-            //active = d3.select(null);
+              m_height = 700;
 
             var projection = d3.geo.mercator()
               .translate([m_width / 2, m_height / 1.5]);
 
             var path = d3.geo.path().projection(projection);
             var t = projection.translate(); // the projection's default translation
-            var s = projection.scale(110) // the projection's default scale        
+            var s = projection.scale(110) // the projection's default scale
 
             var path = d3.geo.path()
               .projection(projection);
@@ -560,7 +551,7 @@
               });
 
             d3.json("refs/" + mapfile, function(error, us) {
-              if (error) throw error;            
+              if (error) throw error;
 
               if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
@@ -590,7 +581,7 @@
                            + " unitflux-" + unit_dict[d.properties.MARCATS];
                   })
                   .style("fill", function (d, i) {
-                    unit_flux[i] = unit_dict[d.properties.MARCATS];                    
+                    unit_flux[i] = unit_dict[d.properties.MARCATS];
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
@@ -601,8 +592,8 @@
 
                     //outline all map regions of same MARCATS
                     outline.classed("outline", false);
-                    var this_class = d3.select(this).attr("class").split(/\s+/)[1];
-                    outline = d3.selectAll("." + this_class).classed("outline", "true");
+                    var this_class = get_classFromPath(this);
+                    outline = d3.selectAll(this_class).classed("outline", "true");
 
                     //outline corresponding stacked bar (and handle '&'' cases)
                     var matching_barClass = getKeyByValue(marcats_dict, 
@@ -610,7 +601,7 @@
                     if (matching_barClass === "Barents&KaraSea") 
                       matching_barClass = "BarentsKaraSea";
                     else if (matching_barClass === "ChinaSea&Kuroshio") 
-                      matching_barClass = "ChinaSeaKuroshio";                    
+                      matching_barClass = "ChinaSeaKuroshio";
                     d3.select(".class" + matching_barClass).classed("active_bar", true);
 
                     // tooltip
@@ -660,17 +651,15 @@
                     d3.select(".tooltip").style("display", "none");
 
                     // remove outline of map regions
-                    console.log("outline.node() in mouseout: ", outline.node())
                     d3.selectAll(".outline").classed("outline", false);
 
                     // remove outline on stackedbar
                     d3.select(".active_bar").classed("active_bar", false);
                   })
                   .on("click", function (d) {
-                    console.log("this in click: ", this)                    
                     _this = this;
                     clicked(path, d, m_width, m_height, _this)
-                  });                
+                  });
 
                 globalg.append("path")
                   .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
@@ -679,7 +668,7 @@
                   .attr("class", "mesh")
                   .attr("d", path);
 
-              } else { //zoom region corresponding to clicked stacked bar                
+              } else { //zoom region corresponding to clicked stacked bar
 
                 globalg.selectAll("path") 
                   .filter(function(d) {
@@ -725,11 +714,15 @@
           }
 
           function clicked(path, d, m_width, m_height, _this) {
-            console.log("outline.node(): ", outline.node())
-            console.log("_this: ", _this)            
-            if (outline.node() === _this) return resetMap();
-            outline.classed("outline", false);
-            outline = d3.select(_this).classed("outline", true);
+
+            var this_class = get_classFromPath(_this);
+            
+            if (outline_mapclick.node() &&
+                get_classFromPath(outline_mapclick.node()) === get_classFromPath(_this)) {
+              return resetMap();
+            }
+            outline_mapclick.classed("outline_mapclick", false);
+            outline_mapclick = d3.selectAll(this_class).classed("outline_mapclick", true);
 
             var bounds = path.bounds(d),
               dx = bounds[1][0] - bounds[0][0],
@@ -746,9 +739,9 @@
           }
 
           function resetMap() {
-            outline.classed("outline", false);
-            outline = d3.select(null);
-            d3.select(".outline").classed("outline", false)
+            outline_mapclick.classed("outline_mapclick", false);
+            outline_mapclick = d3.select(null);
+            d3.selectAll(".outline_mapclick").classed("outline_mapclick", false)
 
             globalg.transition()
               .duration(750)
@@ -761,12 +754,34 @@
               .attr("stroke", null);
 
             // clear tooltip
-            d3.select(".tooltip").style("display", "none");            
+            d3.select(".tooltip").style("display", "none");
 
           }
 
 
         } //end plotHistogram()
+
+        //=================
+        // General functions
+        function get_classFromPath(_this) { //get class from <path > element
+                        
+          var marcat_class = "." + d3.select(_this).attr("class").split(/\s+/)[1];
+
+          return marcat_class;
+        }
+
+        function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
+            
+          var classMarcats = this_class.split(/\s+/)[1];
+          if ( classMarcats === "classBarentsKaraSea") classMarcats = "classBarents&KaraSea";
+          else if ( classMarcats === "classChinaSeaKuroshio") classMarcats = "classChinaSea&Kuroshio";
+            
+          var class_to_match = ".marcat-" + marcats_dict[classMarcats.split("class").pop()];
+
+          return class_to_match;
+        }
+
+
       </script>
 
     </div>

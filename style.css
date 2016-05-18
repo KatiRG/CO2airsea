@@ -186,7 +186,7 @@
     fill: orange;
   }
 
-  .feature.outline {
+  .feature.outline, .outline_mapclick {
     stroke: orange;
     stroke-width: 0.9;
   }
