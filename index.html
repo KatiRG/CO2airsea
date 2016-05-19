@@ -294,9 +294,14 @@
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)")
-              .on("mouseenter", function (d) {
+              .on("mouseenter", function (d) { //hover over x-axis class labels
 
-                d3.select(this).style("cursor", "pointer")
+                //console.log("orig font-weight: ", d3.select(this).style("font-weight"))
+                d3.select(this)
+                  .style("cursor", "pointer")
+                  .style("font-weight","bold");
+
+                d3.select(".tooltip").style("display", "block");
                            
                 marcatsGroup = d3.select(this).text().split(/\s+/)[0] + "Marcats";
                 // outline all marcats regions belonging to this class
@@ -306,8 +311,20 @@
                 marcatsClass = class_dict[d];
                 d3.selectAll(marcatsClass).classed("active_bar", true);
 
+                // tooltip
+                var class_uptake = totalFlux_dict[d];
+                div.transition().style("opacity", .9);
+                  div.html(d + " (sum): " + "<br><br>"
+                             + format(class_uptake) + " " + units + "<br>"                           
+                           )
+                    .style("left", (d3.event.pageX + 20) + "px")
+                    .style("top", (d3.event.pageY - 20) + "px");
+
               })
               .on("mouseout", function (d) {
+                d3.select(this)                  
+                  .style("font-weight","400");
+
                 // remove outline on stacked bars and map regions
                 d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", false);
                 d3.selectAll(marcatsClass).classed("active_bar", false);
