@@ -64,7 +64,8 @@
             formatX = d3.format("02d"), //for numbering countries in stackedbar x-axis
             format = d3.format("5.2f"), //for tooltip values
             units = "Tg C yr <sup>-1</sup>",
-            units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>";
+            units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>"
+            global_uptake = 100; //Tg
 
         d3.select("#resetMap").style("display", "list-item");
 
@@ -182,6 +183,17 @@
             "Polar": ".classAntarcticShelves, .classBarentsKaraSea, .classCanadianArchipelagos, .classNorthernGreenland, .classNorwegianBasin, .classSiberianShelves, .classSouthernGreenland"
           };
 
+          // To store total surface area flux of each class
+          var totalFlux_dict = {
+            "Polar": 0.0,
+            "Marginal sea": 0.0,
+            "Subpolar": 0.0,
+            "Tropical": 0.0,
+            "WBC": 0.0,
+            "EBC": 0.0,
+            "Indian margins": 0.0
+          }
+
           var color = d3.scale.ordinal()
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
@@ -279,12 +291,10 @@
               })
               .style("fill", "#2f2f2f")
               .style("text-anchor", "end")
-              //.style("font-size","12px")
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)")
               .on("mouseenter", function (d) {
-                console.log("d: ", d)
 
                 d3.select(this).style("cursor", "pointer")
                            
@@ -293,13 +303,13 @@
                 d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", true);
 
                 // outline all stacked bars in this class
-                marcatsClass = class_dict[d];                
+                marcatsClass = class_dict[d];
                 d3.selectAll(marcatsClass).classed("active_bar", true);
 
               })
-              .on("mouseout", function (d) {                
+              .on("mouseout", function (d) {
                 // remove outline on stacked bars and map regions
-                d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", false);              
+                d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", false);
                 d3.selectAll(marcatsClass).classed("active_bar", false);
 
               });
@@ -363,9 +373,26 @@
                 return y(0) - y(d.value); //heights calculated based on data value (accurate)
               })
               .attr("class", function(d) {
-                if (d.value != 0) {
+                if (d.value != 0) {                  
                   classLabel = d.name.replace(/\s/g, '').replace(/&/g, ''); //remove spaces and '&'
                   areaFlux = d.value;
+
+                  // calculate total surface area flux for each class
+                  if (d.country === "Polar")
+                    totalFlux_dict["Polar"] = parseFloat(totalFlux_dict["Polar"]) + parseFloat(d.value);                
+                  if (d.country === "Marginal sea")
+                    totalFlux_dict["Marginal sea"] = parseFloat(totalFlux_dict["Marginal sea"]) + parseFloat(d.value);
+                  if (d.country === "Subpolar")
+                    totalFlux_dict["Subpolar"] = parseFloat(totalFlux_dict["Subpolar"]) + parseFloat(d.value);
+                  if (d.country === "Tropical")
+                    totalFlux_dict["Tropical"] = parseFloat(totalFlux_dict["Tropical"]) + parseFloat(d.value);
+                  if (d.country === "WBC")
+                    totalFlux_dict["WBC"] = parseFloat(totalFlux_dict["WBC"]) + parseFloat(d.value);
+                  if (d.country === "EBC")
+                    totalFlux_dict["EBC"] = parseFloat(totalFlux_dict["EBC"]) + parseFloat(d.value);
+                  if (d.country === "Indian margins")
+                    totalFlux_dict["Indian margins"] = parseFloat(totalFlux_dict["Indian margins"]) + parseFloat(d.value);
+
                   return "bars class" + classLabel + " areaflux-" + areaFlux;
                 }
               })
@@ -393,7 +420,8 @@
 
                 if (d3.select(this).style("opacity") != 0) {
                   var unitflux = d3.select(class_to_match).attr("class")
-                                   .split(/\s+/)[2].split("unitflux-").pop();
+                                   .split(/\s+/)[2].split("unitflux-").pop(),
+                      class_uptake = totalFlux_dict[d.country];
 
                   var xPos = parseFloat(d3.select(this).attr("x"));
                   var yPos = parseFloat(d3.select(this).attr("y"));
@@ -402,7 +430,9 @@
                   div.transition().style("opacity", .9);
                   div.html(d.country + ": " + d.name + "<br><br><b>" 
                            + format(d.value) + " " + units + "  (area flux)" + "</b>"
-                           + "<br>" + format(unitflux) + " " + units_unitArea + "  (unit flux)")
+                           + "<br>" + format(unitflux) + " " + units_unitArea + "  (unit flux)"
+                           + "<br><br><b>" + format(d.value / class_uptake * 100) + "% of uptake in class"
+                           + "<br>" + format(d.value / global_uptake * 100) + "% of global uptake" + "</b>")
                     .style("left", (d3.event.pageX + 20) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
