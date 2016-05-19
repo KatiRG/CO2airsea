@@ -2,10 +2,13 @@
 <meta charset="utf-8">
 
 <script src="d3.v3.min.js"></script>
+<!--https://github.com/d3/d3-geo-projection/-->
+<!--<script src="http://d3js.org/d3.geo.projection.v0.min.js" charset="utf-8"></script>-->
+<script src="lib/d3.geo.projection.v0.min.js" charset="utf-8"></script>
 <script src="lib/d3-legend.min.js"></script>
 <script src="lib/jquery-1.10.2.min.js"></script>
 <script src="lib/topojson.v1.min.js"></script>
-<!--bootstrap 3.0.2 -->
+
 <link href="lib/bootstrap.css" rel="stylesheet">
 <script src="lib/bootstrap.min.js"></script>
 <link href="lib/sticky-footer-navbar.css" rel="stylesheet">
@@ -507,12 +510,12 @@
             var m_width = 960,
               m_height = 700;
 
-            var projection = d3.geo.mercator()
+            var projection = d3.geo.naturalEarth()
               .translate([m_width / 2, m_height / 1.5]);
 
             var path = d3.geo.path().projection(projection);
             var t = projection.translate(); // the projection's default translation
-            var s = projection.scale(110) // the projection's default scale
+            var s = projection.scale(200) // the projection's default scale
 
             var path = d3.geo.path()
               .projection(projection);
@@ -552,7 +555,7 @@
                 svg4
                     .append("g")
                     .attr("class", "legendQuant")
-                    .attr("transform", "translate(104,432)");
+                    .attr("transform", "translate(452,5)");
 
                 // svg4.select(".legendQuant")
                 //     .append("rect")
