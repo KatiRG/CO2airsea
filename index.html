@@ -538,7 +538,7 @@
 
                 var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
                   .append("svg")
-                  .attr("width", m_width + margin.left + margin.right)
+                  .attr("width", m_width + margin.left + margin.right)                  
                   .attr("height", m_height + margin.top + margin.bottom);
 
                 svg4.append("rect")
@@ -548,10 +548,17 @@
                   //.on("click", reset);
 
                 // map legend
-                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
-                svg4.append("g")
+                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)       
+                svg4
+                    .append("g")
                     .attr("class", "legendQuant")
-                    .attr("transform", "translate(136,432)");
+                    .attr("transform", "translate(104,432)");
+
+                // svg4.select(".legendQuant")
+                //     .append("rect")
+                //     .attr("width", "10%")
+                //     .attr("height", "13%")
+                //     .attr("fill", "pink");    
 
                 var legend = d3.legend.color()
                                .labelFormat(d3.format(".2f"))
@@ -654,7 +661,18 @@
                   })
                   .on("click", function (d) {
                     _this = this;
-                    clicked(path, d, m_width, m_height, _this)
+                    clicked(path, d, m_width, m_height, _this)                  
+
+                    //svg4.attr("transform", "translate(236,0)");
+                    // svg4                    
+                    // .select(".legendQuant")                    
+                    // .append("rect")
+                    // .transition()
+                    // .delay(2500)
+                    // .attr("width", "10%")
+                    // .attr("height", "13%")                    
+                    // .attr("fill", "pink");
+
                   });
 
                 globalg.append("path")
@@ -663,6 +681,8 @@
                   }))
                   .attr("class", "mesh")
                   .attr("d", path);
+
+
 
               } else { //zoom region corresponding to clicked stacked bar
 
@@ -675,7 +695,6 @@
 
                   });
               }
-
 
             }); //end d3.json
 
