@@ -2,6 +2,7 @@
 <meta charset="utf-8">
 
 <script src="d3.v3.min.js"></script>
+<script src="lib/d3-legend.min.js"></script>
 <script src="lib/jquery-1.10.2.min.js"></script>
 <script src="lib/topojson.v1.min.js"></script>
 <!--bootstrap 3.0.2 -->
@@ -95,16 +96,6 @@
             .rangeRound([height, 0]);
 
           // Alphabetical Order of region names (Agulhas Current, Antarctic Shelves, etc.)
-          // var marcat_colors = ["#ADB38D", "#084594", "#EB6841", "#2171b5", "#8c96c6", "#3FB8AF",
-          //   "#AEC1BF", "#edf8fb", "#7FA0FF", "#ffa474", "#5a5443", "#b3cde3",
-          //   "#DAD1B4", "#A09077", "#00A0B0", "#6A4A3C", "#99d8c9", "#006d2c",
-          //   "#EDC951", "#66c2a4", "#9D928C", "#CC333F", "#FFFBD3", "#BFD0BB",
-          //   "#b81b34", "#c6dbef", "#6baed6", "#DAD8A7", "#ccece6", "#7FC7AF",
-          //   "#FF9E9D", "#F9D19C", "#FF3D7F", "#4292c6", "#8b0000", "#FCD5D3",
-          //   "#C5B1AC", "#9ecae1", "#2ca25f", "#f47461", "#88419d", "#ffffe0",
-          //   "#ffd59b", "#db4551", "#edf8fb"
-          // ];
-
           var marcat_colors = [
             "#DAD1B4", "#084594", "#f7fcfd", "#2171b5", "#A6AED4", "#bfd3e6", 
             "#ADB38D", "#C4D4D1", "#6baed6", "#f47461", "#5a5443", "#8c96c6",
@@ -192,15 +183,11 @@
             // .range([Coal_color, Oil_color, Gas_color, GasFlaring_color, Cement_color]);
             .range(marcat_colors);
 
-          // var map_colourbar = d3.scale.quantize()
-          //       .domain([minflux, maxflux])
-          //       .range(colorbrewer.Greys[5]);  
-
           var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
               clicked_bar = d3.select(null), //for clicking stacked bar
               outline = d3.select(null), //for outlining map on mouseover
               outline_mapclick = d3.select(null); //for outlining map on map click
-          //var store_fill; //store fill colour of map region corresponding to clicked stacked bar
+          
           var globalg; //global g for paths
           var zoomRegion = -999; //global var for region to zoom
 
@@ -229,8 +216,6 @@
             .append("h4")
             .append("foreignObject")
             .html("Anthropogenic CO2 flux [Tg C yr<sup>-1</sup>]");
-           
-
 
           var div = d3.select("body").append("div")
             .attr("class", "tooltip")
@@ -473,16 +458,9 @@
                         .attr("stroke", null);
 
               active_bar = d3.select(null);
-
-              // // clear any previously clicked map region
-              // d3.selectAll('.feature.active')
-              //   .classed("active", false)
-              //   .style("fill", store_fill);
             }
 
           }); //d3.tsv(histfile)
-
-          
 
 
           //===================================================
@@ -512,9 +490,10 @@
               });
 
               // must use quantize http://stackoverflow.com/questions/26817035/colorbrewer-scale-only-returning-lightest-values-on-d3-map
+              // map legend with d3.Legend http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e
               var map_colourbar = d3.scale.quantize()
-                .domain([minflux, maxflux])
-                .range(colorbrewer.Greys[5]);
+                .domain([Math.floor(minflux), Math.ceil(maxflux)]) //0 - 1
+                .range(colorbrewer.Greys[6]);
 
               plotMap(unit_dict, map_colourbar);
 
@@ -568,7 +547,20 @@
                   .attr("height", m_height)
                   //.on("click", reset);
 
-                //var g = svg.append("g")
+                // map legend
+                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
+                svg4.append("g")
+                    .attr("class", "legendQuant")
+                    .attr("transform", "translate(136,432)");
+
+                var legend = d3.legend.color()
+                               .labelFormat(d3.format(".2f"))
+                               .useClass(false) //if true, all boxes are black
+                               .scale(map_colourbar);
+
+                svg4.select(".legendQuant")
+                    .call(legend);               
+                
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
 
@@ -584,6 +576,8 @@
                   })
                   .style("fill", function (d, i) {
                     unit_flux[i] = unit_dict[d.properties.MARCATS];
+                    // console.log("unit_flux[i]: ", unit_flux[i])
+                    // console.log("map_colourbar for each level: ", map_colourbar(unit_flux[i]))
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
