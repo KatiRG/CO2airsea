@@ -383,17 +383,17 @@
               })
               .style("fill", function(d) {
                 //console.log("color(d.name): ", d.name +", "+ color(d.name))
-                return color(d.name);              
+                return color(d.name);
               });
 
             // country rects event handlers
             state.selectAll("rect")
-              .on("mouseenter", function(d) {                
+              .on("mouseenter", function(d) {
                 d3.select(this).style("cursor", "pointer");
-                d3.select(".tooltip").style("display", "block");                
+                d3.select(".tooltip").style("display", "block");
 
                 // outline clicked stacked bar
-                active_bar = d3.select(this).classed("active_bar", true);  
+                active_bar = d3.select(this).classed("active_bar", true);
 
                 // toggle active state of stacked bar to outline/de-outline it
                 // if (active_bar.node() === this) return reset_bar();
@@ -401,7 +401,7 @@
 
                 // toolip. Get unitflux value stored in class of map region path
                 var this_class = d3.select(this).attr("class");
-                class_to_match = get_mapClass(this_class);                
+                class_to_match = get_mapClass(this_class);
 
                 if (d3.select(this).style("opacity") != 0) {
                   var unitflux = d3.select(class_to_match).attr("class")
@@ -420,7 +420,7 @@
                 }
 
                 // highlight corresponding areas on map
-                //fill_orig = d3.select(class_to_match).style("fill");                
+                //fill_orig = d3.select(class_to_match).style("fill");
                 d3.selectAll(class_to_match)
                   .classed("outline", true);
 
@@ -439,7 +439,7 @@
 
                 // restore map region to orig colour
                 d3.selectAll(class_to_match)
-                  .classed("outline", false);                  
+                  .classed("outline", false);
 
               })
               .on("click", function(d) {
@@ -447,6 +447,8 @@
 
                 if (clicked_bar.node() === this && d3.select(this).classed("clicked_bar") === true) {
                   clicked_bar = d3.select(this).classed("clicked_bar", false);
+                  clicked_bar = d3.select(null);
+                  active_bar = d3.select(null);
                   return resetMap();
                 }
 
@@ -462,7 +464,7 @@
                   .attr("stroke", null);
 
                 // outline clicked stacked bar
-                active_bar = d3.select(this).classed("active_bar", true);          
+                active_bar = d3.select(this).classed("active_bar", true);
                 
               });
 
@@ -742,6 +744,7 @@
             outline_mapclick.classed("outline_mapclick", false);
             outline_mapclick = d3.select(null);
             d3.selectAll(".outline_mapclick").classed("outline_mapclick", false)
+            zoomRegion = -999; //clear zoomRegion
 
             globalg.transition()
               .duration(750)
