@@ -599,9 +599,11 @@
 
                 // map legend
                 // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)       
-                svg4
+                svg4                    
                     .append("g")
                     .attr("class", "legendQuant")
+                    //.append("foreignObject") //http://stackoverflow.com/questions/18697278/how-to-style-svg-g-element
+                    .attr("id", "G")
                     .attr("transform", "translate(452,5)");
 
                 // svg4.select(".legendQuant")
@@ -846,6 +848,31 @@
 
           return class_to_match;
         }
+
+        // hex_EBC = ["#C4D4D1", "#2ca25f", "#ccece6", "#66c2a4", "#99d8c9", "#006d2c"];
+        // hex_Polar = ["#7FA0FF", "#6baed6", "#2171b5", "#c6dbef", "#9ecae1", "#4292c6", "#084594"];
+
+
+        // function hexToRgb(hex) {
+        //     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        //     return result ? {
+        //         r: parseInt(result[1], 16),
+        //         g: parseInt(result[2], 16),
+        //         b: parseInt(result[3], 16)
+        //     } : null;
+        // }
+
+        // function calc_L(hex) {
+        //   var L = [];
+
+        //   for (i=0; i<hex.length; i++) {
+        //     var rgb = hexToRgb(hex[i]);
+        //     L[i] = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+        //   }
+        //   console.log("L: ", L)
+
+        //   return L;
+        // }
 
 
       </script>
