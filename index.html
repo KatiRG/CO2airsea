@@ -50,8 +50,11 @@
         <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
           <li id="resetMap">Reset</li>
         </ul>   
-
-        <div id="legendDiv"></div>     
+        
+        <div id="legendDivTitle">
+          Unit flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
+        </div>
+        <div id="legendDiv"></div>
 
       </p>
 
@@ -602,9 +605,9 @@
                 // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
                 var svgLegend = d3.select("#legendDiv")
                     .append("svg")
-                    .attr("width", 200) .attr("height", 150);
+                    .attr("width", 200) .attr("height", 150);          
 
-                svgLegend.append("g")
+                svgLegend.append("g")                    
                     .attr("class", "legendQuant");
 
                 var legend = d3.legend.color()
@@ -614,6 +617,12 @@
 
                 svgLegend.select(".legendQuant")
                     .call(legend);
+
+                // Add thin border to legend boxes
+                d3.select(".legendCells")
+                  .selectAll("rect")
+                  .style("stroke", "black")
+                  .style("stroke-width", ".25px");
                 
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");

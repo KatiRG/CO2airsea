@@ -200,7 +200,7 @@
   }
 
   #legendDiv {
-    background-color: white; 
+    background-color: white;
     border: 1px solid #a9a9a9;
     position: absolute;
     top: 562px;
@@ -210,4 +210,12 @@
     opacity: 0.85;
     padding: 10px;
     border-radius: 10px;
+  }
+ 
+   #legendDivTitle {    
+    position: absolute;
+    top: 536px;
+    left: 717px;
+    height: 100px;
+    width: 500px;
   }
