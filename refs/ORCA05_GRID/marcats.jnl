@@ -1,0 +1,7 @@
+
+use "/home/biomac1/tbourge/MARCATS/nc_dat/ORCA05_MARCATS_LJS18_1993-2012_Cflx.nc"
+use "/home/biomac1/geocean/ocmip/grids/ORCA0.5_grid.nc"
+!shade/mod/pal=blue_darkred/hlim=-180:180:30/lev=(-inf)(-3,3,.5)(inf) mcm2y_ljs18[d=1],lon[d=2],lat[d=2]
+shade/pal=blue_darkred/lev=(-inf)(-3,3,.5)(inf) mcm2y_ljs18[d=1],lon[d=2],lat[d=2]
+
+!frame/file=marcats.svg
