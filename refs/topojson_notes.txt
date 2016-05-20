@@ -58,3 +58,15 @@ mapshaper -i GIS_FILES/Continental_Shelf.shp -simplify 1% -o id-field="MARCATS" 
 Update: Timothee fixed problem with continental shelf shapefile where part of mediterranean was included in Caribbean (Continental_Shelf_v5.*). Rerun mapshaper:
 
 mapshaper -i Continental_Shelf_v5.shp -simplify 1% -o id-field="MARCATS" -o Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson
+
+Merge continental shelves with continents
+-----------------------------------------
+Do not want to label all map regions with MARCATS id because in the visualization, the continents should not be part of the selection. So, renamed MARCATS column in Continents.shp to MARCont, then used MMQGIS > Combine > Merge Layers to merge file to new shapefile: tempmerge_2.shp.
+
+Now run mapshaper on the merged file:
+
+mapshaper -i tempmerge_2.shp -simplify 1% -o id-field="MARCATS" -o CShelf_v5_plusContinents_mapshaper_1pc.topojson
+
+Convert orca marcat to topojson
+--------------------------------
+mapshaper -i ORCA05_GRID/marcats.shp -simplify 1% -o id-field="orca0.5_mar" -o marcat_orcat0.5_mar_mapshaper_1pc.topojson
