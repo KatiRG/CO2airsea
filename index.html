@@ -61,8 +61,10 @@
       <script src="sankey.js"></script>
       <script>
         var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv
-            //mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
-            mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
+            mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
+            continentsFile = "continents_mapshaper_1pc.topojson",
+            gridFile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
+            //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
             //mapfile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
             chartdiv = "Mchart",
             mapdiv = "Mmap",
@@ -584,18 +586,17 @@
             d3.select("#resetMap")
               .on("click", function() {
                 return resetMap();
-              });
+              });            
 
+            // Continental Shelf layer, interactive
             d3.json("refs/" + mapfile, function(error, us) {
               if (error) throw error;
-
-              console.log("us: ", us)
-
+              
               if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
                 var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
                   .append("svg")
-                  .attr("width", m_width + margin.left + margin.right)                  
+                  .attr("width", m_width + margin.left + margin.right)
                   .attr("height", m_height + margin.top + margin.bottom);
 
                 svg4.append("rect")
@@ -631,9 +632,10 @@
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
 
+                // Continental shelf layer, interactive
                 globalg.selectAll("path")
-                  //.data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
-                  .data(topojson.feature(us, us.objects.tempmerge_2).features)
+                  .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
+                  //.data(topojson.feature(us, us.objects.tempmerge_2).features)
                   //.data(topojson.feature(us, us.objects.marcats).features)
                   .enter().append("path")
                   .attr("d", path)
@@ -723,19 +725,16 @@
                   .on("click", function (d) {
                     _this = this;
                     clicked(path, d, m_width, m_height, _this)
-
                   });
 
                 globalg.append("path")
-                  //.datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
-                  .datum(topojson.mesh(us, us.objects.tempmerge_2, function(a, b) {  
-                  //.datum(topojson.mesh(us, us.objects.marcats, function(a, b) {  
+                  .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
+                  //.datum(topojson.mesh(us, us.objects.tempmerge_2, function(a, b) {
+                  //.datum(topojson.mesh(us, us.objects.marcats, function(a, b) {
                     return a !== b;
                   }))
                   .attr("class", "mesh")
                   .attr("d", path);
-
-
 
               } else { //zoom region corresponding to clicked stacked bar
 
@@ -749,7 +748,9 @@
                   });
               }
 
-            }); //end d3.json
+            }); //end d3.json for Continental Shelf layer
+
+         
 
             // use to get reverse of marcats_dict dictionary
             function getKeyByValue(hash, value) {
