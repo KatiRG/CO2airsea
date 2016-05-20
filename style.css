@@ -32,7 +32,7 @@
   div.tooltip {
     position: absolute;
     padding: 5px;
-    text-align: center;
+    text-align: left;
     font: 12px sans-serif;
     color: #000;
     background: #AAA;
@@ -173,6 +173,7 @@
   .background {
     fill: none;
     pointer-events: all;
+    position: absolute;
   }
 
   .feature {
@@ -186,7 +187,7 @@
     fill: orange;
   }
 
-  .feature.outline {
+  .feature.outline, .outline_mapclick {
     stroke: orange;
     stroke-width: 0.9;
   }
@@ -196,4 +197,25 @@
     stroke: #fff;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  #legendDiv {
+    background-color: white;
+    border: 1px solid #a9a9a9;
+    position: absolute;
+    top: 562px;
+    left: 733px;
+    height: 124px;
+    width: 110px;
+    opacity: 0.85;
+    padding: 10px;
+    border-radius: 10px;
+  }
+ 
+   #legendDivTitle {    
+    position: absolute;
+    top: 536px;
+    left: 717px;
+    height: 100px;
+    width: 500px;
   }

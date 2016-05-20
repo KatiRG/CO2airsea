@@ -45,13 +45,16 @@
       <div id="infotext" style="width: 700px;"></div>
       <div id="infotext2" style="width: 615px;"></div>
 
-      <p id="chart">    
+      <p id="chart">
 
-        <div id="sortCol"></div>
-
-        <ul class="nytg-sort" style='position: absolute; left: 770px; top: 50px;'>
+        <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
           <li id="resetMap">Reset</li>
-        </ul>
+        </ul>   
+        
+        <div id="legendDivTitle">
+          Unit flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
+        </div>
+        <div id="legendDiv"></div>
 
       </p>
 
@@ -594,29 +597,32 @@
                 svg4.append("rect")
                   .attr("class", "background")
                   .attr("width", m_width)
-                  .attr("height", m_height)
+                  .attr("height", m_height);
                   //.on("click", reset);
 
+             
                 // map legend
-                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)       
-                svg4
-                    .append("g")
-                    .attr("class", "legendQuant")
-                    .attr("transform", "translate(452,5)");
+                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
+                var svgLegend = d3.select("#legendDiv")
+                    .append("svg")
+                    .attr("width", 200) .attr("height", 150);          
 
-                // svg4.select(".legendQuant")
-                //     .append("rect")
-                //     .attr("width", "10%")
-                //     .attr("height", "13%")
-                //     .attr("fill", "pink");    
+                svgLegend.append("g")                    
+                    .attr("class", "legendQuant");
 
                 var legend = d3.legend.color()
                                .labelFormat(d3.format(".2f"))
                                .useClass(false) //if true, all boxes are black
                                .scale(map_colourbar);
 
-                svg4.select(".legendQuant")
-                    .call(legend);               
+                svgLegend.select(".legendQuant")
+                    .call(legend);
+
+                // Add thin border to legend boxes
+                d3.select(".legendCells")
+                  .selectAll("rect")
+                  .style("stroke", "black")
+                  .style("stroke-width", ".25px");
                 
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
@@ -633,13 +639,12 @@
                   })
                   .style("fill", function (d, i) {
                     unit_flux[i] = unit_dict[d.properties.MARCATS];
-                    // console.log("unit_flux[i]: ", unit_flux[i])
-                    // console.log("map_colourbar for each level: ", map_colourbar(unit_flux[i]))
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
                     return "id-" + d.properties.COSCAT;
                   })
+                  //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
                     d3.select(".tooltip").style("display", "block");
 
@@ -677,19 +682,19 @@
 
                       // Format to un-camelCase and insert & for two regions
                       var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
-                      if (marcats_string_format === "Barents Kara Sea") 
+                      if (marcats_string_format === "Barents Kara Sea")
                         marcats_string_format = "Barents & Kara Sea";
-                      else if (marcats_string_format === "China Sea Kuroshio") 
+                      else if (marcats_string_format === "China Sea Kuroshio")
                         marcats_string_format = "China Sea & Kuroshio";
-                      else if (marcats_string_format === "Bayof Bengal") 
+                      else if (marcats_string_format === "Bayof Bengal")
                         marcats_string_format = "Bay of Bengal";
-                      else if (marcats_string_format === "Gulfof Mexico") 
+                      else if (marcats_string_format === "Gulfof Mexico")
                         marcats_string_format = "Gulf of Mexico";
-                      else if (marcats_string_format === "Seaof Japan") 
+                      else if (marcats_string_format === "Seaof Japan")
                         marcats_string_format = "Sea of Japan";
-                      else if (marcats_string_format === "Seaof Labrador") 
+                      else if (marcats_string_format === "Seaof Labrador")
                         marcats_string_format = "Sea of Labrador";
-                      else if (marcats_string_format === "Seaof Okhotsk") 
+                      else if (marcats_string_format === "Seaof Okhotsk")
                         marcats_string_format = "Sea of Okhotsk";
                       
                       div.transition().style("opacity", .9);
@@ -711,17 +716,7 @@
                   })
                   .on("click", function (d) {
                     _this = this;
-                    clicked(path, d, m_width, m_height, _this)                  
-
-                    //svg4.attr("transform", "translate(236,0)");
-                    // svg4                    
-                    // .select(".legendQuant")                    
-                    // .append("rect")
-                    // .transition()
-                    // .delay(2500)
-                    // .attr("width", "10%")
-                    // .attr("height", "13%")                    
-                    // .attr("fill", "pink");
+                    clicked(path, d, m_width, m_height, _this)
 
                   });
 
@@ -846,6 +841,31 @@
 
           return class_to_match;
         }
+
+        // hex_EBC = ["#C4D4D1", "#2ca25f", "#ccece6", "#66c2a4", "#99d8c9", "#006d2c"];
+        // hex_Polar = ["#7FA0FF", "#6baed6", "#2171b5", "#c6dbef", "#9ecae1", "#4292c6", "#084594"];
+
+
+        // function hexToRgb(hex) {
+        //     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        //     return result ? {
+        //         r: parseInt(result[1], 16),
+        //         g: parseInt(result[2], 16),
+        //         b: parseInt(result[3], 16)
+        //     } : null;
+        // }
+
+        // function calc_L(hex) {
+        //   var L = [];
+
+        //   for (i=0; i<hex.length; i++) {
+        //     var rgb = hexToRgb(hex[i]);
+        //     L[i] = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+        //   }
+        //   console.log("L: ", L)
+
+        //   return L;
+        // }
 
 
       </script>
