@@ -45,13 +45,13 @@
       <div id="infotext" style="width: 700px;"></div>
       <div id="infotext2" style="width: 615px;"></div>
 
-      <p id="chart">    
+      <p id="chart">
 
-        <div id="sortCol"></div>
-
-        <ul class="nytg-sort" style='position: absolute; left: 770px; top: 50px;'>
+        <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
           <li id="resetMap">Reset</li>
-        </ul>
+        </ul>   
+
+        <div id="legendDiv"></div>     
 
       </p>
 
@@ -594,31 +594,26 @@
                 svg4.append("rect")
                   .attr("class", "background")
                   .attr("width", m_width)
-                  .attr("height", m_height)
+                  .attr("height", m_height);
                   //.on("click", reset);
 
+             
                 // map legend
-                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)       
-                svg4                    
-                    .append("g")
-                    .attr("class", "legendQuant")
-                    //.append("foreignObject") //http://stackoverflow.com/questions/18697278/how-to-style-svg-g-element
-                    .attr("id", "G")
-                    .attr("transform", "translate(452,5)");
+                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
+                var svgLegend = d3.select("#legendDiv")
+                    .append("svg")
+                    .attr("width", 200) .attr("height", 150);
 
-                // svg4.select(".legendQuant")
-                //     .append("rect")
-                //     .attr("width", "10%")
-                //     .attr("height", "13%")
-                //     .attr("fill", "pink");    
+                svgLegend.append("g")
+                    .attr("class", "legendQuant");
 
                 var legend = d3.legend.color()
                                .labelFormat(d3.format(".2f"))
                                .useClass(false) //if true, all boxes are black
                                .scale(map_colourbar);
 
-                svg4.select(".legendQuant")
-                    .call(legend);               
+                svgLegend.select(".legendQuant")
+                    .call(legend);
                 
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
@@ -635,13 +630,12 @@
                   })
                   .style("fill", function (d, i) {
                     unit_flux[i] = unit_dict[d.properties.MARCATS];
-                    // console.log("unit_flux[i]: ", unit_flux[i])
-                    // console.log("map_colourbar for each level: ", map_colourbar(unit_flux[i]))
                     return map_colourbar(unit_flux[i]);
                   })
                   .attr("id", function(d) {
                     return "id-" + d.properties.COSCAT;
                   })
+                  //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
                     d3.select(".tooltip").style("display", "block");
 
@@ -679,19 +673,19 @@
 
                       // Format to un-camelCase and insert & for two regions
                       var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
-                      if (marcats_string_format === "Barents Kara Sea") 
+                      if (marcats_string_format === "Barents Kara Sea")
                         marcats_string_format = "Barents & Kara Sea";
-                      else if (marcats_string_format === "China Sea Kuroshio") 
+                      else if (marcats_string_format === "China Sea Kuroshio")
                         marcats_string_format = "China Sea & Kuroshio";
-                      else if (marcats_string_format === "Bayof Bengal") 
+                      else if (marcats_string_format === "Bayof Bengal")
                         marcats_string_format = "Bay of Bengal";
-                      else if (marcats_string_format === "Gulfof Mexico") 
+                      else if (marcats_string_format === "Gulfof Mexico")
                         marcats_string_format = "Gulf of Mexico";
-                      else if (marcats_string_format === "Seaof Japan") 
+                      else if (marcats_string_format === "Seaof Japan")
                         marcats_string_format = "Sea of Japan";
-                      else if (marcats_string_format === "Seaof Labrador") 
+                      else if (marcats_string_format === "Seaof Labrador")
                         marcats_string_format = "Sea of Labrador";
-                      else if (marcats_string_format === "Seaof Okhotsk") 
+                      else if (marcats_string_format === "Seaof Okhotsk")
                         marcats_string_format = "Sea of Okhotsk";
                       
                       div.transition().style("opacity", .9);
@@ -713,17 +707,7 @@
                   })
                   .on("click", function (d) {
                     _this = this;
-                    clicked(path, d, m_width, m_height, _this)                  
-
-                    //svg4.attr("transform", "translate(236,0)");
-                    // svg4                    
-                    // .select(".legendQuant")                    
-                    // .append("rect")
-                    // .transition()
-                    // .delay(2500)
-                    // .attr("width", "10%")
-                    // .attr("height", "13%")                    
-                    // .attr("fill", "pink");
+                    clicked(path, d, m_width, m_height, _this)
 
                   });
 

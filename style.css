@@ -173,6 +173,7 @@
   .background {
     fill: none;
     pointer-events: all;
+    position: absolute;
   }
 
   .feature {
@@ -198,7 +199,15 @@
     stroke-linejoin: round;
   }
 
-  #G {
-    background: red; 
-    border: 1px dashed black;
+  #legendDiv {
+    background-color: white; 
+    border: 1px solid #a9a9a9;
+    position: absolute;
+    top: 562px;
+    left: 733px;
+    height: 124px;
+    width: 110px;
+    opacity: 0.85;
+    padding: 10px;
+    border-radius: 10px;
   }
