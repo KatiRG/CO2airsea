@@ -219,3 +219,10 @@
     height: 100px;
     width: 146px;
   }
+
+  .subunit-boundary {
+    fill: none;
+    stroke: #A09077;
+    stroke-dasharray: 1,1;
+    stroke-linejoin: round;
+  }

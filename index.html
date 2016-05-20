@@ -588,6 +588,10 @@
                 return resetMap();
               });            
 
+          // Continent layer, not interactive
+          d3.json("refs/" + continentsFile, function(error, continent) {
+            console.log("continent:", continent)
+
             // Continental Shelf layer, interactive
             d3.json("refs/" + mapfile, function(error, us) {
               if (error) throw error;
@@ -605,7 +609,7 @@
                   .attr("height", m_height);
                   //.on("click", reset);
 
-             
+                // ======================
                 // map legend
                 // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
                 var svgLegend = d3.select("#legendDiv")
@@ -628,6 +632,8 @@
                   .selectAll("rect")
                   .style("stroke", "black")
                   .style("stroke-width", ".25px");
+
+                // ======================
                 
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
@@ -635,8 +641,6 @@
                 // Continental shelf layer, interactive
                 globalg.selectAll("path")
                   .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
-                  //.data(topojson.feature(us, us.objects.tempmerge_2).features)
-                  //.data(topojson.feature(us, us.objects.marcats).features)
                   .enter().append("path")
                   .attr("d", path)
                   .attr("class", function(d) {
@@ -729,12 +733,25 @@
 
                 globalg.append("path")
                   .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
-                  //.datum(topojson.mesh(us, us.objects.tempmerge_2, function(a, b) {
-                  //.datum(topojson.mesh(us, us.objects.marcats, function(a, b) {
                     return a !== b;
                   }))
                   .attr("class", "mesh")
                   .attr("d", path);
+
+                // Continents only
+                globalg.selectAll("path")
+                  .data(topojson.feature(continent, continent.objects.Continents).features)                  
+                  .enter().append("path")
+                  .attr("d", path)
+                  .attr("class", "subunit-boundary");
+
+                globalg.append("path")
+                  .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {                
+                    return a !== b;
+                  }))
+                  .attr("class", "mesh")
+                  .attr("d", path)
+                  .attr("class", "subunit-boundary");  
 
               } else { //zoom region corresponding to clicked stacked bar
 
@@ -749,6 +766,7 @@
               }
 
             }); //end d3.json for Continental Shelf layer
+        }); //end d3.json for Continents layer
 
          
 
