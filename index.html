@@ -658,6 +658,7 @@
                   })
                   //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
+
                     d3.select(".tooltip").style("display", "block");
 
                     //outline all map regions of same MARCATS
@@ -675,7 +676,8 @@
                     d3.select(".class" + matching_barClass).classed("active_bar", true);
 
                     // tooltip
-                    var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
+                    var marcats_num = d3.select(this).attr("class").split(/\s+/)[1].split("marcat-").pop()
+                    var marcats_string = getKeyByValue(marcats_dict, marcats_num);
                     // Remove & to match class label
                     if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
                     else if ( marcats_string === "ChinaSea&Kuroshio") 
