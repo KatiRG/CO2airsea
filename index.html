@@ -21,24 +21,25 @@
   <div id="wrap">
 
     <!-- Fixed navbar -->
-      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="container">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.html">Anthropogenic CO2 Fluxes</a>
-          </div>
-          <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-              <li><a href="sankeyView.html" target="_blank">Sankey View</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
+          <a class="navbar-brand" href="index.html">Anthropogenic CO2 Fluxes</a>
         </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="sankeyView.html" target="_blank">Sankey View</a></li>
+          </ul>
+        </div>
+        <!--/.nav-collapse -->
       </div>
- 
+    </div>
+
     <!-- Begin page content -->
     <div class="container">
 
@@ -48,9 +49,13 @@
       <p id="chart">
 
         <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
-          <li id="resetMap">Reset</li>
-        </ul>   
-        
+          <li id="mapButton">Reset</li>          
+        </ul>
+
+        <!--<ul class="nytg-sort" style='position: absolute; left: 875px; top: 130px;'>          
+          <li id="gridButton">Grid</li>
+        </ul>-->
+
         <div id="legendDivTitle">
           Unit flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
         </div>
@@ -61,20 +66,21 @@
       <script src="sankey.js"></script>
       <script>
         var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv            
-            mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
-            continentsFile = "ne_110m_coastline.topojson", //"continents_mapshaper_1pc.topojson",
-            gridFile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
-            //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
-            //mapfile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
-            chartdiv = "Mchart",
-            mapdiv = "Mmap",
-            formatX = d3.format("02d"), //for numbering countries in stackedbar x-axis
-            format = d3.format("5.2f"), //for tooltip values
-            units = "Tg C yr <sup>-1</sup>",
-            units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>"
-            global_uptake = 100; //Tg
+          mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
+          continentsFile = "ne_110m_coastline.topojson", //"continents_mapshaper_1pc.topojson",
+          gridFile = "marcat_orcat0.5_mar_mapshaper.topojson",
+          //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
+          //mapfile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
+          chartdiv = "Mchart",
+          mapdiv = "Mmap",
+          formatX = d3.format("02d"), //for numbering countries in stackedbar x-axis
+          format = d3.format("5.2f"), //for tooltip values
+          units = "Tg C yr <sup>-1</sup>",
+          units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>"
+        global_uptake = 100; //Tg
 
-        d3.select("#resetMap").style("display", "list-item");
+        d3.select("#mapButton").style("display", "list-item").style("cursor", "auto");
+        //d3.select("#gridButton").style("display", "none");
 
         plotHistogram(chartdiv, mapdiv);
 
@@ -108,7 +114,7 @@
 
           // Alphabetical Order of region names (Agulhas Current, Antarctic Shelves, etc.)
           var marcat_colors = [
-            "#DAD1B4", "#084594", "#f7fcfd", "#2171b5", "#A6AED4", "#bfd3e6", 
+            "#DAD1B4", "#084594", "#f7fcfd", "#2171b5", "#A6AED4", "#bfd3e6",
             "#ADB38D", "#C4D4D1", "#6baed6", "#f47461", "#5a5443", "#8c96c6",
             "#AEC1BF", "#A09077", "#810f7c", "#8c96c6", "#2ca25f", "#ccece6",
             "#88419d", "#66c2a4", "#F9D19C", "#420040", "#BFD0BB", "#C5B1AC",
@@ -179,7 +185,7 @@
             "EBCMarcats": ".marcat-2, .marcat-4, .marcat-19, .marcat-22, .marcat-24, .marcat-33",
             "IndianMarcats": ".marcat-27, .marcat-30, .marcat-31, .marcat-32"
           };
-          
+
           var class_dict = {
             "EBC": ".classCaliforniaCurrent, .classIberianUpwelling, .classLeeuwinCurrent, .classMoroccanUpwelling, .classPeruvianUpwellingCurrent, .classSouthernWesternAfrica",
             "Indian margins": ".classBayofBengal, .classEasternArabianSea, .classTropicalEasternIndian, .classWesternArabianSea",
@@ -206,10 +212,10 @@
             .range(marcat_colors);
 
           var active_bar = d3.select(null), //for mouseenter / mouseout on stacked bar
-              clicked_bar = d3.select(null), //for clicking stacked bar
-              outline = d3.select(null), //for outlining map on mouseover
-              outline_mapclick = d3.select(null); //for outlining map on map click
-          
+            clicked_bar = d3.select(null), //for clicking stacked bar
+            outline = d3.select(null), //for outlining map on mouseover
+            outline_mapclick = d3.select(null); //for outlining map on map click
+
           var globalg; //global g for paths
           var zoomRegion = -999; //global var for region to zoom
 
@@ -259,10 +265,14 @@
               var y0 = 0;
               // Stack bars in order of value
               //http://stackoverflow.com/questions/25253834/sorting-a-d3-js-stacked-bar-chart
-              var order = color.domain().map(function(d) { return d; })
-                 .sort(function(a, b) { return +d[b] - +d[a]; });
+              var order = color.domain().map(function(d) {
+                  return d;
+                })
+                .sort(function(a, b) {
+                  return +d[b] - +d[a];
+                });
               //d.sources = color.domain().map(function(name) {
-              d.sources = order.map(function(name) {  
+              d.sources = order.map(function(name) {
                 return {
                   country: d.RCLASS,
                   name: name,
@@ -271,7 +281,7 @@
                   value: d[name],
                   ycoord_corrected: 0
                 };
-              });              
+              });
               d.total = d.sources[d.sources.length - 1].y1;
 
             });
@@ -287,7 +297,7 @@
             y.domain([0, d3.max(data, function(d) {
               return d.total;
             })]);
-            
+
             svg3.append("g")
               .attr("class", "x axis")
               .attr("transform", "translate(0," + height + ")")
@@ -301,15 +311,15 @@
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)")
-              .on("mouseenter", function (d) { //hover over x-axis class labels
+              .on("mouseenter", function(d) { //hover over x-axis class labels
 
                 //console.log("orig font-weight: ", d3.select(this).style("font-weight"))
                 d3.select(this)
                   .style("cursor", "pointer")
-                  .style("font-weight","bold");
+                  .style("font-weight", "bold");
 
                 d3.select(".tooltip").style("display", "block");
-                           
+
                 marcatsGroup = d3.select(this).text().split(/\s+/)[0] + "Marcats";
                 // outline all marcats regions belonging to this class
                 d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", true);
@@ -321,16 +331,16 @@
                 // tooltip
                 var class_uptake = totalFlux_dict[d];
                 div.transition().style("opacity", .9);
-                  div.html(d + " (sum): " + "<br><br>"
-                             + format(class_uptake) + " " + units + "<br>"                           
-                           )
-                    .style("left", (d3.event.pageX + 20) + "px")
-                    .style("top", (d3.event.pageY - 20) + "px");
+                div.html(d + " (sum): " + "<br><br>" +
+                    format(class_uptake) + " " + units + "<br>"
+                  )
+                  .style("left", (d3.event.pageX + 20) + "px")
+                  .style("top", (d3.event.pageY - 20) + "px");
 
               })
-              .on("mouseout", function (d) {
-                d3.select(this)                  
-                  .style("font-weight","400");
+              .on("mouseout", function(d) {
+                d3.select(this)
+                  .style("font-weight", "400");
 
                 // remove outline on stacked bars and map regions
                 d3.selectAll(marcatsGroups_dict[marcatsGroup]).classed("outline", false);
@@ -342,7 +352,7 @@
               .attr("class", "y axis")
               .call(yAxis)
               .append("text")
-              .style("font-size","12px")
+              .style("font-size", "12px")
               .attr("transform", "rotate(-90)")
               .attr("y", 6)
               .attr("dy", ".71em")
@@ -397,13 +407,13 @@
                 return y(0) - y(d.value); //heights calculated based on data value (accurate)
               })
               .attr("class", function(d) {
-                if (d.value != 0) {                  
+                if (d.value != 0) {
                   classLabel = d.name.replace(/\s/g, '').replace(/&/g, ''); //remove spaces and '&'
                   areaFlux = d.value;
 
                   // calculate total surface area flux for each class
                   if (d.country === "Polar")
-                    totalFlux_dict["Polar"] = parseFloat(totalFlux_dict["Polar"]) + parseFloat(d.value);                
+                    totalFlux_dict["Polar"] = parseFloat(totalFlux_dict["Polar"]) + parseFloat(d.value);
                   if (d.country === "Marginal sea")
                     totalFlux_dict["Marginal sea"] = parseFloat(totalFlux_dict["Marginal sea"]) + parseFloat(d.value);
                   if (d.country === "Subpolar")
@@ -444,19 +454,19 @@
 
                 if (d3.select(this).style("opacity") != 0) {
                   var unitflux = d3.select(class_to_match).attr("class")
-                                   .split(/\s+/)[2].split("unitflux-").pop(),
-                      class_uptake = totalFlux_dict[d.country];
+                    .split(/\s+/)[2].split("unitflux-").pop(),
+                    class_uptake = totalFlux_dict[d.country];
 
                   var xPos = parseFloat(d3.select(this).attr("x"));
                   var yPos = parseFloat(d3.select(this).attr("y"));
                   var height = parseFloat(d3.select(this).attr("height"))
 
                   div.transition().style("opacity", .9);
-                  div.html(d.country + ": " + d.name + "<br><br><b>" 
-                           + format(d.value) + " " + units + "  (area flux)" + "</b>"
-                           + "<br>" + format(unitflux) + " " + units_unitArea + "  (unit flux)"
-                           + "<br><br><b>" + format(d.value / class_uptake * 100) + "% of uptake in class"
-                           + "<br>" + format(d.value / global_uptake * 100) + "% of global uptake" + "</b>")
+                  div.html(d.country + ": " + d.name + "<br><br><b>" +
+                      format(d.value) + " " + units + "  (area flux)" + "</b>" +
+                      "<br>" + format(unitflux) + " " + units_unitArea + "  (unit flux)" +
+                      "<br><br><b>" + format(d.value / class_uptake * 100) + "% of uptake in class" +
+                      "<br>" + format(d.value / global_uptake * 100) + "% of global uptake" + "</b>")
                     .style("left", (d3.event.pageX + 20) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
                 }
@@ -496,6 +506,9 @@
 
                 clicked_bar = d3.select(this).classed("clicked_bar", true);
 
+                d3.select("#mapButton").style("cursor", "pointer")
+                  .classed("enabled", true);
+
                 // zoom corresponding map region
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
                 plotMap();
@@ -507,12 +520,12 @@
 
                 // outline clicked stacked bar
                 active_bar = d3.select(this).classed("active_bar", true);
-                
+
               });
 
             function reset_bar() {
               active_bar.classed("active_bar", false)
-                        .attr("stroke", null);
+                .attr("stroke", null);
 
               active_bar = d3.select(null);
             }
@@ -583,202 +596,226 @@
             //world map with zoom and pan: https://bl.ocks.org/d3noob/5189284
 
             // reset map button
-            d3.select("#resetMap")
+            d3.select("#mapButton")
               .on("click", function() {
                 return resetMap();
-              });            
+              });
 
-          // Continent layer, not interactive
-          d3.json("refs/" + continentsFile, function(error, continent) {
+            // Model layer, not interactive          
+            d3.json("refs/" + gridFile, function(error, modelgrid) {
 
-            // Continental Shelf layer, interactive
-            d3.json("refs/" + mapfile, function(error, us) {
-              if (error) throw error;
-              
-              if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
+              // Continent layer, not interactive
+              d3.json("refs/" + continentsFile, function(error, continent) {
 
-                var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
-                  .append("svg")
-                  .attr("width", m_width + margin.left + margin.right)
-                  .attr("height", m_height + margin.top + margin.bottom);
+                // Continental Shelf layer, interactive
+                d3.json("refs/" + mapfile, function(error, us) {
+                  if (error) throw error;
 
-                svg4.append("rect")
-                  .attr("class", "background")
-                  .attr("width", m_width)
-                  .attr("height", m_height);
-                  //.on("click", reset); 
+                  if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
-                // ======================
-                // map legend
-                // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
-                var svgLegend = d3.select("#legendDiv")
-                    .append("svg")
-                    .attr("width", 200) .attr("height", 150);          
+                    var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
+                      .append("svg")
+                      .attr("width", m_width + margin.left + margin.right)
+                      .attr("height", m_height + margin.top + margin.bottom);
 
-                svgLegend.append("g")                    
-                    .attr("class", "legendQuant");
+                    svg4.append("rect")
+                      .attr("class", "background")
+                      .attr("width", m_width)
+                      .attr("height", m_height);
+                    //.on("click", reset); 
 
-                var legend = d3.legend.color()
-                               .labelFormat(d3.format(".2f"))
-                               .useClass(false) //if true, all boxes are black
-                               .scale(map_colourbar);
+                    // ======================
+                    // map legend
+                    // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
+                    var svgLegend = d3.select("#legendDiv")
+                      .append("svg")
+                      .attr("width", 200).attr("height", 150);
 
-                svgLegend.select(".legendQuant")
-                    .call(legend);
+                    svgLegend.append("g")
+                      .attr("class", "legendQuant");
 
-                // Add thin border to legend boxes
-                d3.select(".legendCells")
-                  .selectAll("rect")
-                  .style("stroke", "black")
-                  .style("stroke-width", ".25px");
+                    var legend = d3.legend.color()
+                      .labelFormat(d3.format(".2f"))
+                      .useClass(false) //if true, all boxes are black
+                      .scale(map_colourbar);
 
-                // ======================
-                
-                globalg = svg4.append("g")
-                  .style("stroke-width", "1.5px");
+                    svgLegend.select(".legendQuant")
+                      .call(legend);
 
-                // Continental shelf layer, interactive
-                globalg.selectAll("path.feature")
-                  .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
-                  .enter().append("path")
-                  .attr("d", path)
-                  .attr("class", function(d) {                    
-                    // add abs anthro unit flux to class so stacked bar can get value
-                    return "feature"
-                           + " marcat-" + d.properties.MARCATS
-                           + " unitflux-" + unit_dict[d.properties.MARCATS];
-                  })
-                  .style("fill", function (d, i) {
-                    unit_flux[i] = unit_dict[d.properties.MARCATS];
-                    return map_colourbar(unit_flux[i]);
-                  })
-                  .attr("id", function(d) {
-                    return "id-" + d.properties.COSCAT;
-                  })
-                  //.attr("transform", "translate(0,-85)")
-                  .on("mouseenter", function (d, i) {
+                    // Add thin border to legend boxes
+                    d3.select(".legendCells")
+                      .selectAll("rect")
+                      .style("stroke", "black")
+                      .style("stroke-width", ".25px");
 
-                    d3.select(".tooltip").style("display", "block");
+                    // ======================
 
-                    //outline all map regions of same MARCATS
-                    outline.classed("outline", false);
-                    var this_class = get_classFromPath(this);
-                    outline = d3.selectAll(this_class).classed("outline", "true");
+                    globalg = svg4.append("g")
+                      .style("stroke-width", "1.5px");
 
-                    //outline corresponding stacked bar (and handle '&'' cases)
-                    var matching_barClass = getKeyByValue(marcats_dict, 
-                                               this_class.split("marcat-").pop());
-                    if (matching_barClass === "Barents&KaraSea") 
-                      matching_barClass = "BarentsKaraSea";
-                    else if (matching_barClass === "ChinaSea&Kuroshio") 
-                      matching_barClass = "ChinaSeaKuroshio";
-                    d3.select(".class" + matching_barClass).classed("active_bar", true);
+                    // Continental shelf layer, interactive
+                    globalg.selectAll("path.feature")
+                      .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
+                      .enter().append("path")
+                      .attr("d", path)
+                      .attr("class", function(d) {
+                        // add abs anthro unit flux to class so stacked bar can get value
+                        return "feature" +
+                          " marcat-" + d.properties.MARCATS +
+                          " unitflux-" + unit_dict[d.properties.MARCATS];
+                      })
+                      .style("fill", function(d, i) {
+                        unit_flux[i] = unit_dict[d.properties.MARCATS];
+                        return map_colourbar(unit_flux[i]);
+                      })
+                      .attr("id", function(d) {
+                        return "id-" + d.properties.COSCAT;
+                      })
+                      //.attr("transform", "translate(0,-85)")
+                      .on("mouseenter", function(d, i) {
 
-                    // tooltip
-                    var marcats_num = d3.select(this).attr("class").split(/\s+/)[1].split("marcat-").pop()
-                    var marcats_string = getKeyByValue(marcats_dict, marcats_num);
-                    // Remove & to match class label
-                    if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
-                    else if ( marcats_string === "ChinaSea&Kuroshio") 
-                      marcats_string = "ChinaSeaKuroshio";
+                        d3.select(".tooltip").style("display", "block");
 
-                    if (d3.select(this).style("opacity") != 0) {
-                      // Read areaflux stored in class of stackedbar
-                      var areaflux = d3.select(".class" + marcats_string)
-                                       .attr("class")
-                                       .split(/\s+/)[2]
-                                       .split("areaflux-").pop();
+                        //outline all map regions of same MARCATS
+                        outline.classed("outline", false);
+                        var this_class = get_classFromPath(this);
+                        outline = d3.selectAll(this_class).classed("outline", "true");
 
-                      var xPos = parseFloat(d3.select(this).attr("x"));
-                      var yPos = parseFloat(d3.select(this).attr("y"));
-                      var height = parseFloat(d3.select(this).attr("height"))
+                        //outline corresponding stacked bar (and handle '&'' cases)
+                        var matching_barClass = getKeyByValue(marcats_dict,
+                          this_class.split("marcat-").pop());
+                        if (matching_barClass === "Barents&KaraSea")
+                          matching_barClass = "BarentsKaraSea";
+                        else if (matching_barClass === "ChinaSea&Kuroshio")
+                          matching_barClass = "ChinaSeaKuroshio";
+                        d3.select(".class" + matching_barClass).classed("active_bar", true);
 
-                      // Format to un-camelCase and insert & for two regions
-                      var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
-                      if (marcats_string_format === "Barents Kara Sea")
-                        marcats_string_format = "Barents & Kara Sea";
-                      else if (marcats_string_format === "China Sea Kuroshio")
-                        marcats_string_format = "China Sea & Kuroshio";
-                      else if (marcats_string_format === "Bayof Bengal")
-                        marcats_string_format = "Bay of Bengal";
-                      else if (marcats_string_format === "Gulfof Mexico")
-                        marcats_string_format = "Gulf of Mexico";
-                      else if (marcats_string_format === "Seaof Japan")
-                        marcats_string_format = "Sea of Japan";
-                      else if (marcats_string_format === "Seaof Labrador")
-                        marcats_string_format = "Sea of Labrador";
-                      else if (marcats_string_format === "Seaof Okhotsk")
-                        marcats_string_format = "Sea of Okhotsk";
-                      
-                      div.transition().style("opacity", .9);
-                      div.html(marcats_string_format + ": " + "<br><br><b>"
-                               + format(areaflux) + " " + units + "  (area flux)" + "</b>" + "<br>"
-                               + format(unit_flux[i]) + " " + units_unitArea + "  (unit flux)")
-                         .style("left", (d3.event.pageX + 20) + "px")
-                         .style("top", (d3.event.pageY - 20) + "px");
-                    }
-                  })
-                  .on("mouseout", function (d) {
-                    d3.select(".tooltip").style("display", "none");
+                        // tooltip
+                        var marcats_num = d3.select(this).attr("class").split(/\s+/)[1].split("marcat-").pop()
+                        var marcats_string = getKeyByValue(marcats_dict, marcats_num);
+                        // Remove & to match class label
+                        if (marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
+                        else if (marcats_string === "ChinaSea&Kuroshio")
+                          marcats_string = "ChinaSeaKuroshio";
 
-                    // remove outline of map regions
-                    d3.selectAll(".outline").classed("outline", false);
+                        if (d3.select(this).style("opacity") != 0) {
+                          // Read areaflux stored in class of stackedbar
+                          var areaflux = d3.select(".class" + marcats_string)
+                            .attr("class")
+                            .split(/\s+/)[2]
+                            .split("areaflux-").pop();
 
-                    // remove outline on stackedbar
-                    d3.select(".active_bar").classed("active_bar", false);
-                  })
-                  .on("click", function (d) {
-                    _this = this;       
-                    clicked(path, d, m_width, m_height, _this)
-                  });
+                          var xPos = parseFloat(d3.select(this).attr("x"));
+                          var yPos = parseFloat(d3.select(this).attr("y"));
+                          var height = parseFloat(d3.select(this).attr("height"))
 
-                globalg.append("path")
-                  .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
-                    return a !== b;
-                  }))
-                  .attr("class", "mesh")
-                  .attr("d", path);
+                          // Format to un-camelCase and insert & for two regions
+                          var marcats_string_format = marcats_string.split(/(?=[A-Z])/).join(' ');
+                          if (marcats_string_format === "Barents Kara Sea")
+                            marcats_string_format = "Barents & Kara Sea";
+                          else if (marcats_string_format === "China Sea Kuroshio")
+                            marcats_string_format = "China Sea & Kuroshio";
+                          else if (marcats_string_format === "Bayof Bengal")
+                            marcats_string_format = "Bay of Bengal";
+                          else if (marcats_string_format === "Gulfof Mexico")
+                            marcats_string_format = "Gulf of Mexico";
+                          else if (marcats_string_format === "Seaof Japan")
+                            marcats_string_format = "Sea of Japan";
+                          else if (marcats_string_format === "Seaof Labrador")
+                            marcats_string_format = "Sea of Labrador";
+                          else if (marcats_string_format === "Seaof Okhotsk")
+                            marcats_string_format = "Sea of Okhotsk";
 
-                // Continents only
-                // NB: must select path.subunit-boundary and not just .path, otherwise
-                // "d" will relate to the Continent object and not the Shelves (ruins zoom)
-                globalg.selectAll("path.subunit-boundary")
-                  //.data(topojson.feature(continent, continent.objects.Continents).features) //for plates
-                  .data(topojson.feature(continent, continent.objects.ne_110m_coastline).features)
-                  .enter().append("path")
-                  .attr("d", path)
-                  .attr("class", "subunit-boundary");
+                          div.transition().style("opacity", .9);
+                          div.html(marcats_string_format + ": " + "<br><br><b>" +
+                              format(areaflux) + " " + units + "  (area flux)" + "</b>" + "<br>" +
+                              format(unit_flux[i]) + " " + units_unitArea + "  (unit flux)")
+                            .style("left", (d3.event.pageX + 20) + "px")
+                            .style("top", (d3.event.pageY - 20) + "px");
+                        }
+                      })
+                      .on("mouseout", function(d) {
+                        d3.select(".tooltip").style("display", "none");
 
-                globalg.append("path.subunit-boundary")
-                  //.datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) { //for plates
-                    .datum(topojson.mesh(continent, continent.objects.ne_110m_coastline, function(a, b) {
-                    return a !== b;
-                  }))
-                  .attr("class", "mesh")
-                  .attr("d", path)
-                  .attr("class", "subunit-boundary");
-                
+                        // remove outline of map regions
+                        d3.selectAll(".outline").classed("outline", false);
 
-              } else { //zoom region corresponding to clicked stacked bar
+                        // remove outline on stackedbar
+                        d3.select(".active_bar").classed("active_bar", false);
+                      })
+                      .on("click", function(d) {
+                        _this = this;
+                        clicked(path, d, m_width, m_height, _this, modelgrid)
+                      });
 
-                globalg.selectAll("path.feature") 
-                  .filter(function(d) {
+                    globalg.append("path")
+                      .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
+                        return a !== b;
+                      }))
+                      .attr("class", "mesh")
+                      .attr("d", path);
 
-                    if (d.properties && d.properties.MARCATS === zoomRegion) {
-                      getBounds(path, d, m_width, m_height);
-                    }
+                    //==================================
+                    // Continents only
+                    // NB: must select path.subunit-boundary and not just .path, otherwise
+                    // "d" will relate to the Continent object and not the Shelves (ruins zoom)
+                    globalg.selectAll("path.subunit-boundary")
+                      //.data(topojson.feature(continent, continent.objects.Continents).features) //for plates
+                      .data(topojson.feature(continent, continent.objects.ne_110m_coastline).features)
+                      .enter().append("path")
+                      .attr("d", path)
+                      .attr("class", "subunit-boundary");
 
-                  });
-              }
+                    globalg.append("path.subunit-boundary")
+                      //.datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) { //for plates
+                      .datum(topojson.mesh(continent, continent.objects.ne_110m_coastline, function(a, b) {
+                        return a !== b;
+                      }))
+                      .attr("class", "mesh")
+                      .attr("d", path)
+                      .attr("class", "subunit-boundary");
 
-            }); //end d3.json for Continental Shelf layer
-        }); //end d3.json for Continents layer
+                    //==================================
+                    // Model grid                    
+                    globalg.selectAll("path.orca-grid")
+                      .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
+                      .enter().append("path")
+                      .attr("d", path)
+                      .attr("class", "orca-grid");
+                      //.style("display", "none");
 
-         
+                    globalg.append("path.orca-grid")
+                      .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
+                        return a !== b;
+                      }))
+                      .attr("class", "mesh")
+                      .attr("d", path)
+                      .attr("class", "orca-grid");
+                      //.style("display", "none");
+                    //==================================
+
+
+                  } else { //zoom region corresponding to clicked stacked bar
+
+                    globalg.selectAll("path.feature")
+                      .filter(function(d) {
+
+                        if (d.properties && d.properties.MARCATS === zoomRegion) {
+                          getBounds(path, d, m_width, m_height);
+                        }
+
+                      });
+                  }
+
+                }); //end d3.json for Continental Shelf layer
+              }); //end d3.json for Continents layer
+            }); //end d3.json for model grid layer
+
+
             // use to get reverse of marcats_dict dictionary
             function getKeyByValue(hash, value) {
               var key;
-              for(key in hash) {
+              for (key in hash) {
                 if (hash[key] == value) return key;
               }
             }
@@ -803,14 +840,16 @@
               .style("stroke-width", 1.5 / scale + "px")
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 
+            //showGridButton();
+
           }
 
-          function clicked(path, d, m_width, m_height, _this) {
+          function clicked(path, d, m_width, m_height, _this, modelgrid) {
 
             var this_class = get_classFromPath(_this);
-            
+
             if (outline_mapclick.node() &&
-                get_classFromPath(outline_mapclick.node()) === get_classFromPath(_this)) {
+              get_classFromPath(outline_mapclick.node()) === get_classFromPath(_this)) {
               return resetMap();
             }
             outline_mapclick.classed("outline_mapclick", false);
@@ -822,13 +861,46 @@
               x = (bounds[0][0] + bounds[1][0]) / 2,
               y = (bounds[0][1] + bounds[1][1]) / 2,
               scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
-              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
+              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];          
 
             globalg.transition()
               .duration(750)
               .style("stroke-width", 1.5 / scale + "px")
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+              // .selectAll("path.orca-grid")
+              // .style("display", "inline");
+
+            d3.select("#mapButton").style("cursor", "pointer")
+              .classed("enabled", true);
+
+            //showGridButton();
+            
           }
+
+          // function showGridButton() {
+          //   console.log("showGridButton")
+          //   d3.select("#gridButton")
+          //     .style("display", "list-item")
+          //     .classed("enabled", true)
+          //     .on("click", function (d) {
+          //       if (d3.select(this).classed("selected")) {
+          //         d3.select(this).classed("selected", false);
+          //         console.log("toggle grid off")
+
+          //         // // Toggle model grid off
+          //         // globalg.selectAll("path.orca-grid")
+          //         //   .style("display", "none");
+          //       }
+          //       else {
+          //         d3.select(this).classed("selected", true);
+          //         console.log("toggle grid on")
+          //         // Show model grid
+          //         // globalg.selectAll("path.orca-grid")
+          //         //   .style("display", "inline");                  
+          //       }  
+          //     });
+
+          // }
 
           function resetMap() {
             outline_mapclick.classed("outline_mapclick", false);
@@ -840,7 +912,9 @@
               .duration(750)
               .style("stroke-width", "1.5px")
               .attr("transform", "");
-            
+              // .selectAll("path.orca-grid") //make drid visible
+              // .style("display", "none");
+
             // clear outline of clicked stacked bar
             d3.selectAll(".active_bar")
               .classed("active_bar", false)
@@ -848,6 +922,11 @@
 
             // clear tooltip
             d3.select(".tooltip").style("display", "none");
+
+            d3.select("#mapButton").style("cursor", "auto")
+              .classed("enabled", false);
+
+            //d3.select("#gridButton").style("display", "none");  
 
           }
 
@@ -857,18 +936,18 @@
         //=================
         // General functions
         function get_classFromPath(_this) { //get class from <path > element
-                        
+
           var marcat_class = "." + d3.select(_this).attr("class").split(/\s+/)[1];
 
           return marcat_class;
         }
 
         function get_mapClass(this_class) { //get class of map region corresponding to stacked bar
-            
+
           var classMarcats = this_class.split(/\s+/)[1];
-          if ( classMarcats === "classBarentsKaraSea") classMarcats = "classBarents&KaraSea";
-          else if ( classMarcats === "classChinaSeaKuroshio") classMarcats = "classChinaSea&Kuroshio";
-            
+          if (classMarcats === "classBarentsKaraSea") classMarcats = "classBarents&KaraSea";
+          else if (classMarcats === "classChinaSeaKuroshio") classMarcats = "classChinaSea&Kuroshio";
+
           var class_to_match = ".marcat-" + marcats_dict[classMarcats.split("class").pop()];
 
           return class_to_match;
@@ -898,8 +977,6 @@
 
         //   return L;
         // }
-
-
       </script>
 
     </div>
