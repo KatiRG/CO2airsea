@@ -1,0 +1,18 @@
+From Patrick (19.05.2016)
+------------------------
+Based on orca0.5 model.
+
+Open the marcats.shp that is stored on my account on asterix.
+/home/users/brock/marcats
+
+1) pyferret
+--> open and plot marcats cells of the model (orca 0.5)
+--> save as svg with frame command
+2) inkscape
+--> open svg
+--> save as DXF
+3) qgis
+--> open DXF
+--> save as shapefile
+--> clean the shapefile (remove shade of the color bar, the plot frame)
+--> save again
