@@ -60,9 +60,9 @@
 
       <script src="sankey.js"></script>
       <script>
-        var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv
+        var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv            
             mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
-            continentsFile = "continents_mapshaper_1pc.topojson",
+            continentsFile = "ne_110m_coastline.topojson", //"continents_mapshaper_1pc.topojson",
             gridFile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
             //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
             //mapfile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
@@ -590,9 +590,6 @@
 
           // Continent layer, not interactive
           d3.json("refs/" + continentsFile, function(error, continent) {
-            console.log("continent:", continent)
-
-            
 
             // Continental Shelf layer, interactive
             d3.json("refs/" + mapfile, function(error, us) {
@@ -609,27 +606,7 @@
                   .attr("class", "background")
                   .attr("width", m_width)
                   .attr("height", m_height);
-                  //.on("click", reset);
-
-                // //--------------------------------------
-                // //Continents only
-                // var continents_g = svg4.append("g")
-                //   .style("stroke-width", "1.5px");
-
-                // continents_g.selectAll("path")
-                //   .data(topojson.feature(continent, continent.objects.Continents).features)
-                //   .enter().append("path")
-                //   .attr("d", path)
-                //   .attr("class", "subunit-boundary");
-
-                // continents_g.append("path")
-                //   .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {
-                //     return a !== b;
-                //   }))
-                //   .attr("class", "mesh")
-                //   .attr("d", path)
-                //   .attr("class", "subunit-boundary");
-                // //--------------------------------------    
+                  //.on("click", reset); 
 
                 // ======================
                 // map legend
@@ -680,8 +657,6 @@
                   })
                   //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
-                    console.log("mouseenter d: ", d)
-                    console.log("mouseenter this: ", this)
 
                     d3.select(".tooltip").style("display", "block");
 
@@ -753,10 +728,7 @@
                     d3.select(".active_bar").classed("active_bar", false);
                   })
                   .on("click", function (d) {
-                    _this = this;
-                    console.log("_this: ", this)
-                    console.log("path: ", path)
-                    console.log("d: ", d)
+                    _this = this;       
                     clicked(path, d, m_width, m_height, _this)
                   });
 
@@ -771,13 +743,15 @@
                 // NB: must select path.subunit-boundary and not just .path, otherwise
                 // "d" will relate to the Continent object and not the Shelves (ruins zoom)
                 globalg.selectAll("path.subunit-boundary")
-                  .data(topojson.feature(continent, continent.objects.Continents).features)
+                  //.data(topojson.feature(continent, continent.objects.Continents).features) //for plates
+                  .data(topojson.feature(continent, continent.objects.ne_110m_coastline).features)
                   .enter().append("path")
                   .attr("d", path)
                   .attr("class", "subunit-boundary");
 
                 globalg.append("path.subunit-boundary")
-                  .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {
+                  //.datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) { //for plates
+                    .datum(topojson.mesh(continent, continent.objects.ne_110m_coastline, function(a, b) {
                     return a !== b;
                   }))
                   .attr("class", "mesh")
@@ -801,7 +775,6 @@
         }); //end d3.json for Continents layer
 
          
-
             // use to get reverse of marcats_dict dictionary
             function getKeyByValue(hash, value) {
               var key;

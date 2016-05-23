@@ -74,3 +74,9 @@ mapshaper -i ORCA05_GRID/marcats.shp -simplify 1% -o id-field="orca0.5_mar" -o m
 Convert continents to topojson
 --------------------------------
 mapshaper -i GIS_FILES/Continents.shp -simplify 1% -o id-field="MARCont" -o continents_mapshaper_1pc.topojson
+
+Use only continent outlines
+----------------------------
+Download continent outlines from http://www.naturalearthdata.com/downloads/110m-physical-vectors/
+
+mapshaper -i /homel/cnangini/Bureau/PROJECTS/CO2Flux/coastline/ne_110m_coastline.shp -o refs/ne_110m_coastline.topojson
