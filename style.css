@@ -228,3 +228,10 @@
     stroke-linejoin: round;*/
     stroke-width: 0.6;
   }
+
+  .orca-grid {
+    fill: none;
+    stroke: red;
+    opacity: 0.5;
+    stroke-width: 0.05;
+  }

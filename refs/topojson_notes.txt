@@ -69,7 +69,12 @@ mapshaper -i tempmerge_2.shp -simplify 1% -o id-field="MARCATS" -o CShelf_v5_plu
 
 Convert orca marcat to topojson
 --------------------------------
-mapshaper -i ORCA05_GRID/marcats.shp -simplify 1% -o id-field="orca0.5_mar" -o marcat_orcat0.5_mar_mapshaper_1pc.topojson
+mapshaper -i /homel/cnangini/Bureau/PROJECTS/CO2Flux/ORCA05_GRID/marcats.shp -o id-field="orca0.5_mar" -o marcat_orcat0.5_mar_mapshaper.topojson
+
+//simplified
+mapshaper -i /homel/cnangini/Bureau/PROJECTS/CO2Flux/ORCA05_GRID/marcats.shp -simplify 50% -o id-field="orca0.5_mar" -o marcat_orcat0.5_mar_mapshaper_50pc.topojson
+
+mapshaper -i /homel/cnangini/Bureau/PROJECTS/CO2Flux/ORCA05_GRID/marcats.shp -simplify 1% -o id-field="orca0.5_mar" -o marcat_orcat0.5_mar_mapshaper_1pc.topojson
 
 Convert continents to topojson
 --------------------------------
