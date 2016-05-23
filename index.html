@@ -60,8 +60,12 @@
 
       <script src="sankey.js"></script>
       <script>
-        var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv
+        var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv            
             mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
+            continentsFile = "ne_110m_coastline.topojson", //"continents_mapshaper_1pc.topojson",
+            gridFile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
+            //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
+            //mapfile = "marcat_orcat0.5_mar_mapshaper_1pc.topojson",
             chartdiv = "Mchart",
             mapdiv = "Mmap",
             formatX = d3.format("02d"), //for numbering countries in stackedbar x-axis
@@ -582,25 +586,29 @@
             d3.select("#resetMap")
               .on("click", function() {
                 return resetMap();
-              });
+              });            
 
+          // Continent layer, not interactive
+          d3.json("refs/" + continentsFile, function(error, continent) {
+
+            // Continental Shelf layer, interactive
             d3.json("refs/" + mapfile, function(error, us) {
               if (error) throw error;
-
+              
               if (zoomRegion === -999) { //plot map for first time (no stacked bar clicked)
 
                 var svg4 = d3.select("#chart").append("div").attr("id", mapdiv)
                   .append("svg")
-                  .attr("width", m_width + margin.left + margin.right)                  
+                  .attr("width", m_width + margin.left + margin.right)
                   .attr("height", m_height + margin.top + margin.bottom);
 
                 svg4.append("rect")
                   .attr("class", "background")
                   .attr("width", m_width)
                   .attr("height", m_height);
-                  //.on("click", reset);
+                  //.on("click", reset); 
 
-             
+                // ======================
                 // map legend
                 // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
                 var svgLegend = d3.select("#legendDiv")
@@ -623,15 +631,18 @@
                   .selectAll("rect")
                   .style("stroke", "black")
                   .style("stroke-width", ".25px");
+
+                // ======================
                 
                 globalg = svg4.append("g")
                   .style("stroke-width", "1.5px");
 
-                globalg.selectAll("path")
+                // Continental shelf layer, interactive
+                globalg.selectAll("path.feature")
                   .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
                   .enter().append("path")
                   .attr("d", path)
-                  .attr("class", function(d) {
+                  .attr("class", function(d) {                    
                     // add abs anthro unit flux to class so stacked bar can get value
                     return "feature"
                            + " marcat-" + d.properties.MARCATS
@@ -646,6 +657,7 @@
                   })
                   //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
+
                     d3.select(".tooltip").style("display", "block");
 
                     //outline all map regions of same MARCATS
@@ -663,7 +675,8 @@
                     d3.select(".class" + matching_barClass).classed("active_bar", true);
 
                     // tooltip
-                    var marcats_string = getKeyByValue(marcats_dict, d.properties.MARCATS);
+                    var marcats_num = d3.select(this).attr("class").split(/\s+/)[1].split("marcat-").pop()
+                    var marcats_string = getKeyByValue(marcats_dict, marcats_num);
                     // Remove & to match class label
                     if ( marcats_string === "Barents&KaraSea") marcats_string = "BarentsKaraSea";
                     else if ( marcats_string === "ChinaSea&Kuroshio") 
@@ -715,9 +728,8 @@
                     d3.select(".active_bar").classed("active_bar", false);
                   })
                   .on("click", function (d) {
-                    _this = this;
+                    _this = this;       
                     clicked(path, d, m_width, m_height, _this)
-
                   });
 
                 globalg.append("path")
@@ -727,11 +739,29 @@
                   .attr("class", "mesh")
                   .attr("d", path);
 
+                // Continents only
+                // NB: must select path.subunit-boundary and not just .path, otherwise
+                // "d" will relate to the Continent object and not the Shelves (ruins zoom)
+                globalg.selectAll("path.subunit-boundary")
+                  //.data(topojson.feature(continent, continent.objects.Continents).features) //for plates
+                  .data(topojson.feature(continent, continent.objects.ne_110m_coastline).features)
+                  .enter().append("path")
+                  .attr("d", path)
+                  .attr("class", "subunit-boundary");
 
+                globalg.append("path.subunit-boundary")
+                  //.datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) { //for plates
+                    .datum(topojson.mesh(continent, continent.objects.ne_110m_coastline, function(a, b) {
+                    return a !== b;
+                  }))
+                  .attr("class", "mesh")
+                  .attr("d", path)
+                  .attr("class", "subunit-boundary");
+                
 
               } else { //zoom region corresponding to clicked stacked bar
 
-                globalg.selectAll("path") 
+                globalg.selectAll("path.feature") 
                   .filter(function(d) {
 
                     if (d.properties && d.properties.MARCATS === zoomRegion) {
@@ -741,8 +771,10 @@
                   });
               }
 
-            }); //end d3.json
+            }); //end d3.json for Continental Shelf layer
+        }); //end d3.json for Continents layer
 
+         
             // use to get reverse of marcats_dict dictionary
             function getKeyByValue(hash, value) {
               var key;

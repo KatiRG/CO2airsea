@@ -217,5 +217,14 @@
     top: 536px;
     left: 717px;
     height: 100px;
-    width: 500px;
+    width: 146px;
+  }
+
+  .subunit-boundary {
+    fill: none;
+    stroke: #810f7c;
+    opacity: 0.5;
+    /*stroke-dasharray: 1,1;
+    stroke-linejoin: round;*/
+    stroke-width: 0.6;
   }
