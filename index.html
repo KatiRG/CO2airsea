@@ -592,6 +592,8 @@
           d3.json("refs/" + continentsFile, function(error, continent) {
             console.log("continent:", continent)
 
+            
+
             // Continental Shelf layer, interactive
             d3.json("refs/" + mapfile, function(error, us) {
               if (error) throw error;
@@ -608,6 +610,26 @@
                   .attr("width", m_width)
                   .attr("height", m_height);
                   //.on("click", reset);
+
+                // //--------------------------------------
+                // //Continents only
+                // var continents_g = svg4.append("g")
+                //   .style("stroke-width", "1.5px");
+
+                // continents_g.selectAll("path")
+                //   .data(topojson.feature(continent, continent.objects.Continents).features)
+                //   .enter().append("path")
+                //   .attr("d", path)
+                //   .attr("class", "subunit-boundary");
+
+                // continents_g.append("path")
+                //   .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {
+                //     return a !== b;
+                //   }))
+                //   .attr("class", "mesh")
+                //   .attr("d", path)
+                //   .attr("class", "subunit-boundary");
+                // //--------------------------------------    
 
                 // ======================
                 // map legend
@@ -639,11 +661,11 @@
                   .style("stroke-width", "1.5px");
 
                 // Continental shelf layer, interactive
-                globalg.selectAll("path")
+                globalg.selectAll("path.feature")
                   .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
                   .enter().append("path")
                   .attr("d", path)
-                  .attr("class", function(d) {
+                  .attr("class", function(d) {                    
                     // add abs anthro unit flux to class so stacked bar can get value
                     return "feature"
                            + " marcat-" + d.properties.MARCATS
@@ -658,6 +680,8 @@
                   })
                   //.attr("transform", "translate(0,-85)")
                   .on("mouseenter", function (d, i) {
+                    console.log("mouseenter d: ", d)
+                    console.log("mouseenter this: ", this)
 
                     d3.select(".tooltip").style("display", "block");
 
@@ -730,6 +754,9 @@
                   })
                   .on("click", function (d) {
                     _this = this;
+                    console.log("_this: ", this)
+                    console.log("path: ", path)
+                    console.log("d: ", d)
                     clicked(path, d, m_width, m_height, _this)
                   });
 
@@ -741,23 +768,26 @@
                   .attr("d", path);
 
                 // Continents only
-                globalg.selectAll("path")
-                  .data(topojson.feature(continent, continent.objects.Continents).features)                  
+                // NB: must select path.subunit-boundary and not just .path, otherwise
+                // "d" will relate to the Continent object and not the Shelves (ruins zoom)
+                globalg.selectAll("path.subunit-boundary")
+                  .data(topojson.feature(continent, continent.objects.Continents).features)
                   .enter().append("path")
                   .attr("d", path)
                   .attr("class", "subunit-boundary");
 
-                globalg.append("path")
-                  .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {                
+                globalg.append("path.subunit-boundary")
+                  .datum(topojson.mesh(continent, continent.objects.Continents, function(a, b) {
                     return a !== b;
                   }))
                   .attr("class", "mesh")
                   .attr("d", path)
-                  .attr("class", "subunit-boundary");  
+                  .attr("class", "subunit-boundary");
+                
 
               } else { //zoom region corresponding to clicked stacked bar
 
-                globalg.selectAll("path") 
+                globalg.selectAll("path.feature") 
                   .filter(function(d) {
 
                     if (d.properties && d.properties.MARCATS === zoomRegion) {
