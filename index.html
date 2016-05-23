@@ -768,12 +768,13 @@
                       .attr("class", "subunit-boundary");
 
                     //==================================
-                    // Model grid                  
+                    // Model grid                    
                     globalg.selectAll("path.orca-grid")
                       .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
                       .enter().append("path")
                       .attr("d", path)
                       .attr("class", "orca-grid");
+                      // .style("display", "none");
 
                     globalg.append("path.orca-grid")
                       .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
@@ -782,6 +783,7 @@
                       .attr("class", "mesh")
                       .attr("d", path)
                       .attr("class", "orca-grid");
+                      // .style("display", "none");
 
 
                   } else { //zoom region corresponding to clicked stacked bar
@@ -832,13 +834,10 @@
           }
 
           function clicked(path, d, m_width, m_height, _this, modelgrid) {
-            // // Display model grid only if map is zoomed
-            // // Model grid
+            // Make grid visible            
             // globalg.selectAll("path.orca-grid")
-            //   .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
-            //   .enter().append("path")
-            //   .attr("d", path)
-            //   .attr("class", "orca-grid");
+            //        .style("display", "inline");
+            //console.log("display: ", globalg.selectAll("path.orca-grid").style("display"))
 
             var this_class = get_classFromPath(_this);
 
@@ -857,10 +856,14 @@
               scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
               translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
 
+            console.log("bounds: ", bounds)
+
             globalg.transition()
               .duration(750)
               .style("stroke-width", 1.5 / scale + "px")
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+              // .selectAll("path.orca-grid")
+              // .style("display", "inline");
           }
 
           function resetMap() {
@@ -873,6 +876,8 @@
               .duration(750)
               .style("stroke-width", "1.5px")
               .attr("transform", "");
+              // .selectAll("path.orca-grid")
+              // .style("display", "none");
 
             // clear outline of clicked stacked bar
             d3.selectAll(".active_bar")
