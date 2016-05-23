@@ -222,7 +222,8 @@
 
   .subunit-boundary {
     fill: none;
-    stroke: #A09077;
-    stroke-dasharray: 1,1;
-    stroke-linejoin: round;
+    stroke: #FCD5D3;
+    /*stroke-dasharray: 1,1;
+    stroke-linejoin: round;*/
+    stroke-width: 0.6;
   }
