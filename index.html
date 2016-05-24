@@ -775,24 +775,24 @@
                       .attr("d", path)
                       .attr("class", "subunit-boundary");
 
-                    // //==================================
-                    // // Model grid                    
-                    // globalg.selectAll("path.orca-grid")
-                    //   .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
-                    //   .enter().append("path")
-                    //   .attr("d", path)
-                    //   .attr("class", "orca-grid")
-                    //   .style("display", "none");
+                    //==================================
+                    // Model grid                    
+                    globalg.selectAll("path.orca-grid")
+                      .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
+                      .enter().append("path")
+                      .attr("d", path)
+                      .attr("class", "orca-grid")
+                      .style("display", "none");
 
-                    // globalg.append("path.orca-grid")
-                    //   .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
-                    //     return a !== b;
-                    //   }))
-                    //   .attr("class", "mesh")
-                    //   .attr("d", path)
-                    //   .attr("class", "orca-grid")
-                    //   .style("display", "none");
-                    // //==================================
+                    globalg.append("path.orca-grid")
+                      .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
+                        return a !== b;
+                      }))
+                      .attr("class", "mesh")
+                      .attr("d", path)
+                      .attr("class", "orca-grid")
+                      .style("display", "none");
+                    //==================================
 
 
                   } else { //zoom region corresponding to clicked stacked bar
@@ -878,13 +878,29 @@
           }
 
           function showGridButton() {
+            console.log("showGridButton")
             d3.select("#gridButton")
               .style("display", "list-item")
               .classed("enabled", true)
               .on("click", function (d) {
-                if (d3.select(this).classed("selected"))
+                if (d3.select(this).classed("selected")) {
                   d3.select(this).classed("selected", false);
-                else d3.select(this).classed("selected", true);
+                  console.log("toggle grid off")
+
+                  // // Toggle model grid off
+                  // globalg.selectAll("path.orca-grid")
+                  //   .style("display", "none");
+                }
+                else {
+                  d3.select(this).classed("selected", true);
+                  console.log("toggle grid on")
+                  // Show model grid
+                  // globalg.selectAll("path.orca-grid")
+                  //   .style("display", "inline");
+                    
+                }
+
+                
               });
 
           }
