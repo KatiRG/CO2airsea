@@ -49,7 +49,11 @@
       <p id="chart">
 
         <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
-          <li id="resetMap">Reset</li>
+          <li id="mapButton">Reset</li>          
+        </ul>
+
+        <ul class="nytg-sort" style='position: absolute; left: 875px; top: 130px;'>          
+          <li id="gridButton">Grid</li>
         </ul>
 
         <div id="legendDivTitle">
@@ -75,7 +79,8 @@
           units_unitArea = "mol C m<sup>-2</sup> yr<sup>-1</sup>"
         global_uptake = 100; //Tg
 
-        d3.select("#resetMap").style("display", "list-item");
+        d3.select("#mapButton").style("display", "list-item").style("cursor", "auto");
+        d3.select("#gridButton").style("display", "none");
 
         plotHistogram(chartdiv, mapdiv);
 
@@ -501,6 +506,9 @@
 
                 clicked_bar = d3.select(this).classed("clicked_bar", true);
 
+                d3.select("#mapButton").style("cursor", "pointer")
+                  .classed("enabled", true);
+
                 // zoom corresponding map region
                 zoomRegion = parseInt(marcats_dict[d.name.replace(/\s/g, '')]);
                 plotMap();
@@ -588,7 +596,7 @@
             //world map with zoom and pan: https://bl.ocks.org/d3noob/5189284
 
             // reset map button
-            d3.select("#resetMap")
+            d3.select("#mapButton")
               .on("click", function() {
                 return resetMap();
               });
@@ -767,23 +775,24 @@
                       .attr("d", path)
                       .attr("class", "subunit-boundary");
 
-                    //==================================
-                    // Model grid                    
-                    globalg.selectAll("path.orca-grid")
-                      .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
-                      .enter().append("path")
-                      .attr("d", path)
-                      .attr("class", "orca-grid");
-                      // .style("display", "none");
+                    // //==================================
+                    // // Model grid                    
+                    // globalg.selectAll("path.orca-grid")
+                    //   .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
+                    //   .enter().append("path")
+                    //   .attr("d", path)
+                    //   .attr("class", "orca-grid")
+                    //   .style("display", "none");
 
-                    globalg.append("path.orca-grid")
-                      .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
-                        return a !== b;
-                      }))
-                      .attr("class", "mesh")
-                      .attr("d", path)
-                      .attr("class", "orca-grid");
-                      // .style("display", "none");
+                    // globalg.append("path.orca-grid")
+                    //   .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
+                    //     return a !== b;
+                    //   }))
+                    //   .attr("class", "mesh")
+                    //   .attr("d", path)
+                    //   .attr("class", "orca-grid")
+                    //   .style("display", "none");
+                    // //==================================
 
 
                   } else { //zoom region corresponding to clicked stacked bar
@@ -831,13 +840,11 @@
               .style("stroke-width", 1.5 / scale + "px")
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 
+            showGridButton();
+
           }
 
           function clicked(path, d, m_width, m_height, _this, modelgrid) {
-            // Make grid visible            
-            // globalg.selectAll("path.orca-grid")
-            //        .style("display", "inline");
-            //console.log("display: ", globalg.selectAll("path.orca-grid").style("display"))
 
             var this_class = get_classFromPath(_this);
 
@@ -854,9 +861,7 @@
               x = (bounds[0][0] + bounds[1][0]) / 2,
               y = (bounds[0][1] + bounds[1][1]) / 2,
               scale = .2 / Math.max(dx / m_width, dy / m_height), //orig scale factor = .9
-              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];
-
-            console.log("bounds: ", bounds)
+              translate = [m_width / 2 - scale * x, m_height / 2 - scale * y];          
 
             globalg.transition()
               .duration(750)
@@ -864,6 +869,24 @@
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
               // .selectAll("path.orca-grid")
               // .style("display", "inline");
+
+            d3.select("#mapButton").style("cursor", "pointer")
+              .classed("enabled", true);
+
+            showGridButton();
+            
+          }
+
+          function showGridButton() {
+            d3.select("#gridButton")
+              .style("display", "list-item")
+              .classed("enabled", true)
+              .on("click", function (d) {
+                if (d3.select(this).classed("selected"))
+                  d3.select(this).classed("selected", false);
+                else d3.select(this).classed("selected", true);
+              });
+
           }
 
           function resetMap() {
@@ -876,7 +899,7 @@
               .duration(750)
               .style("stroke-width", "1.5px")
               .attr("transform", "");
-              // .selectAll("path.orca-grid")
+              // .selectAll("path.orca-grid") //make drid visible
               // .style("display", "none");
 
             // clear outline of clicked stacked bar
@@ -886,6 +909,11 @@
 
             // clear tooltip
             d3.select(".tooltip").style("display", "none");
+
+            d3.select("#mapButton").style("cursor", "auto")
+              .classed("enabled", false);
+
+            d3.select("#gridButton").style("display", "none");  
 
           }
 
