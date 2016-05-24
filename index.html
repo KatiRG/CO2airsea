@@ -52,9 +52,9 @@
           <li id="mapButton">Reset</li>          
         </ul>
 
-        <ul class="nytg-sort" style='position: absolute; left: 875px; top: 130px;'>          
+        <!--<ul class="nytg-sort" style='position: absolute; left: 875px; top: 130px;'>          
           <li id="gridButton">Grid</li>
-        </ul>
+        </ul>-->
 
         <div id="legendDivTitle">
           Unit flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
@@ -80,7 +80,7 @@
         global_uptake = 100; //Tg
 
         d3.select("#mapButton").style("display", "list-item").style("cursor", "auto");
-        d3.select("#gridButton").style("display", "none");
+        //d3.select("#gridButton").style("display", "none");
 
         plotHistogram(chartdiv, mapdiv);
 
@@ -781,8 +781,8 @@
                       .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
                       .enter().append("path")
                       .attr("d", path)
-                      .attr("class", "orca-grid")
-                      .style("display", "none");
+                      .attr("class", "orca-grid");
+                      //.style("display", "none");
 
                     globalg.append("path.orca-grid")
                       .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
@@ -790,8 +790,8 @@
                       }))
                       .attr("class", "mesh")
                       .attr("d", path)
-                      .attr("class", "orca-grid")
-                      .style("display", "none");
+                      .attr("class", "orca-grid");
+                      //.style("display", "none");
                     //==================================
 
 
@@ -840,7 +840,7 @@
               .style("stroke-width", 1.5 / scale + "px")
               .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 
-            showGridButton();
+            //showGridButton();
 
           }
 
@@ -873,37 +873,34 @@
             d3.select("#mapButton").style("cursor", "pointer")
               .classed("enabled", true);
 
-            showGridButton();
+            //showGridButton();
             
           }
 
-          function showGridButton() {
-            console.log("showGridButton")
-            d3.select("#gridButton")
-              .style("display", "list-item")
-              .classed("enabled", true)
-              .on("click", function (d) {
-                if (d3.select(this).classed("selected")) {
-                  d3.select(this).classed("selected", false);
-                  console.log("toggle grid off")
+          // function showGridButton() {
+          //   console.log("showGridButton")
+          //   d3.select("#gridButton")
+          //     .style("display", "list-item")
+          //     .classed("enabled", true)
+          //     .on("click", function (d) {
+          //       if (d3.select(this).classed("selected")) {
+          //         d3.select(this).classed("selected", false);
+          //         console.log("toggle grid off")
 
-                  // // Toggle model grid off
-                  // globalg.selectAll("path.orca-grid")
-                  //   .style("display", "none");
-                }
-                else {
-                  d3.select(this).classed("selected", true);
-                  console.log("toggle grid on")
-                  // Show model grid
-                  // globalg.selectAll("path.orca-grid")
-                  //   .style("display", "inline");
-                    
-                }
+          //         // // Toggle model grid off
+          //         // globalg.selectAll("path.orca-grid")
+          //         //   .style("display", "none");
+          //       }
+          //       else {
+          //         d3.select(this).classed("selected", true);
+          //         console.log("toggle grid on")
+          //         // Show model grid
+          //         // globalg.selectAll("path.orca-grid")
+          //         //   .style("display", "inline");                  
+          //       }  
+          //     });
 
-                
-              });
-
-          }
+          // }
 
           function resetMap() {
             outline_mapclick.classed("outline_mapclick", false);
@@ -929,7 +926,7 @@
             d3.select("#mapButton").style("cursor", "auto")
               .classed("enabled", false);
 
-            d3.select("#gridButton").style("display", "none");  
+            //d3.select("#gridButton").style("display", "none");  
 
           }
 

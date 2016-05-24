@@ -217,10 +217,3 @@
     opacity: 0.5;
     stroke-width: 0.05;
   }
-
-  .button-active {
-    background: none repeat scroll 0 0 #e9e9e9;
-    border-color: #aaa;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2) inset;
-    color: #555;
-  }
