@@ -59,6 +59,9 @@ var path = d3.geo.path().projection(projection);
 var t = projection.translate(); // the projection's default translation
 var s = projection.scale(99) // the projection's default scale
 
+console.log("t orig: ", t)
+console.log("s orig: ", s)
+
 var zoom = d3.behavior.zoom()
     //.translate([0, 0])
     //.scale(1)
