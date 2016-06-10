@@ -57,7 +57,7 @@
         </ul>-->
 
         <div id="legendDivTitle">
-          Unit flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
+          flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
         </div>
         <div id="legendDiv"></div>
 
@@ -65,8 +65,9 @@
 
       <script src="sankey.js"></script>
       <script>
-        var histfile = "orca05_absAnthroPerArea_TgPerYr.tsv", //orca05.tsv            
-          mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
+        var histfile = "orca05_absAnthroPerArea_TgPerYr_10june2016.tsv", //orca05.tsv            
+          mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid_10june2016.topojson",
+          //mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
           continentsFile = "ne_110m_coastline.topojson", //"continents_mapshaper_1pc.topojson",
           gridFile = "marcat_orcat0.5_mar_mapshaper.topojson",
           //mapfile = "CShelf_v5_plusContinents_mapshaper_1pc.topojson",
@@ -539,7 +540,7 @@
           // Read in flux values per unit area
           // ======================================
 
-          d3.tsv("orca05_absAnthroUnitArea.tsv", function(error, unitdata) {
+          d3.tsv("orca05_absAnthroUnitArea_10june2016.tsv", function(error, unitdata) {
               if (error) throw error;
 
               // Create an array to store unit flux values, indexed by MARCATS_ID
@@ -583,14 +584,14 @@
             var path = d3.geo.path().projection(projection);
             var t = projection.translate(); // the projection's default translation
             var s = projection.scale(200) // the projection's default scale
+            console.log("t orig: ", t)
+            console.log("s orig: ", s)
 
             var path = d3.geo.path()
               .projection(projection);
 
-            // var zoom = d3.behavior.zoom()
-            //   .on("zoom", zoomed);
-            // svg4
-            //   .call(zoom); // delete this line to disable free zooming
+            var zoom = d3.behavior.zoom()
+              .on("zoom", zoomed);
 
             //http://stackoverflow.com/questions/34556761/fixing-zoom-jump-when-scaling-map
             //world map with zoom and pan: https://bl.ocks.org/d3noob/5189284
@@ -624,6 +625,9 @@
                       .attr("height", m_height);
                     //.on("click", reset); 
 
+                    // svg4
+                    //   .call(zoom); // delete this line to disable free zooming
+
                     // ======================
                     // map legend
                     // http://d3-legend.susielu.com (from http://bl.ocks.org/syntagmatic/29bccce80df0f253c97e)
@@ -655,7 +659,7 @@
 
                     // Continental shelf layer, interactive
                     globalg.selectAll("path.feature")
-                      .data(topojson.feature(us, us.objects.Continental_Shelf_v5).features)
+                      .data(topojson.feature(us, us.objects.Continental_Shelf).features)
                       .enter().append("path")
                       .attr("d", path)
                       .attr("class", function(d) {
@@ -749,7 +753,7 @@
                       });
 
                     globalg.append("path")
-                      .datum(topojson.mesh(us, us.objects.Continental_Shelf_v5, function(a, b) {
+                      .datum(topojson.mesh(us, us.objects.Continental_Shelf, function(a, b) {
                         return a !== b;
                       }))
                       .attr("class", "mesh")
@@ -775,24 +779,24 @@
                       .attr("d", path)
                       .attr("class", "subunit-boundary");
 
-                    //==================================
-                    // Model grid                    
-                    globalg.selectAll("path.orca-grid")
-                      .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
-                      .enter().append("path")
-                      .attr("d", path)
-                      .attr("class", "orca-grid");
-                      //.style("display", "none");
+                    // //==================================
+                    // // Model grid                    
+                    // globalg.selectAll("path.orca-grid")
+                    //   .data(topojson.feature(modelgrid, modelgrid.objects.marcats).features)
+                    //   .enter().append("path")
+                    //   .attr("d", path)
+                    //   .attr("class", "orca-grid");
+                    //   //.style("display", "none");
 
-                    globalg.append("path.orca-grid")
-                      .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
-                        return a !== b;
-                      }))
-                      .attr("class", "mesh")
-                      .attr("d", path)
-                      .attr("class", "orca-grid");
-                      //.style("display", "none");
-                    //==================================
+                    // globalg.append("path.orca-grid")
+                    //   .datum(topojson.mesh(modelgrid, modelgrid.objects.marcats, function(a, b) {
+                    //     return a !== b;
+                    //   }))
+                    //   .attr("class", "mesh")
+                    //   .attr("d", path)
+                    //   .attr("class", "orca-grid");
+                    //   //.style("display", "none");
+                    // //==================================
 
 
                   } else { //zoom region corresponding to clicked stacked bar
@@ -818,6 +822,30 @@
               for (key in hash) {
                 if (hash[key] == value) return key;
               }
+            }
+
+            function zoomed() {
+              //http://bl.ocks.org/biovisualize/2322933
+              // d3.event.translate (an array) stores the current translation from the parent SVG element
+              // t (an array) stores the projection's default translation
+              // we add the x and y vales in each array to determine the projection's new translation
+              var tx = t[0] * d3.event.scale + d3.event.translate[0];
+              var ty = t[1] * d3.event.scale + d3.event.translate[1];
+
+              projection.translate([tx, ty]);
+
+              // now we determine the projection's new scale, but there's a problem:
+              // the map doesn't 'zoom onto the mouse point'
+              projection.scale(s * d3.event.scale);
+
+              console.log("t now: ", t)
+              console.log("s now: ", s)
+
+              // redraw the map
+              //svg4.selectAll("path").attr("d", path);
+              //uk.selectAll("path").attr("d", path);
+              globalg.selectAll("path").attr("d", path);
+
             }
 
 
@@ -873,9 +901,10 @@
             d3.select("#mapButton").style("cursor", "pointer")
               .classed("enabled", true);
 
-            //showGridButton();
-            
+            //showGridButton();            
           }
+
+          
 
           // function showGridButton() {
           //   console.log("showGridButton")
