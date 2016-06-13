@@ -42,35 +42,17 @@
     border-radius: 8px;
   }
   
-  .nytg-navigation li.selected {
+  .nytg-sort li.selected {
     background: none repeat scroll 0 0 #e9e9e9;
     border-color: #aaa;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.2) inset;
     color: #555;
   }
-  
-  .nytg-navigation li:first-of-type {
-    border-radius: 4px 0 0 4px;
-  }
-  
-  .nytg-navigation li:last-of-type {
-    border-radius: 0 4px 4px 0;
-    border-right: 1px solid #ccc;
-  }
-  
-  .nytg-navigation li {
-    background: none repeat scroll 0 0 #f9f9f9;
-    border-bottom: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-top: 1px solid #ccc;
-    color: #999;
-    cursor: pointer;
-    float: left;
-    font-size: 14px;
-    margin: 0;
-    padding: 10px 18px;
-    border-radius: 4px 4px 4px 4px;
-  }
+
+  .nytg-sort li.enabled {    
+    border-color: #808080;
+    color: #595959;
+  }  
   
   ul {
     list-style: outside none none;
@@ -204,7 +186,7 @@
     border: 1px solid #a9a9a9;
     position: absolute;
     top: 562px;
-    left: 733px;
+    left: 728px;
     height: 124px;
     width: 110px;
     opacity: 0.85;
@@ -217,12 +199,21 @@
     top: 536px;
     left: 717px;
     height: 100px;
-    width: 146px;
+    width: 153px;
   }
 
   .subunit-boundary {
     fill: none;
-    stroke: #A09077;
-    stroke-dasharray: 1,1;
-    stroke-linejoin: round;
+    stroke: #810f7c;
+    opacity: 0.5;
+    /*stroke-dasharray: 1,1;
+    stroke-linejoin: round;*/
+    stroke-width: 0.6;
+  }
+
+  .orca-grid {
+    fill: none;
+    stroke: red;
+    opacity: 0.5;
+    stroke-width: 0.05;
   }
