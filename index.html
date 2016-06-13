@@ -11,7 +11,7 @@
 
 <link href="lib/bootstrap.css" rel="stylesheet">
 <script src="lib/bootstrap.min.js"></script>
-<link href="lib/sticky-footer-navbar.css" rel="stylesheet">
+<link href="lib/sticky-footer-navbar-orig.css" rel="stylesheet">
 <link href="style.css" rel="stylesheet" type="text/css">
 <script src="lib/colorbrewer.js"></script>
 
@@ -46,7 +46,7 @@
       <div id="infotext" style="width: 700px;"></div>
       <div id="infotext2" style="width: 615px;"></div>
 
-      <p id="chart">
+      <div id="chart">
 
         <ul class="nytg-sort" style='position: absolute; left: 770px; top: 130px;'>
           <li id="mapButton">Reset</li>          
@@ -61,7 +61,7 @@
         </div>
         <div id="legendDiv"></div>
 
-      </p>
+      </div>
 
       <script src="sankey.js"></script>
       <script>
@@ -87,7 +87,7 @@
 
         function plotHistogram(chartdiv, mapdiv) {
 
-          d3.select("#infotext2").html("This stacked bar chart shows the anthropogenic carbon fluxes absorbed by MARCATS coastal regions per class, weighted by surface area [Tg C yr <sup>-1</sup>], as calculated by our ORCA05 model. This model simulates an anthropogenic carbon uptake of 0.1 +/- 0.01 Pg C yr<sup>-1</sup> or 0.31 mol C m<sup>-2</sup> yr<sup>-1</sup> for the global coastal ocean, given as an average for years 1993 to 2012." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar or map region to find the flux for the corresponding MARCATS region, as well as the flux per unit area [mol C m<sup>-2</sup> yr <sup>-1</sup>]." + "<br/>" + "<br/>" + "<p>")
+          d3.select("#infotext2").html("This stacked bar chart shows the anthropogenic carbon fluxes absorbed by <a href='http://dx.doi.org/10.5194/hess-17-2029-2013' target='_blank'>MARCATS</a> coastal regions per class, weighted by surface area [Tg C yr <sup>-1</sup>], as calculated by our ORCA05 model. This model simulates an anthropogenic carbon uptake of 0.1 +/- 0.01 Pg C yr<sup>-1</sup> or 0.31 mol C m<sup>-2</sup> yr<sup>-1</sup> for the global coastal ocean, given as an average for years 1993 to 2012." + "<br/>" + "<br/>" + "<p>" + "Hover over each stacked bar or map region to find the flux for the corresponding MARCATS region, as well as the flux per unit area [mol C m<sup>-2</sup> yr <sup>-1</sup>]." + "<br/>" + "<br/>" + "<p>")
             .style("display", "block");
 
           // http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
@@ -1008,17 +1008,19 @@
         // }
       </script>
 
-    </div>
-    <!-- /.container -->
-  </div>
-  <!-- /.wrap -->
+    </div><!-- /.container -->
 
-  <!--<div id="footer">
+  </div><!-- /.wrap -->
+  
+
+  <div id="footer">
     <div class="container">
-      <p class="text-muted credit"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span> &nbsp;<img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 1.3 - 2016/02/05 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Authors: Cathy Nangini, Patrick Brockmann.</p>
+      <p class="text-muted credit">Created by <a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en"><img src="img/LSCE_Icon.png" title="Climate and Environment Sciences Laboratory"/></a> and hosted by <a target="_blank" href="http://www.ipsl.fr/en"><span title="Institut Pierre Simon Laplace" style="font-weight:bold;">IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en"><img src="img/IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2016/06/12</p>
+      
+    </div><!-- /.container -->
+  </div><!-- /.footer -->
 
-    </div>
-  </div>-->
+  </div>
 
 </body>
 
