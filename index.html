@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 
+<!--To export d3 as svg file-->
+<!--https://github.com/agordon/d3export_demo/blob/master/index.html-->
+
+<!-- Use CDN'd libraries: Jquery, d3js, BootStrap, google-code-prettify -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<!--<script src="http://d3js.org/d3.v2.js"></script>
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/js/bootstrap.min.js"></script>-->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"></script>
+
 <script src="d3.v3.min.js"></script>
-<!--https://github.com/d3/d3-geo-projection/-->
-<!--<script src="http://d3js.org/d3.geo.projection.v0.min.js" charset="utf-8"></script>-->
 <script src="lib/d3.geo.projection.v0.min.js" charset="utf-8"></script>
 <script src="lib/d3-legend.min.js"></script>
 <script src="lib/jquery-1.10.2.min.js"></script>
@@ -52,19 +60,57 @@
           <li id="mapButton">Reset</li>          
         </ul>
 
-        <!--<ul class="nytg-sort" style='position: absolute; left: 875px; top: 130px;'>          
-          <li id="gridButton">Grid</li>
-        </ul>-->
+
+        <!-- ########### The Export Section ####### -->
+        <div class="row">
+          <div class="span12">
+            <h2>Export Drawing</h2>
+
+            <br/>
+            <button class="btn btn-success" id="save_as_svg" value="">
+              Save as SVG</button>
+            <button class="btn btn-success" id="save_as_pdf" value="">
+              Save as PDF</button>
+            <button class="btn btn-success" id="save_as_png" value="">
+              Save as High-Res PNG</button>
+          </div>
+        </div>
 
         <div id="legendDivTitle">
           flux [mol C m<sup>-2</sup> yr<sup>-1</sup>]
         </div>
         <div id="legendDiv"></div>
-
       </p>
+
+      <!-- Hidden <FORM> to submit the SVG data to the server, which will convert it to SVG/PDF/PNG downloadable file.
+      The form is populated and submitted by the JavaScript below. -->
+     <form id="svgform" method="post" action="download.pl">
+       <input type="hidden" id="output_format" name="output_format" value="">
+       <input type="hidden" id="data" name="data" value="">
+     </form>
 
       <script src="sankey.js"></script>
       <script>
+
+        /*
+        Utility function: populates the <FORM> with the SVG data
+        and the requested output format, and submits the form.
+        */
+        function submit_download_form(output_format)
+        {
+          // Get the d3js SVG element
+          var tmp = document.getElementById("Mchart");
+          var svg = tmp.getElementsByTagName("svg")[0];
+          // Extract the data as SVG text string
+          var svg_xml = (new XMLSerializer).serializeToString(svg);
+          // Submit the <FORM> to the server.
+          // The result will be an attachment file to download.
+          var form = document.getElementById("svgform");
+          form['output_format'].value = output_format;
+          form['data'].value = svg_xml ;
+          form.submit();
+        }
+
         var histfile = "orca05_absAnthroPerArea_TgPerYr_12june2016.tsv", //orca05.tsv            
           mapfile = "Continental_Shelf_mapshaper_1pc_marcatsid_10june2016.topojson",
           //mapfile = "Continental_Shelf_v5_mapshaper_1pc_marcatsid.topojson",
@@ -1006,6 +1052,18 @@
 
         //   return L;
         // }
+
+        /*
+            One-time initialization
+        */
+        $(document).ready(function() {
+          //create_d3js_drawing();          
+          // Attached actions to the buttons          
+          $("#save_as_svg").click(function() { submit_download_form("svg"); });
+          $("#save_as_pdf").click(function() { submit_download_form("pdf"); });
+          $("#save_as_png").click(function() { submit_download_form("png"); });
+        });
+
       </script>
 
     </div>
